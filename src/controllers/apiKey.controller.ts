@@ -10,7 +10,7 @@ export default class ApiKeyController {
     async generateApiKey(req: Request, res: Response) {
         try {
             const userId = req.params.userId;
-            const foundKey = await ApiKeyService.findOne({ userId });
+            const foundKey = await ApiKeyService.findOne({ userId, isValid: true });
 
             if (foundKey) {
                 return res.status(409).send({
@@ -37,7 +37,7 @@ export default class ApiKeyController {
 
     async invalidateApiKey(req: Request, res: Response) {
         try {
-            const apiKey = await ApiKeyService.findOne({ userId: req.params.userId })
+            const apiKey = await ApiKeyService.findOne({ userId: req.params.userId, isValid: true })
 
             if (!apiKey) {
                 return res.status(404).send({

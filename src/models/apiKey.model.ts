@@ -9,9 +9,9 @@ const apiKeySchema = new Schema<IApiKey>({
         unique: true
     },
     userId: {
-        type: Schema.Types.ObjectId,
+        type: String,
         required: true,
-        ref: "User"
+        ref: DATABASES.PROFILE
     },
     isValid: {
         type: Boolean,

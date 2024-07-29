@@ -6,7 +6,8 @@ const DATABASES = {
     // POINTS: "Point",
     // CAMPAIGN: "Campaign",
     PRODUCT: "Product",
-    TRANSACTION: "Transaction"
+    TRANSACTION: "Transaction",
+    PAYLOAD: "Payload"
 };
 
 const MESSAGES = {

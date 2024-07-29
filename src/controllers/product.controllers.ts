@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ProductService from "../services/product.servicee";
+import AuthRequest from "../interfaces/auth.interface";
 const {
     create,
     getProductById,
@@ -7,7 +8,6 @@ const {
     getProducts
 } = new ProductService();
 const deployedLink = "https://sel-by-verxio.onrender.com";
-const devnetBlink = "https://dial.to/devnet?action=solana-action:";
 
 export default class ProductController {
     async createProduct(req: Request, res: Response) {
@@ -24,7 +24,7 @@ export default class ProductController {
 
             const unlimited = req.body.quantity === 0 ? true : false;
 
-            const product = await create({ ...req.body, userId: req.params.userId, unlimited });
+            const product = await create({ ...req.body, userId: (req as AuthRequest).user._id, unlimited });
             const encodedProductName = product?.name.replace(/\s+/g, '-');
 
             return res.status(200)
@@ -73,7 +73,7 @@ export default class ProductController {
 
     async getUserProduct(req: Request, res: Response) {
         try {
-            const product = await getProducts({ userId: req.params.userId });
+            const product = await getProducts({ userId: (req as AuthRequest).user._id });
 
             if (product.length === 0) {
                 return res.status(404)

@@ -7,15 +7,14 @@ const {
 } = new UserService();
 const ApiKeyService = new ApiKey();
 
-export default async function authenticateForFiles(req: Request, res: Response, next: NextFunction) {
+export default async function authenticate(req: Request, res: Response, next: NextFunction) {
     try {
-        const tokenHeader = req.headers['authorization'];
         const apiKey = req.header('X-API-Key');
 
-        if (!tokenHeader && !apiKey) {
+        if (!apiKey) {
             return res.status(401).send({
                 success: false,
-                message: "Please provide token or API-Key"
+                message: "Please provide API-Key"
             });
         }
 

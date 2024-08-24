@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import ProductService from "../services/product.servicee";
+import ProductService from "../services/product.service";
 import TransactionService from "../services/transaction.service";
 import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
 import {

@@ -4,7 +4,7 @@ const DATABASES = {
     API_KEY: "Api_Key",
     PROFILE: "Profile",
     // POINTS: "Point",
-    // CAMPAIGN: "Campaign",
+    CAMPAIGN: "Campaign",
     PRODUCT: "Product",
     TRANSACTION: "Transaction",
     PAYLOAD: "Payload"

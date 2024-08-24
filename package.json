@@ -14,6 +14,11 @@
   "dependencies": {
     "@candypay/checkout-sdk": "^0.1.57",
     "@solana/actions": "^1.0.3",
+    "@solana/web3.js": "^1.95.2",
+    "@streamflow/common": "^6.3.9",
+    "@streamflow/distributor": "^6.3.9",
+    "bn.js": "^5.2.1",
+    "bs58": "^6.0.0",
     "cloudinary": "^2.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -31,6 +36,7 @@
     "typescript": "^5.5.4"
   },
   "devDependencies": {
+    "@types/bn.js": "^5.1.5",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",

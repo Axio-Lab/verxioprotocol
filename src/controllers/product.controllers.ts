@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import ProductService from "../services/product.servicee";
+import ProductService from "../services/product.service";
 import AuthRequest from "../interfaces/auth.interface";
 const {
     create,

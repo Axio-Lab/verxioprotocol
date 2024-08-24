@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import PaymentService from "../services/payment.service";
-import ProductService from "../services/product.servicee";
+import ProductService from "../services/product.service";
 import PayloadService from "../services/payload.service";
 import sendEmail from "../utils/sendmail.util";
 import underdog from "../configs/underdog.config";

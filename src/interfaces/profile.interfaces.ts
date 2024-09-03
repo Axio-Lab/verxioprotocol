@@ -5,4 +5,5 @@ export default interface IProfile {
     email?: string | undefined | null;
     imageUrl?: string | undefined | null;
     bio?: string | undefined | null;
+    xp?: number | undefined | null;
 }

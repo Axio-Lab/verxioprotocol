@@ -111,16 +111,52 @@ const campaignSchema = new Schema<ICampaign>({
             required: true,
             trim: true
         },
+        xp: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        availableXP: {
+            type: Number,
+            required: true,
+            default: 0
+        },
         res: {
             type: Object,
-            required: function () { return this.rewardInfo.type === "token"},
+            required: function () { return this.rewardInfo.type === "token" },
             trim: true
         }
-    }
+    },
+    metaData: {}
 }, {
     strict: true,
     timestamps: true,
     versionKey: false
+});
+
+campaignSchema.set('toObject', { virtuals: true });
+campaignSchema.set('toJSON', { virtuals: true });
+
+// Virtual field for status
+campaignSchema.virtual('status').get(function () {
+    const now = new Date();
+    const startDate = new Date(this.campaignInfo.start);
+    const endDate = new Date(this.campaignInfo.end);
+
+    if (this.rewardInfo.xp === 0) {
+        return 'Draft';
+    } else {
+        if (!startDate || !endDate) {
+            return 'Upcoming';
+        } else if (now < startDate) {
+            return 'Upcoming';
+        } else if (now >= startDate && now <= endDate) {
+            return 'Active';
+        } else if (now > endDate) {
+            return 'Completed';
+        }
+    }
+    return 'Draft';
 });
 
 const Campaign = model(DATABASES.CAMPAIGN, campaignSchema, DATABASES.CAMPAIGN);

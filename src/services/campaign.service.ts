@@ -13,6 +13,14 @@ export default class CampaignService {
         return await Campaign.create(campaign);
     }
 
+    async findOne(params: {}) {
+        return await Campaign.findOne(params);
+    }
+
+    async find(params: {}) {
+        return await Campaign.find(params);
+    }
+    
     async createDistributorClient(wallet: any, numberOfReceipts: string, totalAmount: string) {
         try {
             const now = Math.floor(Date.now() / 1000);

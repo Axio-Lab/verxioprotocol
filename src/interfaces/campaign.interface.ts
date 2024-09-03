@@ -27,8 +27,11 @@ export default interface ICampaign {
     rewardInfo: {
         amount: number;
         noOfPeople: number;
+        xp: number;
+        availableXP: number;
         method: string;
         type: string;
         res?: object;
-    }
+    };
+    metaData: {}
 }

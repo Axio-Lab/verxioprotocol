@@ -1,7 +1,6 @@
 import Joi from "joi";
 
 const createCampaignSchema = Joi.object({
-    userId: Joi.string().required().trim(),
     campaignInfo: Joi.object({
         title: Joi.string().required().trim(),
         start: Joi.string().required().trim(),
@@ -32,7 +31,8 @@ const createCampaignSchema = Joi.object({
         noOfPeople: Joi.number().required(),
         method: Joi.string().required().trim(),
         type: Joi.string().required().trim()
-    }).required()
+    }).required(),
+    metaData: Joi.object().optional()
 });
 
 export {

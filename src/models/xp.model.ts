@@ -1,10 +1,10 @@
 import { model, Schema } from "mongoose";
-import IApiKey from "../interfaces/apiKey.interface";
+import IXP from "../interfaces/xp.interface";
 import { DATABASES } from "../configs/constants.configs";
 
-const apiKeySchema = new Schema<IApiKey>({
-    key: {
-        type: String,
+const XPSchema = new Schema<IXP>({
+    point: {
+        type: Number,
         required: true,
         unique: true
     },
@@ -13,9 +13,10 @@ const apiKeySchema = new Schema<IApiKey>({
         required: true,
         ref: DATABASES.PROFILE
     },
-    isValid: {
-        type: Boolean,
-        required: true
+    time: {
+        type: Date,
+        required: true,
+        unique: false
     }
 }, {
     strict: true,
@@ -23,5 +24,5 @@ const apiKeySchema = new Schema<IApiKey>({
     versionKey: false
 });
 
-const ApiKey = model<IApiKey>(DATABASES.API_KEY, apiKeySchema, DATABASES.API_KEY);
-export default ApiKey;
+const XP = model<IXP>(DATABASES.XP, XPSchema, DATABASES.XP);
+export default XP;

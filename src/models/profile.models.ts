@@ -29,6 +29,11 @@ const profileSchema = new Schema({
   bio: {
     type: String,
     trim: true
+  },
+  xp: {
+    type: Number,
+    required: true,
+    default: 0
   }
 }, {
   strict: false,

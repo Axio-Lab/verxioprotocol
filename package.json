@@ -17,6 +17,7 @@
     "@solana/web3.js": "^1.95.2",
     "@streamflow/common": "^6.3.9",
     "@streamflow/distributor": "^6.3.9",
+    "bigint-buffer": "^1.1.5",
     "bn.js": "^5.2.1",
     "bs58": "^6.0.0",
     "cloudinary": "^2.0.3",

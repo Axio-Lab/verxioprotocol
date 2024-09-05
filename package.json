@@ -15,6 +15,7 @@
     "@candypay/checkout-sdk": "^0.1.57",
     "@solana/actions": "^1.0.3",
     "@solana/web3.js": "^1.95.2",
+    "axios": "^1.7.7",
     "cloudinary": "^2.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

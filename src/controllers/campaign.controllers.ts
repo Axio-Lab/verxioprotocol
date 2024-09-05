@@ -6,7 +6,7 @@ import Profile from "../services/profile.services";
 const ProfileService = new Profile();
 const {
     create,
-    createDistributorClient,
+    // createDistributorClient,
     find
 } = new CampaignService();
 

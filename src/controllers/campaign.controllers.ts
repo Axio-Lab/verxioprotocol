@@ -122,7 +122,7 @@ export default class ProductController {
                 });
             }
 
-            campaign.isPaused = false;
+            campaign.isPaused = true;
             await campaign.save();
 
             return res.status(200)
@@ -151,7 +151,7 @@ export default class ProductController {
                 });
             }
 
-            campaign.isPaused = true;
+            campaign.isPaused = false;
             await campaign.save();
 
             return res.status(200)

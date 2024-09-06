@@ -127,7 +127,12 @@ const campaignSchema = new Schema<ICampaign>({
             trim: true
         }
     },
-    metaData: {}
+    metaData: {},
+    isPaused: {
+        type: Boolean,
+        required: false,
+        default: false
+    }
 }, {
     strict: true,
     timestamps: true,

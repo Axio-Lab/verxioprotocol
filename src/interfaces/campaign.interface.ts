@@ -33,5 +33,6 @@ export default interface ICampaign {
         type: string;
         res?: object;
     };
-    metaData: {}
+    metaData: {};
+    isPaused: boolean;
 }

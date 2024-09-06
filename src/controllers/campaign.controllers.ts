@@ -7,7 +7,8 @@ const ProfileService = new Profile();
 const {
     create,
     // createDistributorClient,
-    find
+    find,
+    findOne
 } = new CampaignService();
 
 export default class ProductController {
@@ -77,6 +78,92 @@ export default class ProductController {
                 .send({
                     success: false,
                     message: `Error occured while fetching campaigns info: ${error.message}`
+                })
+        }
+    }
+
+    async deleteCampaign(req: Request, res: Response) {
+        try {
+            const userId = (req as AuthRequest).user._id;
+            const campaign = await findOne({ userId, campaignId: req.params.campaignId });
+
+            if (!campaign) {
+                return res.status(404).send({
+                    success: false,
+                    message: "Campaign not found"
+                });
+            }
+
+            await campaign.deleteOne();
+
+            return res.status(200)
+                .send({
+                    success: true,
+                    message: "Campaign deleted successfully"
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while deleting campaign: ${error.message}`
+                })
+        }
+    }
+
+    async pauseCampaign(req: Request, res: Response) {
+        try {
+            const userId = (req as AuthRequest).user._id;
+            const campaign = await findOne({ userId, campaignId: req.params.campaignId });
+
+            if (!campaign) {
+                return res.status(404).send({
+                    success: false,
+                    message: "Campaign not found"
+                });
+            }
+
+            campaign.isPaused = false;
+            await campaign.save();
+
+            return res.status(200)
+                .send({
+                    success: true,
+                    message: "Campaign paused successfully"
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while pausing campaign: ${error.message}`
+                })
+        }
+    }
+
+    async playCampaign(req: Request, res: Response) {
+        try {
+            const userId = (req as AuthRequest).user._id;
+            const campaign = await findOne({ userId, campaignId: req.params.campaignId });
+
+            if (!campaign) {
+                return res.status(404).send({
+                    success: false,
+                    message: "Campaign not found"
+                });
+            }
+
+            campaign.isPaused = true;
+            await campaign.save();
+
+            return res.status(200)
+                .send({
+                    success: true,
+                    message: "Campaign resumed successfully"
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while resuming campaign: ${error.message}`
                 })
         }
     }

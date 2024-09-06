@@ -19,10 +19,10 @@ router.post("/", authenticate, validate(createCampaignSchema), createCampaign);
 router.get("/", authenticate, viewDevCampaigns);
 
 //pause Campaign
-router.patch("/:campaignId", authenticate, pauseCampaign);
+router.patch("/pause/:campaignId", authenticate, pauseCampaign);
 
 //play Campaign
-router.patch("/:campaignId", authenticate, playCampaign);
+router.patch("/start/:campaignId", authenticate, playCampaign);
 
 //Delete Campaign
 router.delete("/:campaignId", authenticate, deleteCampaign);

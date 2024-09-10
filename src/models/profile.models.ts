@@ -34,7 +34,12 @@ const profileSchema = new Schema({
     type: Number,
     required: true,
     default: 0
-  }
+  },
+  sol: {
+    type: Number,
+    required: true,
+    default: 0
+  },
 }, {
   strict: false,
   timestamps: true

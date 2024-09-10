@@ -6,4 +6,5 @@ export default interface IProfile {
     imageUrl?: string | undefined | null;
     bio?: string | undefined | null;
     xp?: number | undefined | null;
+    sol?: number | undefined | null;
 }

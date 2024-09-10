@@ -9,13 +9,13 @@ const createCampaignSchema = Joi.object({
         description: Joi.string().required().trim(),
         banner: Joi.string().required().trim()
     }).required(),
-    participantInfo: Joi.object({
-        status: Joi.string().required().trim(),
-        participants: Joi.array().items(Joi.string()).optional(),
-        level: Joi.string().required().trim(),
-        nationality: Joi.string().optional().trim(),
-        ageRange: Joi.string().optional().trim()
-    }).required(),
+    // participantInfo: Joi.object({
+    //     status: Joi.string().required().trim(),
+    //     participants: Joi.array().items(Joi.string()).optional(),
+    //     level: Joi.string().required().trim(),
+    //     nationality: Joi.string().optional().trim(),
+    //     ageRange: Joi.string().optional().trim()
+    // }).required(),
     actions: Joi.array().items(
         Joi.object({
             type: Joi.string().required().trim(),
@@ -27,9 +27,9 @@ const createCampaignSchema = Joi.object({
         })
     ).required(),
     rewardInfo: Joi.object({
-        amount: Joi.number().required(),
+        amount: Joi.number().optional(),
         noOfPeople: Joi.number().required(),
-        method: Joi.string().required().trim(),
+        // method: Joi.string().optional().trim(),
         type: Joi.string().required().trim()
     }).required(),
     metaData: Joi.object().optional()

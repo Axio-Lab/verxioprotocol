@@ -24,11 +24,6 @@ const campaignSchema = new Schema<ICampaign>({
             required: true,
             trim: true
         },
-        timeZone: {
-            type: String,
-            required: true,
-            trim: true
-        },
         description: {
             type: String,
             required: true,
@@ -36,38 +31,38 @@ const campaignSchema = new Schema<ICampaign>({
         },
         banner: {
             type: String,
-            required: true,
-            trim: true
-        }
-    },
-    participantInfo: {
-        status: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        participants: {
-            type: [{
-                type: String
-            }],
-            required: false
-        },
-        level: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        nationality: {
-            type: String,
-            required: false,
-            trim: true
-        },
-        ageRange: {
-            type: String,
             required: false,
             trim: true
         }
     },
+    // participantInfo: {
+    //     status: {
+    //         type: String,
+    //         required: false,
+    //         trim: true
+    //     },
+    //     participants: {
+    //         type: [{
+    //             type: String
+    //         }],
+    //         required: false
+    //     },
+    //     level: {
+    //         type: String,
+    //         required: false,
+    //         trim: true
+    //     },
+    //     nationality: {
+    //         type: String,
+    //         required: false,
+    //         trim: true
+    //     },
+    //     ageRange: {
+    //         type: String,
+    //         required: false,
+    //         trim: true
+    //     }
+    // },
     actions: [{
         type: {
             type: String,
@@ -95,17 +90,17 @@ const campaignSchema = new Schema<ICampaign>({
     rewardInfo: {
         amount: {
             type: Number,
-            required: true
+            required: false
         },
         noOfPeople: {
             type: Number,
             required: true
         },
-        method: {
-            type: String,
-            required: true,
-            trim: true
-        },
+        // method: {
+        //     type: String,
+        //     required: true,
+        //     trim: true
+        // },
         type: {
             type: String,
             required: true,

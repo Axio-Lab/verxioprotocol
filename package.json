@@ -13,8 +13,11 @@
   },
   "dependencies": {
     "@candypay/checkout-sdk": "^0.1.57",
+    "@lightprotocol/compressed-token": "^0.11.1",
+    "@lightprotocol/stateless.js": "^0.11.0",
     "@solana/actions": "^1.0.3",
-    "@solana/web3.js": "^1.95.2",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/web3.js": "^1.95.3",
     "axios": "^1.7.7",
     "cloudinary": "^2.0.3",
     "cors": "^2.8.5",

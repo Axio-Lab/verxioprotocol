@@ -5,17 +5,16 @@ export default interface ICampaign {
         title: string;
         start: string;
         end: string;
-        timeZone: string;
         description: string;
         banner: string;
     };
-    participantInfo: {
-        status: string;
-        participants?: [string];
-        level: string;
-        nationality?: string;
-        ageRange?: string;
-    };
+    // participantInfo: {
+    //     status: string;
+    //     participants?: [string];
+    //     level: string;
+    //     nationality?: string;
+    //     ageRange?: string;
+    // };
     actions: [{
         type: string;
         options: {
@@ -25,13 +24,14 @@ export default interface ICampaign {
         }
     }];
     rewardInfo: {
-        amount: number;
+        amount?: number;
         noOfPeople: number;
         xp: number;
         availableXP: number;
-        method: string;
+        // method: string;
         type: string;
         res?: object;
     };
-    metaData: {}
+    metaData: {};
+    isPaused: boolean;
 }

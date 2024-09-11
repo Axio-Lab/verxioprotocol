@@ -6,7 +6,7 @@ const XPSchema = new Schema<IXP>({
     point: {
         type: Number,
         required: true,
-        unique: true
+        unique: false
     },
     userId: {
         type: String,

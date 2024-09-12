@@ -10,8 +10,8 @@ const {
     getProfile
 } = new ProfileController();
 
-//create or update a profile
-router.put("/:id", createProfile);
+//create or fetches a profile
+router.post("/:id", createProfile);
 
 //upload profile image
 router.post("/image", upload.single("image"), uploadImage);

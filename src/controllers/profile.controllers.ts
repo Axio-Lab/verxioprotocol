@@ -22,12 +22,12 @@ export default class ProfileController {
     const profileFromId = await findOne({ _id: id });
     if (profileFromId) {
 
-      const updatedProfile = await editById(id, req.body);
-      return res.status(201)
+      const profile = await findOne({ _id: id });
+      return res.status(200)
         .send({
           success: true,
-          message: UPDATED,
-          profile: updatedProfile
+          message: FETCHED,
+          profile: profile
         });
     } else {
       //creates a profile if id doesn't exist

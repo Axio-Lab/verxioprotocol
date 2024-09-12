@@ -15,6 +15,7 @@
     "@candypay/checkout-sdk": "^0.1.57",
     "@lightprotocol/compressed-token": "^0.11.1",
     "@lightprotocol/stateless.js": "^0.11.0",
+    "@reclaimprotocol/js-sdk": "^1.3.11",
     "@solana/actions": "^1.0.3",
     "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.95.3",
@@ -32,7 +33,8 @@
     "nodemailer": "^6.9.14",
     "pino": "^8.19.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.5",

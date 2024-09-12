@@ -1,7 +1,7 @@
 import { Router } from "express";
 import ProfileController from '../controllers/profile.controllers';
-import validate from "../middlewares/validate.middleware";
-import { profileSchema } from "../schemas/profile.schemas";
+// import validate from "../middlewares/validate.middleware";
+// import { profileSchema } from "../schemas/profile.schemas";
 import upload from "../configs/multer.configs";
 const router = Router();
 const {
@@ -11,7 +11,7 @@ const {
 } = new ProfileController();
 
 //create or update a profile
-router.put("/:id", validate(profileSchema), createProfile);
+router.put("/:id", createProfile);
 
 //upload profile image
 router.post("/image", upload.single("image"), uploadImage);

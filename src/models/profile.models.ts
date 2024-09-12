@@ -7,29 +7,6 @@ const profileSchema = new Schema({
     required: true,
     trim: true
   },
-  firstName: {
-    type: String,
-    trim: true
-  },
-  lastName: {
-    type: String,
-    trim: true
-  },
-  email: {
-    type: String,
-    lowercase: true,
-    unique: true,
-    sparse: true,
-    trim: true
-  },
-  imageUrl: {
-    type: String,
-    trim: true
-  },
-  bio: {
-    type: String,
-    trim: true
-  },
   xp: {
     type: Number,
     required: true,
@@ -39,7 +16,7 @@ const profileSchema = new Schema({
     type: Number,
     required: true,
     default: 0
-  },
+  }
 }, {
   strict: false,
   timestamps: true

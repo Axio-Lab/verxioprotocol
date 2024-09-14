@@ -65,7 +65,7 @@ export default class ProfileController {
     }
 
     const reclaimClient = new Reclaim.ProofRequest(APP_ID, sessionId as any);
-    await reclaimClient.buildProofRequest(PROVIDERS.github_username as any);
+    await reclaimClient.buildProofRequest(PROVIDERS.gmail as any);
     reclaimClient.setSignature(await reclaimClient.generateSignature(APP_SECRET));
 
     const { requestUrl, statusUrl } = await reclaimClient.createVerificationRequest();

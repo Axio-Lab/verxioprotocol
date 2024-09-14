@@ -63,13 +63,18 @@ const campaignSchema = new Schema<ICampaign>({
     //         trim: true
     //     }
     // },
-    actions: [{
-        type: {
+    actions: {
+        campaignType: {
             type: String,
             required: true,
             trim: true
         },
-        options: {
+        actionType: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        action: {
             description: {
                 type: String,
                 required: true,
@@ -86,12 +91,12 @@ const campaignSchema = new Schema<ICampaign>({
                 trim: true
             }
         }
-    }],
+    },
     rewardInfo: {
-        amount: {
-            type: Number,
-            required: false
-        },
+        // amount: {
+        //     type: Number,
+        //     required: false
+        // },
         noOfPeople: {
             type: Number,
             required: true
@@ -116,11 +121,11 @@ const campaignSchema = new Schema<ICampaign>({
             required: true,
             default: 0
         },
-        res: {
-            type: Object,
-            required: function () { return this.rewardInfo.type === "token" },
-            trim: true
-        }
+        // res: {
+        //     type: Object,
+        //     required: function () { return this.rewardInfo.type === "token" },
+        //     trim: true
+        // }
     },
     metaData: {},
     isPaused: {

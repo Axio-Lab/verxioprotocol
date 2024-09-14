@@ -7,8 +7,12 @@ const router = Router();
 const {
     createProfile,
     uploadImage,
-    getProfile
+    getProfile,
+    verifyUser
 } = new ProfileController();
+
+//verify user
+router.post("/verify-user", verifyUser);
 
 //create or fetches a profile
 router.post("/:id", createProfile);

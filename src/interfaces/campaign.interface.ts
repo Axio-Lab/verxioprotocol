@@ -15,22 +15,23 @@ export default interface ICampaign {
     //     nationality?: string;
     //     ageRange?: string;
     // };
-    actions: [{
-        type: string;
-        options: {
+    actions: {
+        campaignType: string;
+        actionType: string;
+        action: {
             description: string;
             url: string;
             amount: string;
         }
-    }];
+    };
     rewardInfo: {
-        amount?: number;
+        // amount?: number;
         noOfPeople: number;
         xp: number;
         availableXP: number;
         // method: string;
         type: string;
-        res?: object;
+        // res?: object;
     };
     metaData: {};
     isPaused: boolean;

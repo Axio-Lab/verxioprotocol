@@ -26,7 +26,7 @@ export default class ProductController {
 
             const campaign = await create({ ...data, userId });
 
-            const requiredXp = 200 * campaign.actions.length * campaign.rewardInfo.noOfPeople;
+            const requiredXp = 200 * campaign.rewardInfo.noOfPeople;
 
             const profile = await ProfileService.findOne({ _id: userId });
             if (profile) {

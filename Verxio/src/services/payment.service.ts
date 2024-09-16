@@ -1,4 +1,4 @@
-import candypay from "../configs/candypay.config";
+// import candypay from "../configs/candypay.config";
 import IProduct from "../interfaces/product.interface";
 import Profile from "./profile.services";
 const ProfileService = new Profile();

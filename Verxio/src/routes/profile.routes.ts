@@ -11,11 +11,11 @@ const {
     verifyUser
 } = new ProfileController();
 
-//verify user
-router.post("/verify-user", verifyUser);
-
 //create or fetches a profile
 router.post("/:id", createProfile);
+
+//verify user
+router.post("/verify-user", verifyUser);
 
 //upload profile image
 router.post("/image", upload.single("image"), uploadImage);

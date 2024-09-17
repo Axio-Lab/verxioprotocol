@@ -24,6 +24,7 @@ export default class ProfileController {
     const profileFromId = await findOne({ _id: id });
     if (profileFromId) {
 
+      
       const profile = await findOne({ _id: id });
       return res.status(200)
         .send({

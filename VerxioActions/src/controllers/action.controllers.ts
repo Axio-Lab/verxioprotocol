@@ -232,15 +232,22 @@ export default class ActionController {
         });
       }
       
-      const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
+      
+      // const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
+      const transaction = await prepareBurnTokensTransaction(
+        '7F9dXiDKbGMPZ5SdL5qsJk9UNb4dA72uTTQDo3yAMdX7', //Token mint
+        1, //Amount
+        account
+      )
 
       const payload: ActionPostResponse = {
         transaction: transaction.serialize({
           requireAllSignatures: false,
           verifySignatures: true,
         }).toString('base64'),
-        message: `You've successfully minted token`,
+        message: `You've successfully burned ${campaign.actions.action.amount} token`,
       };
+
       console.log("Payload:", payload)
       console.log("Transaction:", transaction)
 

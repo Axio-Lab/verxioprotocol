@@ -16,6 +16,7 @@ export default interface ICampaign {
             amount?: number;
             quantity?: number;
             address?: string;
+            product?: string;
             minAmount?: number;
             options?: string[];
         };

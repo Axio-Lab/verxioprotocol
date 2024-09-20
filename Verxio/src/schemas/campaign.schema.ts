@@ -30,8 +30,8 @@ const createCampaignSchema = Joi.object({
                     return helpers.error('any.invalid', { message: 'fields must be omitted or an empty object for "Submit-Url".' });
                 }
             } else if (actionType === 'Sell-Product') {
-                const { amount, quantity } = value;
-                if (typeof amount !== 'number' || typeof quantity !== 'number') {
+                const { amount, quantity, product } = value;
+                if (typeof amount !== 'number' || typeof quantity !== 'number' || typeof product !== 'string') {
                     return helpers.error('any.invalid');
                 }
             } else {

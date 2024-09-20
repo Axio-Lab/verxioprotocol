@@ -5,31 +5,49 @@ const createCampaignSchema = Joi.object({
         title: Joi.string().required().trim(),
         start: Joi.string().required().trim(),
         end: Joi.string().required().trim(),
-        // timeZone: Joi.string().required().trim(),
         description: Joi.string().required().trim(),
-        banner: Joi.string().optional().trim()
+        banner: Joi.string().required().trim()
     }).required(),
-    // participantInfo: Joi.object({
-    //     status: Joi.string().required().trim(),
-    //     participants: Joi.array().items(Joi.string()).optional(),
-    //     level: Joi.string().required().trim(),
-    //     nationality: Joi.string().optional().trim(),
-    //     ageRange: Joi.string().optional().trim()
-    // }).required(),
-    actions: Joi.object({
-        campaignType: Joi.string().required().trim(),
-        actionType: Joi.string().required().trim(),
-        action: Joi.object({
-            description: Joi.string().required().trim(),
-            url: Joi.string().required().trim(),
-            amount: Joi.number().required()
-        }).required()
+    action: Joi.object({
+        actionType: Joi.string().valid('Burn-Token', 'Compress-Token', 'Decompress-Token', 'Poll', 'Submit-Url', 'Sell-Product').required().trim(),
+        fields: Joi.object().custom((value, helpers) => {
+            const { actionType } = helpers.state.ancestors[0];
+
+            if (actionType === 'Burn-Token' || actionType === 'Compress-Token' || actionType === 'Decompress-Token') {
+                const { address, minAmount } = value;
+                if (!address || typeof address !== 'string' || !address.trim()) {
+                    return helpers.error('any.invalid');
+                }
+                if (!minAmount || typeof minAmount !== 'number') {
+                    return helpers.error('any.invalid');
+                }
+            } else if (actionType === 'Poll') {
+                if (!Array.isArray(value.options) || value.options.length === 0) {
+                    return helpers.error('any.invalid');
+                }
+            } else if (actionType === 'Submit-Url') {
+                if (value !== undefined && !(typeof value === 'object' && Object.keys(value).length === 0)) {
+                    return helpers.error('any.invalid', { message: 'fields must be omitted or an empty object for "Submit-Url".' });
+                }
+            } else if (actionType === 'Sell-Product') {
+                const { amount, quantity } = value;
+                if (typeof amount !== 'number' || typeof quantity !== 'number') {
+                    return helpers.error('any.invalid');
+                }
+            } else {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
     }).required(),
     rewardInfo: Joi.object({
-        // amount: Joi.number().optional(),
         noOfPeople: Joi.number().required(),
-        // method: Joi.string().optional().trim(),
-        type: Joi.string().required().trim()
+        type: Joi.string().valid('Token', 'Verxio-XP', 'Whitelist-Spot', 'Airdrop', 'NFT-Drop', 'Merch-Drop').required().trim(),
+        amount: Joi.number().when('type', {
+            is: Joi.string().valid('Token', 'Verxio-XP'),
+            then: Joi.required(),
+            otherwise: Joi.optional()
+        })
     }).required(),
     metaData: Joi.object().optional()
 });

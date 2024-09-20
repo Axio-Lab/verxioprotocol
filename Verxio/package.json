@@ -19,7 +19,7 @@
     "@solana/actions": "^1.0.3",
     "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.95.3",
-    "@streamflow/stream": "^4.0.3",
+    "@streamflow/stream": "^6.4.3",
     "axios": "^1.7.7",
     "bn.js": "^5.2.1",
     "cloudinary": "^2.0.3",

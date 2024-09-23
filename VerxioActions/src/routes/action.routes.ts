@@ -2,24 +2,15 @@ import { Router } from "express";
 import ActionController from '../controllers/action.controllers';
 const router = Router();
 const {
-    getProductAction,
-    postProductAction,
-    getBurnAction,
-    postBurnAction
+    getAction,
+    postAction
 } = new ActionController();
 
 //get product action
-router.get("/p/:name", getProductAction);
-router.options("/p/:name", getProductAction);
+router.get("/p/:name", getAction);
+router.options("/p/:name", getAction);
 
 //post product action
-router.post("/p/:name", postProductAction);
-
-//get campaign action
-router.get("/c/:title", getBurnAction);
-router.options("/c/:title", getBurnAction);
-
-//post campaign action
-router.post("/c/:title", postBurnAction);
+router.post("/p/:name", postAction);
 
 export default router;

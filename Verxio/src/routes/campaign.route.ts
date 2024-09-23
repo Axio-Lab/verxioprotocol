@@ -9,8 +9,6 @@ const {
     createCampaign,
     viewDevCampaigns,
     deleteCampaign,
-    // pauseCampaign,
-    // playCampaign
 } = new CampaignController();
 
 //create a campaign
@@ -18,12 +16,6 @@ router.post("/", authenticate, parseActionType, validate(createCampaignSchema), 
 
 //view Developers Campaigns
 router.get("/", authenticate, viewDevCampaigns);
-
-// //pause Campaign
-// router.patch("/pause/:campaignId", authenticate, pauseCampaign);
-
-// //play Campaign
-// router.patch("/start/:campaignId", authenticate, playCampaign);
 
 //Delete Campaign
 router.delete("/:campaignId", authenticate, deleteCampaign);

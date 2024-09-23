@@ -14,6 +14,16 @@ const campaignSchema = new Schema<ICampaign>({
             required: true,
             trim: true
         },
+        description: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        banner: {
+            type: String,
+            required: true,
+            trim: true
+        },
         start: {
             type: String,
             required: true,
@@ -23,145 +33,71 @@ const campaignSchema = new Schema<ICampaign>({
             type: String,
             required: true,
             trim: true
-        },
-        description: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        banner: {
-            type: String,
-            required: false,
-            trim: true
         }
     },
-    // participantInfo: {
-    //     status: {
-    //         type: String,
-    //         required: false,
-    //         trim: true
-    //     },
-    //     participants: {
-    //         type: [{
-    //             type: String
-    //         }],
-    //         required: false
-    //     },
-    //     level: {
-    //         type: String,
-    //         required: false,
-    //         trim: true
-    //     },
-    //     nationality: {
-    //         type: String,
-    //         required: false,
-    //         trim: true
-    //     },
-    //     ageRange: {
-    //         type: String,
-    //         required: false,
-    //         trim: true
-    //     }
-    // },
-    actions: {
-        campaignType: {
-            type: String,
-            required: true,
-            trim: true
-        },
+    action: {
         actionType: {
             type: String,
             required: true,
+            enum: ['Burn-Token', 'Compress-Token', 'Decompress-Token', 'Poll', 'Submit-Url', 'Sell-Product'],
             trim: true
         },
-        action: {
-            description: {
-                type: String,
-                required: true,
-                trim: true
+        fields: {
+            type: Schema.Types.Mixed,
+            required: function (this: ICampaign) {
+                return this.action.actionType !== 'Submit-Url';
             },
-            url: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            amount: {
-                type: Number,
-                required: true,
-                trim: true
+            validate: {
+                validator: function (this: ICampaign, value: any) {
+                    const actionType = this.action.actionType;
+
+                    if ((actionType === 'Burn-Token') || (actionType === 'Compress-Token') || (actionType === 'Decompress-Token')) {
+                        return typeof value.address === 'string' && value.address.trim() !== '' &&
+                            typeof value.minAmount === 'number';
+                    } else if (actionType === 'Poll') {
+                        return Array.isArray(value.options) && value.options.length > 0;
+                    } else if (actionType === 'Submit-Url') {
+                        return true;
+                    } else if (actionType === 'Sell-Product') {
+                        return typeof value.product === 'string' && value.product.trim() !== '' &&
+                            typeof value.amount === 'number' &&
+                            typeof value.quantity === 'number';
+                    }
+                    return false;
+                },
+                message: "Invalid action structure for the given actionType"
             }
         }
     },
     rewardInfo: {
-        // amount: {
-        //     type: Number,
-        //     required: false
-        // },
+        type: {
+            type: String,
+            required: true,
+            enum: ['Token', 'Verxio-XP', 'Whitelist-Spot', 'Airdrop', 'NFT-Drop', 'Merch-Drop'],
+            trim: true
+        },
         noOfPeople: {
             type: Number,
             required: true
         },
-        // method: {
-        //     type: String,
-        //     required: true,
-        //     trim: true
-        // },
-        type: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        xp: {
+        amount: {
             type: Number,
-            required: true,
-            default: 0
+            required: function () {
+                return this.rewardInfo.type === "Token" || "Verxio-XP";
+            }
         },
-        availableXP: {
+        availableAmount: {
             type: Number,
-            required: true,
-            default: 0
-        },
-        // res: {
-        //     type: Object,
-        //     required: function () { return this.rewardInfo.type === "token" },
-        //     trim: true
-        // }
+            required: function () {
+                return this.rewardInfo.type === "Token" || "Verxio-XP";
+            }
+        }
     },
-    metaData: {},
-    isPaused: {
-        type: Boolean,
-        required: false,
-        default: false
-    }
+    metaData: {}
 }, {
     strict: true,
     timestamps: true,
     versionKey: false
-});
-
-campaignSchema.set('toObject', { virtuals: true });
-campaignSchema.set('toJSON', { virtuals: true });
-
-// Virtual field for status
-campaignSchema.virtual('status').get(function () {
-    const now = new Date();
-    const startDate = new Date(this.campaignInfo.start);
-    const endDate = new Date(this.campaignInfo.end);
-
-    if (this.rewardInfo.xp === 0) {
-        return 'Draft';
-    } else {
-        if (!startDate || !endDate) {
-            return 'Upcoming';
-        } else if (now < startDate) {
-            return 'Upcoming';
-        } else if (now >= startDate && now <= endDate) {
-            return 'Active';
-        } else if (now > endDate) {
-            return 'Completed';
-        }
-    }
-    return 'Draft';
 });
 
 const Campaign = model(DATABASES.CAMPAIGN, campaignSchema, DATABASES.CAMPAIGN);

@@ -65,15 +65,16 @@ export default class ProfileController {
     }
 
     const reclaimClient = new Reclaim.ProofRequest(APP_ID, sessionId as any);
+    reclaimClient.addContext(
+      (userId),
+      (`For verification on ${new Date()}`)
+    )
     await reclaimClient.buildProofRequest(PROVIDERS.gmail as any);
     reclaimClient.setSignature(await reclaimClient.generateSignature(APP_SECRET));
 
     const { requestUrl, statusUrl } = await reclaimClient.createVerificationRequest();
     console.log("requestUrl", requestUrl);
     console.log("statusUrl", statusUrl);
-
-    // Send the request and status URLs back to the client
-    res.json({ requestUrl, statusUrl });
 
     await reclaimClient.startSession({
       onSuccessCallback: async proof => {
@@ -87,6 +88,9 @@ export default class ProfileController {
         // Your business logic here to handle the error
       }
     })
+
+    // Send the request and status URLs back to the client
+    res.json({ requestUrl, statusUrl });
   }
 
   async uploadImage(req: Request, res: Response) {

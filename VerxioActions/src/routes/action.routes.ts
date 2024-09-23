@@ -7,10 +7,10 @@ const {
 } = new ActionController();
 
 //get product action
-router.get("/p/:name", getAction);
-router.options("/p/:name", getAction);
+router.get("/:name", getAction);
+router.options("/:name", getAction);
 
 //post product action
-router.post("/p/:name", postAction);
+router.post("/:name", postAction);
 
 export default router;

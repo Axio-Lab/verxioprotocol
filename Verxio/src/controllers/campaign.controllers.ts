@@ -10,6 +10,7 @@ const {
     find,
     findOne
 } = new CampaignService();
+const deployedLink = "https://action.verxio.xyz";
 
 export default class ProductController {
     async createCampaign(req: Request, res: Response) {
@@ -47,12 +48,16 @@ export default class ProductController {
             //             })
             //     }
             // }
+            const encodedCampaignName = campaign.campaignInfo.title.replace(/\s+/g, '-');
 
             return res.status(200)
                 .send({
                     success: true,
                     message: "Campaign created successfully",
-                    campaign
+                    campaign: {
+                        ...campaign,
+                        blink: `${deployedLink}/${encodedCampaignName}`
+                    }
                 })
         } catch (error: any) {
             return res.status(500)

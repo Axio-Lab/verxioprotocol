@@ -2,7 +2,7 @@ const PORT = process.env.PORT || 9871;
 const basePath = "/api/v1"
 const DATABASES = {
     CAMPAIGN: "Campaign",
-    PRODUCT: "Product",
+    SUBMISSION: "Submission",
     PROFILE: "Profile"
 };
 

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Campaign from "../services/campaign.service";
+import Submission from "../services/submission.service";
 import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
 import {
   clusterApiUrl,
@@ -12,6 +13,7 @@ import {
 import { prepareBurnTokensTransaction } from "./actions/burnToken";
 
 const CampaignService = new Campaign();
+const SubmissionService = new Submission();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
   "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
@@ -42,6 +44,55 @@ export default class ActionController {
           description: `${campaign.campaignInfo.description}`,
           title: `${campaign.campaignInfo.title}`,
           disabled: (campaign?.action.fields.quantity! <= 0) ? true : false
+        }
+      } else if (campaign.action.actionType === "Submit-Url") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Submit Url`,
+          description: `${campaign.campaignInfo.description}`,
+          title: `${campaign.campaignInfo.title}`,
+          links: {
+            actions: [
+              {
+                label: `Submit Url`,
+                href: `${baseHref}?Url={Url}`,
+                parameters: [
+                  {
+                    name: "Url",
+                    label: "Submit your Url",
+                  },
+                ],
+              },
+            ],
+          },
+
+        }
+      } else if (campaign.action.actionType === "Poll") {
+        const options: any = campaign.action.fields.options?.map(
+          (option: string, index: number) => ({ label: option, value: index.toString() })
+        );
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Poll`,
+          description: `${campaign.campaignInfo.description}`,
+          title: `${campaign.campaignInfo.title}`,
+          links: {
+            actions: [
+              {
+                label: "Submit",
+                href: `${baseHref}?choice={choice}`,
+                parameters: [
+                  {
+                    type: "radio",
+                    name: "choice",
+                    label: `${campaign.campaignInfo.description}`,
+                    required: true,
+                    options
+                  }
+                ]
+              }
+            ]
+          }
         }
       } else {
         payload = {
@@ -98,7 +149,7 @@ export default class ActionController {
 
       const transaction = new Transaction();
 
-      // if (campaign.action.actionType === "Sell-Product") {
+      if (campaign.action.actionType === "Sell-Product") {
         const price = campaign.action.fields.amount;
 
         if (!price) {
@@ -130,9 +181,53 @@ export default class ActionController {
             lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
           }),
         );
-      // } else {
+      } else if (campaign.action.actionType === "Submit-Url") {
 
-      // }
+        const foundSubmission = await SubmissionService.findOne({ campaignId: campaign._id, userId: account.toString() });
+        if (foundSubmission) {
+          transaction.feePayer = account;
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+          const payload: ActionPostResponse = {
+            transaction: transaction.serialize({
+              requireAllSignatures: false,
+              verifySignatures: true,
+            }).toString('base64'),
+            message: `You've already participated in ${campaign.campaignInfo.title}`
+          };
+          console.log("Payload:", payload)
+          console.log("Transaction:", transaction)
+
+          res.set(ACTIONS_CORS_HEADERS);
+          return res.status(200).json(payload);
+        }
+        console.log(req.query.Url)
+        await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.Url as string })
+      } else if (campaign.action.actionType === "Poll") {
+        const foundSubmission = await SubmissionService.findOne({ campaignId: campaign._id, userId: account.toString() });
+        if (foundSubmission) {
+          transaction.feePayer = account;
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+          const payload: ActionPostResponse = {
+            transaction: transaction.serialize({
+              requireAllSignatures: false,
+              verifySignatures: true,
+            }).toString('base64'),
+            message: `You've already participated in ${campaign.campaignInfo.title}`
+          };
+          console.log("Payload:", payload)
+          console.log("Transaction:", transaction)
+
+          res.set(ACTIONS_CORS_HEADERS);
+          return res.status(200).json(payload);
+        }
+        console.log(req.query.Url)
+        await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.choice as string })
+
+      } else {
+
+      }
 
       // Set the end user as the fee payer
       transaction.feePayer = account;

@@ -98,7 +98,7 @@ export default class ActionController {
 
       const transaction = new Transaction();
 
-      if (campaign.action.actionType === "Sell-Product") {
+      // if (campaign.action.actionType === "Sell-Product") {
         const price = campaign.action.fields.amount;
 
         if (!price) {
@@ -130,9 +130,9 @@ export default class ActionController {
             lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
           }),
         );
-      } else {
+      // } else {
 
-      }
+      // }
 
       // Set the end user as the fee payer
       transaction.feePayer = account;

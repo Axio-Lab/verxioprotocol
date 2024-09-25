@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import ProductService from "../services/product.service";
 import Campaign from "../services/campaign.service";
+import Submission from "../services/submission.service";
 import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
 import {
   clusterApiUrl,
@@ -8,53 +8,86 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  Transaction,
+  Transaction
 } from "@solana/web3.js";
 import { prepareBurnTokensTransaction } from "./actions/burnToken";
 
-const {
-  getProductByQuery
-} = new ProductService();
 const CampaignService = new Campaign();
+const SubmissionService = new Submission();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
   "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
 );
 
 export default class ActionController {
-  async getProductAction(req: Request, res: Response) {
+  async getAction(req: Request, res: Response) {
     try {
       const baseHref = new URL(
         `${req.protocol}://${req.get('host')}${req.originalUrl}`
       ).toString();
 
-      const productName = (req.params.name.replace(/-/g, ' '));
-      const product = await getProductByQuery({
-        name: productName
+      const campaignName = (req.params.name.replace(/-/g, ' '));
+      const campaign = await CampaignService.findOne({
+        "campaignInfo.title": campaignName
       });
 
-      if (!product) {
-        return res.status(404).json("Invalid product name")
+      if (!campaign) {
+        return res.status(404).json("Invalid campaign title")
       }
-      const disabled = (product?.quantity! <= 0) ? true : false;
 
       let payload: ActionGetResponse;
-      if (product?.payAnyPrice) {
+
+      if (campaign.action.actionType === "Sell-Product") {
         payload = {
-          title: `${product?.name}`,
-          icon: product?.image as unknown as string,
-          description: `${product?.description}`,
-          label: `Buy Now`,
-          disabled,
+          icon: campaign.campaignInfo.banner,
+          label: `Buy Now (${campaign.action.fields.amount} SOL)`,
+          description: `${campaign.campaignInfo.description}`,
+          title: `${campaign.campaignInfo.title}`,
+          disabled: (campaign?.action.fields.quantity! <= 0) ? true : false
+        }
+      } else if (campaign.action.actionType === "Submit-Url") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Submit Url`,
+          description: `${campaign.campaignInfo.description}`,
+          title: `${campaign.campaignInfo.title}`,
           links: {
             actions: [
               {
-                label: `Buy Now`,
-                href: `${baseHref}?amount={amount}`,
+                label: `Submit Url`,
+                href: `${baseHref}?Url={Url}`,
                 parameters: [
                   {
-                    name: "amount",
-                    label: "Enter a custom USD amount"
+                    name: "Url",
+                    label: "Submit your Url",
+                  },
+                ],
+              },
+            ],
+          },
+
+        }
+      } else if (campaign.action.actionType === "Poll") {
+        const options: any = campaign.action.fields.options?.map(
+          (option: string, index: number) => ({ label: option, value: index.toString() })
+        );
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Poll`,
+          description: `${campaign.campaignInfo.description}`,
+          title: `${campaign.campaignInfo.title}`,
+          links: {
+            actions: [
+              {
+                label: "Submit",
+                href: `${baseHref}?choice={choice}`,
+                parameters: [
+                  {
+                    type: "radio",
+                    name: "choice",
+                    label: `${campaign.campaignInfo.description}`,
+                    required: true,
+                    options
                   }
                 ]
               }
@@ -63,16 +96,14 @@ export default class ActionController {
         }
       } else {
         payload = {
-          icon: product?.image as unknown as string,
-          label: `Buy Now (${product?.price} SOL)`,
-          description: `${product?.description}`,
-          title: `${product?.name}`,
-          disabled
+          icon: "campaign.action.icon",
+          label: "campaign.action.label",
+          description: "campaign.action.description",
+          title: "campaign.action.title"
         }
       }
 
       res.set(ACTIONS_CORS_HEADERS);
-
       return res.json(payload);
 
     } catch (error: any) {
@@ -84,20 +115,19 @@ export default class ActionController {
     }
   }
 
-  async postProductAction(req: Request, res: Response) {
+  async postAction(req: Request, res: Response) {
     try {
-      const productName = (req.params.name.replace(/-/g, ' '));
-      const product = await getProductByQuery({
-        name: productName
+      const campaignName = (req.params.name.replace(/-/g, ' '));
+      const campaign = await CampaignService.findOne({
+        "campaignInfo.title": campaignName
       });
 
-      if (!product) {
-        return res.status(404).json("Invalid product name")
+      if (!campaign) {
+        return res.status(404).json("Invalid campaign title")
       }
 
       const body: ActionPostRequest = req.body;
 
-      // Validate the client-provided input
       let account: PublicKey;
       try {
         account = new PublicKey(body.account);
@@ -117,41 +147,87 @@ export default class ActionController {
         0 // Note: simple accounts that just store native SOL have `0` bytes of data
       );
 
-      let price;
-      if (product?.payAnyPrice) {
-        price = parseFloat(req.query.amount as any);
-        if (price <= 0) throw new Error("amount is too small");
-      } else {
-        price = product?.price!;
-      }
-
-      if (price * LAMPORTS_PER_SOL < minimumBalance) {
-        throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
-      }
-
-      const sellerPubkey: PublicKey = new PublicKey(
-        product?.userId as string
-      );
-
       const transaction = new Transaction();
 
-      // Transfer 90% of the funds to the seller's address
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: account,
-          toPubkey: sellerPubkey,
-          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
-        }),
-      );
+      if (campaign.action.actionType === "Sell-Product") {
+        const price = campaign.action.fields.amount;
 
-      // Transfer 10% of the funds to the default SOL address
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: account,
-          toPubkey: DEFAULT_SOL_ADDRESS,
-          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
-        }),
-      );
+        if (!price) {
+          return res.status(404).json("No price specified")
+        }
+
+        if (price * LAMPORTS_PER_SOL < minimumBalance) {
+          throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
+        }
+
+        const sellerPubkey: PublicKey = new PublicKey(
+          campaign.userId
+        );
+
+        // Transfer 90% of the funds to the seller's address
+        transaction.add(
+          SystemProgram.transfer({
+            fromPubkey: account,
+            toPubkey: sellerPubkey,
+            lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
+          }),
+        );
+
+        // Transfer 10% of the funds to the default SOL address
+        transaction.add(
+          SystemProgram.transfer({
+            fromPubkey: account,
+            toPubkey: DEFAULT_SOL_ADDRESS,
+            lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
+          }),
+        );
+      } else if (campaign.action.actionType === "Submit-Url") {
+
+        const foundSubmission = await SubmissionService.findOne({ campaignId: campaign._id, userId: account.toString() });
+        if (foundSubmission) {
+          transaction.feePayer = account;
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+          const payload: ActionPostResponse = {
+            transaction: transaction.serialize({
+              requireAllSignatures: false,
+              verifySignatures: true,
+            }).toString('base64'),
+            message: `You've already participated in ${campaign.campaignInfo.title}`
+          };
+          console.log("Payload:", payload)
+          console.log("Transaction:", transaction)
+
+          res.set(ACTIONS_CORS_HEADERS);
+          return res.status(200).json(payload);
+        }
+        console.log(req.query.Url)
+        await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.Url as string })
+      } else if (campaign.action.actionType === "Poll") {
+        const foundSubmission = await SubmissionService.findOne({ campaignId: campaign._id, userId: account.toString() });
+        if (foundSubmission) {
+          transaction.feePayer = account;
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+          const payload: ActionPostResponse = {
+            transaction: transaction.serialize({
+              requireAllSignatures: false,
+              verifySignatures: true,
+            }).toString('base64'),
+            message: `You've already participated in ${campaign.campaignInfo.title}`
+          };
+          console.log("Payload:", payload)
+          console.log("Transaction:", transaction)
+
+          res.set(ACTIONS_CORS_HEADERS);
+          return res.status(200).json(payload);
+        }
+        console.log(req.query.Url)
+        await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.choice as string })
+
+      } else {
+
+      }
 
       // Set the end user as the fee payer
       transaction.feePayer = account;
@@ -162,90 +238,7 @@ export default class ActionController {
           requireAllSignatures: false,
           verifySignatures: true,
         }).toString('base64'),
-        message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
-      };
-      console.log("Payload:", payload)
-      console.log("Transaction:", transaction)
-
-      res.set(ACTIONS_CORS_HEADERS);
-      return res.status(200).json(payload);
-
-    } catch (error: any) {
-      return res.status(500).send({
-        success: false,
-        message: `Error: ${error.message}`,
-      });
-    }
-  }
-
-  async getBurnAction(req: Request, res: Response) {
-    try {
-      const campaignName = (req.params.title.replace(/-/g, ' '));
-      const campaign = await CampaignService.findOne({
-        "campaignInfo.title": campaignName
-      });
-
-      if (!campaign) {
-        return res.status(404).json("Invalid campaign title")
-      }
-
-      const payload: ActionGetResponse = {
-        icon: campaign?.campaignInfo.banner as unknown as string,
-        label: `Burn Token`,
-        description: `${campaign?.campaignInfo.description}`,
-        title: `${campaign?.campaignInfo.title}`,
-      };
-      res.set(ACTIONS_CORS_HEADERS);
-
-      return res.json(payload);
-
-    } catch (error: any) {
-      return res.status(500)
-        .send({
-          success: false,
-          message: `Error: ${error.message}`
-        })
-    }
-  }
-
-  async postBurnAction(req: Request, res: Response) {
-    try {
-      const campaignName = (req.params.title.replace(/-/g, ' '));
-      const campaign = await CampaignService.findOne({
-        "campaignInfo.title": campaignName
-      });
-
-      if (!campaign) {
-        return res.status(404).json("Invalid campaign title")
-      }
-      
-      const body: ActionPostRequest = req.body;
-      
-      // Validate the client-provided input
-      let account: PublicKey;
-      try {
-        account = new PublicKey(body.account);
-      } catch (err) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid "account" provided',
-        });
-      }
-      
-      
-      // const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
-      const transaction = await prepareBurnTokensTransaction(
-        '7F9dXiDKbGMPZ5SdL5qsJk9UNb4dA72uTTQDo3yAMdX7', //Token mint
-        1, //Amount
-        account
-      )
-
-      const payload: ActionPostResponse = {
-        transaction: transaction.serialize({
-          requireAllSignatures: false,
-          verifySignatures: true,
-        }).toString('base64'),
-        message: `You've successfully burned ${campaign.actions.action.amount} token`,
+        message: `You've successfully participated in ${campaign.campaignInfo.title}`
       };
 
       console.log("Payload:", payload)
@@ -261,4 +254,158 @@ export default class ActionController {
       });
     }
   }
+
+  // async getBurnAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
+
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
+
+  //     const payload: ActionGetResponse = {
+  //       icon: campaign?.campaignInfo.banner as unknown as string,
+  //       label: `Burn Token`,
+  //       description: `${campaign?.campaignInfo.description}`,
+  //       title: `${campaign?.campaignInfo.title}`,
+  //     };
+  //     res.set(ACTIONS_CORS_HEADERS);
+
+  //     return res.json(payload);
+
+  //   } catch (error: any) {
+  //     return res.status(500)
+  //       .send({
+  //         success: false,
+  //         message: `Error: ${error.message}`
+  //       })
+  //   }
+  // }
+
+  // async postBurnAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
+
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
+
+  //     const body: ActionPostRequest = req.body;
+
+  //     // Validate the client-provided input
+  //     let account: PublicKey;
+  //     try {
+  //       account = new PublicKey(body.account);
+  //     } catch (err) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: 'Invalid "account" provided',
+  //       });
+  //     }
+
+  //     const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
+
+  //     const payload: ActionPostResponse = {
+  //       transaction: transaction.serialize({
+  //         requireAllSignatures: false,
+  //         verifySignatures: true,
+  //       }).toString('base64'),
+  //       message: `You've successfully minted token`,
+  //     };
+  //     console.log("Payload:", payload)
+  //     console.log("Transaction:", transaction)
+
+  //     res.set(ACTIONS_CORS_HEADERS);
+  //     return res.status(200).json(payload);
+
+  //   } catch (error: any) {
+  //     return res.status(500).send({
+  //       success: false,
+  //       message: `Error: ${error.message}`,
+  //     });
+  //   }
+  // }
+
+  // async getUrlAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
+
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
+
+  //     const payload: ActionGetResponse = {
+  //       icon: campaign?.campaignInfo.banner as unknown as string,
+  //       label: `Burn Token`,
+  //       description: `${campaign?.campaignInfo.description}`,
+  //       title: `${campaign?.campaignInfo.title}`,
+  //     };
+  //     res.set(ACTIONS_CORS_HEADERS);
+
+  //     return res.json(payload);
+
+  //   } catch (error: any) {
+  //     return res.status(500)
+  //       .send({
+  //         success: false,
+  //         message: `Error: ${error.message}`
+  //       })
+  //   }
+  // }
+
+  // async postUrlAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
+
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
+
+  //     const body: ActionPostRequest = req.body;
+
+  //     // Validate the client-provided input
+  //     let account: PublicKey;
+  //     try {
+  //       account = new PublicKey(body.account);
+  //     } catch (err) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: 'Invalid "account" provided',
+  //       });
+  //     }
+
+  //     const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
+
+  //     const payload: ActionPostResponse = {
+  //       transaction: transaction.serialize({
+  //         requireAllSignatures: false,
+  //         verifySignatures: true,
+  //       }).toString('base64'),
+  //       message: `You've successfully minted token`,
+  //     };
+  //     console.log("Payload:", payload)
+  //     console.log("Transaction:", transaction)
+
+  //     res.set(ACTIONS_CORS_HEADERS);
+  //     return res.status(200).json(payload);
+
+  //   } catch (error: any) {
+  //     return res.status(500).send({
+  //       success: false,
+  //       message: `Error: ${error.message}`,
+  //     });
+  //   }
+  // }
 }

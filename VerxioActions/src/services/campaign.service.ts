@@ -14,5 +14,4 @@ export default class CampaignService {
     async find(params: {}) {
         return await Campaign.find(params);
     }
-
 }

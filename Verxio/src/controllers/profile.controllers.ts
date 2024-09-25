@@ -69,6 +69,7 @@ export default class ProfileController {
       (userId),
       (`For verification on ${new Date()}`)
     )
+    
     await reclaimClient.buildProofRequest(PROVIDERS.gmail as any, true, 'V2Linking');
     reclaimClient.setRedirectUrl(`https://www.verxio.xyz/dashboard/profile`)
     reclaimClient.setSignature(await reclaimClient.generateSignature(APP_SECRET));

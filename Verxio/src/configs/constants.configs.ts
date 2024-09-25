@@ -3,13 +3,8 @@ const basePath = "/api/v1"
 const DATABASES = {
     API_KEY: "Api_Key",
     PROFILE: "Profile",
-    // POINTS: "Point",
     CAMPAIGN: "Campaign",
-    PRODUCT: "Product",
-    TRANSACTION: "Transaction",
-    PAYLOAD: "Payload",
-    XP: "XP",
-    PARTICIPATION: "Participation"
+    XP: "XP"
 };
 
 const MESSAGES = {

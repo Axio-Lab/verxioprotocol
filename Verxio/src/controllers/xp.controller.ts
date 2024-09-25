@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 
 import XP from "../services/xp.service";
 import Profile from "../services/profile.services";
-import AuthRequest from "../interfaces/auth.interface";
 
 const XPService = new XP();
 const ProfileService = new Profile();

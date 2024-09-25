@@ -14,7 +14,7 @@ export default class SubmissionController {
             return res.status(201).send({
                 success: true,
                 message: "Participants fetched succesfully.",
-                data: submission
+                data: { count: submission.length, ...submission }
             });
 
         } catch (error: any) {

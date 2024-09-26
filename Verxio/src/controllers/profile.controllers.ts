@@ -63,7 +63,6 @@ export default class ProfileController {
       "gmail": "f9f383fd-32d9-4c54-942f-5e9fda349762",
       "yc_founder_details": "0bc34db6-bae2-48ca-b864-9f1094defedc"
     }
-
     const reclaimClient = new Reclaim.ProofRequest(APP_ID, sessionId as any);
     reclaimClient.addContext(
       (userId),

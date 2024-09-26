@@ -11,7 +11,7 @@ import bs58 from 'bs58';
   const BUFFER_TIME = 60; // 1 minute buffer
   const cluster = ICluster.Devnet;
 
-async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signerWallet, account) {
+export async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signerWallet, account) {
   const RPC_URL = "https://devnet.helius-rpc.com/?api-key=d7aa98e6-4f1e-420d-be26-231d5a586b93";
   const connection = new Connection(RPC_URL);
 

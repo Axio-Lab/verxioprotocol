@@ -16,7 +16,13 @@ const {
 router.post("/", authenticate, parseActionType, validate(createCampaignSchema), createCampaign);
 
 //view Developers Campaigns
+router.get("/all", viewDevCampaigns);
+
+//view Developers Campaigns
 router.get("/", authenticate, viewDevCampaigns);
+
+//view Developers Campaigns
+router.get("/:campaignId", authenticate, viewACampaign);
 
 //Delete Campaign
 router.delete("/:campaignId", authenticate, deleteCampaign);

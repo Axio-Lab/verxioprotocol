@@ -12,11 +12,11 @@ const {
 //verify user
 router.post("/verify-user", verifyUser);
 
-//create or fetches a profile
-router.post("/:id", createProfile);
-
 //upload profile image
 router.post("/image", upload.single("image"), uploadImage);
+
+//create or fetches a profile
+router.post("/:id", createProfile);
 
 //get a profile
 router.get("/:id", getProfile);

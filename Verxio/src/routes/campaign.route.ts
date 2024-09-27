@@ -8,6 +8,7 @@ const router = Router();
 const {
     createCampaign,
     viewDevCampaigns,
+    viewACampaign,
     deleteCampaign,
 } = new CampaignController();
 

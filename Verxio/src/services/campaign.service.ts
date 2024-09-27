@@ -20,6 +20,10 @@ export default class CampaignService {
     async find(params: {}) {
         return await Campaign.find(params);
     }
+
+    async count(params: {}) {
+        return await Campaign.countDocuments(params);
+    }
     
     // async createDistributorClient(wallet: any, numberOfReceipts: string, totalAmount: string) {
     //     try {

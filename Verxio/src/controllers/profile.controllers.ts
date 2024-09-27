@@ -3,7 +3,11 @@ import { MESSAGES } from "../configs/constants.configs";
 import ProfileService from "../services/profile.services";
 import cloudinary from "../configs/cloudinary.configs";
 import { Reclaim } from '@reclaimprotocol/js-sdk';
+import ApiKey from "../services/apiKey.service";
+import Campaign from "../services/campaign.service";
 
+const ApiKeyService = new ApiKey();
+const CampaignService = new Campaign();
 const {
   create,
   findOne,
@@ -21,6 +25,14 @@ export default class ProfileController {
   async createProfile(req: Request, res: Response) {
     const { id } = req.params;
 
+    const campaignCount = await CampaignService.count({ userId: id })
+    let apiKey = await ApiKeyService.findOne({ userId: id, isValid: true });
+
+    if (!apiKey) {
+      apiKey = await ApiKeyService.create(id);
+    }
+
+
     const profileFromId = await findOne({ _id: id });
     if (profileFromId) {
 
@@ -29,7 +41,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: FETCHED,
-          profile: profile
+          profile: { ...profile, apiKey, campaignCount }
         });
     } else {
       //creates a profile if id doesn't exist
@@ -39,7 +51,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: CREATED,
-          profile: createdProfile
+          profile: { ...createdProfile, apiKey, campaignCount }
         });
     }
   }
@@ -69,7 +81,7 @@ export default class ProfileController {
       (userId),
       (`For verification on ${new Date()}`)
     )
-    
+
     await reclaimClient.buildProofRequest(PROVIDERS.gmail as any, true, 'V2Linking');
     reclaimClient.setRedirectUrl(`https://www.verxio.xyz/dashboard/profile`)
     reclaimClient.setSignature(await reclaimClient.generateSignature(APP_SECRET));

@@ -71,6 +71,34 @@ export default class ProductController {
         }
     }
 
+    async viewAllCampaigns(req: Request, res: Response) {
+        try {
+            let campaigns: any = await find({ ...req.query })
+            campaigns = await Promise.all(
+                campaigns.map(async (campaign: ICampaign) => {
+                    const submission = await SubmissionService.count({ campaignId: campaign._id });
+                    return {
+                        ...campaign,
+                        submission
+                    };
+                })
+            );
+
+            return res.status(200)
+                .send({
+                    success: true,
+                    message: "Info fetched successfully",
+                    campaigns
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while fetching campaigns info: ${error.message}`
+                })
+        }
+    }
+
     async viewDevCampaigns(req: Request, res: Response) {
         try {
             const userId = (req as AuthRequest).user._id;

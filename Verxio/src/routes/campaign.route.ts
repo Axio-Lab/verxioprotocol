@@ -8,6 +8,7 @@ const router = Router();
 const {
     createCampaign,
     viewDevCampaigns,
+    viewAllCampaigns,
     viewACampaign,
     deleteCampaign,
 } = new CampaignController();
@@ -16,7 +17,7 @@ const {
 router.post("/", authenticate, parseActionType, validate(createCampaignSchema), createCampaign);
 
 //view Developers Campaigns
-router.get("/all", viewDevCampaigns);
+router.get("/all", viewAllCampaigns);
 
 //view Developers Campaigns
 router.get("/", authenticate, viewDevCampaigns);

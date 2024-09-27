@@ -41,7 +41,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: FETCHED,
-          profile: { ...profile, apiKey, campaignCount }
+          profile: { ...profile?.toObject(), key: apiKey.key, campaignCount }
         });
     } else {
       //creates a profile if id doesn't exist
@@ -51,7 +51,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: CREATED,
-          profile: { ...createdProfile, apiKey, campaignCount }
+          profile: { ...createdProfile?.toObject(), key: apiKey.key, campaignCount }
         });
     }
   }

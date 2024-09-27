@@ -26,12 +26,7 @@ export default class ProfileController {
     const { id } = req.params;
 
     const campaignCount = await CampaignService.count({ userId: id })
-    let apiKey = await ApiKeyService.findOne({ userId: id, isValid: true });
-
-    if (!apiKey) {
-      apiKey = await ApiKeyService.create(id);
-    }
-
+    const apiKey = await ApiKeyService.findOne({ userId: id, isValid: true });
 
     const profileFromId = await findOne({ _id: id });
     if (profileFromId) {
@@ -41,7 +36,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: FETCHED,
-          profile: { ...profile?.toObject(), key: apiKey.key, campaignCount }
+          profile: { ...profile?.toObject(), key: apiKey?.key, campaignCount }
         });
     } else {
       //creates a profile if id doesn't exist
@@ -51,7 +46,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: CREATED,
-          profile: { ...createdProfile?.toObject(), key: apiKey.key, campaignCount }
+          profile: { ...createdProfile?.toObject(), key: apiKey?.key, campaignCount }
         });
     }
   }

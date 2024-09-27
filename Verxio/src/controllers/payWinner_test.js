@@ -70,9 +70,8 @@ async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
   try {
     // Step 1: Create payemnt streams
     console.log("Creating streams for winners...");
-    const { txs, metadatas, errors } = await solanaClient.createMultiple(createStreamParams, solanaParams);
-    console.log("Streams created successfully. Transaction Idx:", metadatas);
-    console.log("Streams created successfully. Transaction Error:", errors);
+    const { txs, errors } = await solanaClient.createMultiple(createStreamParams, solanaParams);
+    console.log(errors, "errors")
        
        // Step 2: Send treasury fee
     const treasuryWallet = new PublicKey("F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9");
@@ -100,6 +99,7 @@ async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
 
     return {
       streamCreationTxs: txs,
+      streamCreationErros: errors,
     };
   } catch (error) {
     console.error("Error in payWinnersAndWithdraw:", error);
@@ -108,7 +108,7 @@ async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
 }
 
 // Example usage
-const totalPrizePool = 0.4;
+const totalPrizePool = 1;
 const winners = [
   "6WdSAAE49mp7bxKScXDNV41zX1Uk9bCTg6QeaV6YkToy",
   "9qrxh23sGGFxgLTKRD4YzR1bsEzm6vE5vKfK7ngwgXZo",

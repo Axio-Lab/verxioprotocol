@@ -68,7 +68,6 @@ export async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signer
   try {
 
     const { txs, errors } = await solanaClient.createMultiple(createStreamParams, solanaParams);
-    console.log("Streams created successfully. Transaction Error:", errors);  
     
     // Step 2: Send treasury fee
     const treasuryWallet = new PublicKey("F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9");
@@ -94,6 +93,7 @@ export async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signer
     console.log(`Treasury fee transfer transaction sent: ${txid}`);
     return {
       streamCreationTxs: txs,
+      streamCreationErros: errors,
     };
   } catch (error) {
     console.error("Error in payWinnersAndWithdraw:", error);

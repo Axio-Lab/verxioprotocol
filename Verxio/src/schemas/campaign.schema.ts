@@ -22,7 +22,11 @@ const createCampaignSchema = Joi.object({
                     return helpers.error('any.invalid');
                 }
             } else if (actionType === 'Poll') {
-                if (!Array.isArray(value.options) || value.options.length === 0) {
+                const { options, question } = value;
+                if (!Array.isArray(options) || options.length === 0) {
+                    return helpers.error('any.invalid');
+                }
+                if (!question || typeof question !== 'string' || !question.trim()) {
                     return helpers.error('any.invalid');
                 }
             } else if (actionType === 'Submit-Url') {

@@ -138,7 +138,7 @@ export default class ProductController {
                 .send({
                     success: true,
                     message: "Info fetched successfully",
-                    data: { ...campaign, submission }
+                    data: { ...campaign?.toObject(), submission }
                 })
         } catch (error: any) {
             return res.status(500)

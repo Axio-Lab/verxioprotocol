@@ -56,7 +56,7 @@ const campaignSchema = new Schema<ICampaign>({
                             typeof value.minAmount === 'number';
                     } else if (actionType === 'Poll') {
                         return Array.isArray(value.options) && value.options.length > 0 &&
-                        typeof value.question === 'string';
+                        typeof value.title === 'string';
                     } else if (actionType === 'Submit-Url') {
                         return true;
                     } else if (actionType === 'Sell-Product') {

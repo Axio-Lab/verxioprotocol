@@ -58,7 +58,7 @@ export default class ProductController {
                     success: true,
                     message: "Campaign created successfully",
                     campaign: {
-                        ...campaign,
+                        ...campaign.toObject(),
                         blink: `${deployedLink}/${encodedCampaignName}`
                     }
                 })

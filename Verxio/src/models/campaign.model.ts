@@ -84,13 +84,13 @@ const campaignSchema = new Schema<ICampaign>({
         amount: {
             type: Number,
             required: function () {
-                return this.rewardInfo.type === "Token" || "Verxio-XP";
+                return (this.rewardInfo.type === "Token") || (this.rewardInfo.type === "Verxio-XP");
             }
         },
         availableAmount: {
             type: Number,
             required: function () {
-                return this.rewardInfo.type === "Token" || "Verxio-XP";
+                return (this.rewardInfo.type === "Token") || (this.rewardInfo.type === "Verxio-XP");
             }
         }
     },

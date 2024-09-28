@@ -4,6 +4,7 @@ const DATABASES = {
     API_KEY: "Api_Key",
     PROFILE: "Profile",
     CAMPAIGN: "Campaign",
+    SUBMISSION: "Submission",
     XP: "XP"
 };
 

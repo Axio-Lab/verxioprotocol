@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import CampaignService from "../services/campaign.service";
 import AuthRequest from "../interfaces/auth.interface";
 import Profile from "../services/profile.services";
+import Submission from "../services/submission.service";
+import ICampaign from "../interfaces/campaign.interface";
 
+const SubmissionService = new Submission();
 const ProfileService = new Profile();
 const {
     create,
@@ -55,7 +58,7 @@ export default class ProductController {
                     success: true,
                     message: "Campaign created successfully",
                     campaign: {
-                        ...campaign,
+                        ...campaign.toObject(),
                         blink: `${deployedLink}/${encodedCampaignName}`
                     }
                 })
@@ -68,10 +71,18 @@ export default class ProductController {
         }
     }
 
-    async viewDevCampaigns(req: Request, res: Response) {
+    async viewAllCampaigns(req: Request, res: Response) {
         try {
-            const userId = (req as AuthRequest).user._id;
-            const campaigns = await find({ ...req.query, userId })
+            let campaigns: any = await find({ ...req.query })
+            campaigns = await Promise.all(
+                campaigns.map(async (campaign: any) => {
+                    const submission = await SubmissionService.count({ campaignId: campaign._id });
+                    return {
+                        ...campaign.toObject(),
+                        submission
+                    };
+                })
+            );
 
             return res.status(200)
                 .send({
@@ -84,6 +95,55 @@ export default class ProductController {
                 .send({
                     success: false,
                     message: `Error occured while fetching campaigns info: ${error.message}`
+                })
+        }
+    }
+
+    async viewDevCampaigns(req: Request, res: Response) {
+        try {
+            const userId = (req as AuthRequest).user._id;
+            let campaigns: any = await find({ ...req.query, userId })
+            campaigns = await Promise.all(
+                campaigns.map(async (campaign: any) => {
+                    const submission = await SubmissionService.count({ campaignId: campaign._id });
+                    return {
+                        ...campaign.toObject(),
+                        submission
+                    };
+                })
+            );
+
+            return res.status(200)
+                .send({
+                    success: true,
+                    message: "Info fetched successfully",
+                    campaigns
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while fetching campaigns info: ${error.message}`
+                })
+        }
+    }
+
+    async viewACampaign(req: Request, res: Response) {
+        try {
+            const campaign = await findOne({ _id: req.params.campaignId })
+            const submission = await SubmissionService.count({ campaignId: req.params.campaignId });
+
+            return res.status(200)
+                .send({
+                    success: true,
+                    message: "Info fetched successfully",
+                    data: { ...campaign?.toObject(), submission }
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while fetching campaign info: ${error.message}`
                 })
         }
     }

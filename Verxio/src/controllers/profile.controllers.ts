@@ -36,7 +36,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: FETCHED,
-          profile: { ...profile?.toObject(), key: apiKey?.key, campaignCount }
+          profile: { ...profile?.toObject(), key: apiKey?.key || "", campaignCount }
         });
     } else {
       //creates a profile if id doesn't exist
@@ -46,7 +46,7 @@ export default class ProfileController {
         .send({
           success: true,
           message: CREATED,
-          profile: { ...createdProfile?.toObject(), key: apiKey?.key, campaignCount }
+          profile: { ...createdProfile?.toObject(), key: apiKey?.key || "", campaignCount }
         });
     }
   }
@@ -136,12 +136,15 @@ export default class ProfileController {
 
   async getProfile(req: Request, res: Response) {
     const profile = await findOne({ _id: req.params.id });
+    const apiKey = await ApiKeyService.findOne({ userId: req.params.id, isValid: true });
+    const campaignCount = await CampaignService.count({ userId: req.params.id })
+
     if (profile) {
       return res.status(200)
         .send({
           success: true,
           message: FETCHED,
-          profile: profile
+          profile: { ...profile?.toObject(), key: apiKey?.key || "", campaignCount }
         });
     }
     return res.status(404)

@@ -75,10 +75,10 @@ export default class ProductController {
         try {
             let campaigns: any = await find({ ...req.query })
             campaigns = await Promise.all(
-                campaigns.map(async (campaign: ICampaign) => {
+                campaigns.map(async (campaign: any) => {
                     const submission = await SubmissionService.count({ campaignId: campaign._id });
                     return {
-                        ...campaign,
+                        ...campaign.toObject(),
                         submission
                     };
                 })
@@ -104,10 +104,10 @@ export default class ProductController {
             const userId = (req as AuthRequest).user._id;
             let campaigns: any = await find({ ...req.query, userId })
             campaigns = await Promise.all(
-                campaigns.map(async (campaign: ICampaign) => {
+                campaigns.map(async (campaign: any) => {
                     const submission = await SubmissionService.count({ campaignId: campaign._id });
                     return {
-                        ...campaign,
+                        ...campaign.toObject(),
                         submission
                     };
                 })

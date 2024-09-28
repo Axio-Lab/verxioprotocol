@@ -130,8 +130,7 @@ export default class ProductController {
 
     async viewACampaign(req: Request, res: Response) {
         try {
-            const userId = (req as AuthRequest).user._id;
-            const campaign = await findOne({ _id: req.params.campaignId, userId })
+            const campaign = await findOne({ _id: req.params.campaignId })
             const submission = await SubmissionService.count({ campaignId: req.params.campaignId });
 
             return res.status(200)

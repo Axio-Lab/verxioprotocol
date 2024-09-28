@@ -1,19 +1,33 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { BN } from "bn.js";
 import { StreamflowSolana, getBN, ICluster } from '@streamflow/stream';
 import { Keypair, Connection, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import bs58 from 'bs58';
 
   // Constants for fee percentages
   const TOTAL_FEE_PERCENTAGE = 0.01; // 1% total fee
   const STREAMFLOW_FEE_PERCENTAGE = 0.0019; // 0.19% Streamflow fee
   const TREASURY_FEE_PERCENTAGE = TOTAL_FEE_PERCENTAGE - STREAMFLOW_FEE_PERCENTAGE; // 0.8% treasury fee
+  const TREASURY_WALLET = new PublicKey(process.env.TREASURY_WALLET);
+
 
   const BUFFER_TIME = 60; // 1 minute buffer
   const cluster = ICluster.Devnet;
 
-export async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signerWallet, account) {
-  const RPC_URL = "https://devnet.helius-rpc.com/?api-key=d7aa98e6-4f1e-420d-be26-231d5a586b93";
+async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
+  const RPC_URL = `https://devnet.helius-rpc.com/?api-key=${process.env.API_KEY}`;
   const connection = new Connection(RPC_URL);
+
+  function envToKeypair(envVarName) {
+    const envVarValue = process.env[envVarName];
+    const keyArray = envVarValue.replace(/^\[|\]$/g, '').split(',').map(Number);
+    const keyUint8Array = new Uint8Array(keyArray);
+    const keypair = Keypair.fromSecretKey(keyUint8Array);
+    return keypair;
+  }
+  
+  const escrowPayout = envToKeypair("PRIVATE_KEY");
 
   // Calculate fee amounts
   const totalFeeAmount = totalAmount * TOTAL_FEE_PERCENTAGE;
@@ -23,18 +37,14 @@ export async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signer
   const totalAmountWithFees = totalAmount + totalFeeAmount;
 
   // Check balance
-  const balance = await connection.getBalance(account);
+  const balance = await connection.getBalance(escrowPayout.publicKey);
   if (balance < totalAmountWithFees * 1e9) { // Convert to lamports
     throw new Error(`Insufficient balance. Required: ${totalAmountWithFees} SOL, Available: ${balance / 1e9} SOL`);
   }
 
   // Initialize Solana client
   const solanaClient = new StreamflowSolana.SolanaStreamClient(RPC_URL, cluster);
-
-  // Calculate amount per winner 
   const amountPerWinner = totalAmount / winnerAddresses.length;
-
-  // Prepare recipients array
   const recipients = winnerAddresses.map(address => ({
     recipient: address,
     amount: getBN(amountPerWinner, 9),
@@ -59,44 +69,63 @@ export async function payWinnersAndWithdraw(totalAmount, winnerAddresses, signer
     withdrawalFrequency: 0, 
     partner: null,
   };
-    // Prepare Solana-specific parameters
+
     const solanaParams = {
-      sender: signerWallet, 
+      sender: escrowPayout, 
       isNative: true, // We're using native SOL
     };
 
   try {
-
+    // Step 1: Create paymnt streams
+    console.log("Creating streams for winners...");
     const { txs, errors } = await solanaClient.createMultiple(createStreamParams, solanaParams);
-    
-    // Step 2: Send treasury fee
-    const treasuryWallet = new PublicKey("F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9");
-    
+    console.log(errors, "errors")
+       
+       // Step 2: Send treasury fee
     const instruction = SystemProgram.transfer({
-         fromPubkey: account,
-         toPubkey: treasuryWallet,
+         fromPubkey: escrowPayout.publicKey,
+         toPubkey: TREASURY_WALLET,
          lamports: getBN(treasuryFeeAmount, 9),
        });
    
     const latestBlockhash = await connection.getLatestBlockhash();
    
     const messageV0 = new TransactionMessage({
-         payerKey: account,
+         payerKey: escrowPayout.publicKey,
          recentBlockhash: latestBlockhash.blockhash,
          instructions: [instruction],
        }).compileToV0Message();
    
     const transaction = new VersionedTransaction(messageV0);
    
-    transaction.sign([signerWallet]);
+       transaction.sign([escrowPayout]);
+   
     const txid = await connection.sendTransaction(transaction);
-    console.log(`Treasury fee transfer transaction sent: ${txid}`);
+
     return {
       streamCreationTxs: txs,
       streamCreationErros: errors,
+      treasuryFeeTxs: txid,
     };
   } catch (error) {
     console.error("Error in payWinnersAndWithdraw:", error);
     throw error;
   }
 }
+export default payWinnersAndWithdraw;
+
+// Example usage
+// const totalPrizePool = 1;
+// const winners = [
+//   "6WdSAAE49mp7bxKScXDNV41zX1Uk9bCTg6QeaV6YkToy",
+//   "9qrxh23sGGFxgLTKRD4YzR1bsEzm6vE5vKfK7ngwgXZo",
+//   "HwALRRu38hBrztNRZWdWZu33DyCskWmt5P6eXZ2cTfEi",
+//   "FFvPUNGYsQa4vjLAcCJ4zx8vZ4BSqQoCbMMyG3VNuEnd"
+// ];
+
+// payWinnersAndWithdraw(totalPrizePool, winners)
+//   .then(result => {
+//     console.log("Prize distribution and withdrawal complete.");
+//     console.log("Stream Creation Transactions:", result.streamCreationTxs);
+//   })
+//   .catch(error => console.error("Prize distribution and withdrawal failed:", error));

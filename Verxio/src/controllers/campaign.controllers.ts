@@ -69,8 +69,9 @@ export default class ProductController {
     async CreateCampaign(req: Request, res: Response) {
         try {
             const { signedTransaction, campaignData } = req.body;
+            
+            if (campaignData.rewardInfo.type === "token"){
             const connection = new Connection(process.env.SOLANA_RPC_URL!);
-
             // Deserialize and send the transaction
             const transaction = VersionedTransaction.deserialize(Buffer.from(signedTransaction, 'base64'));
             const signature = await connection.sendTransaction(transaction);
@@ -88,7 +89,7 @@ export default class ProductController {
             if (confirmation.value.err) {
                 throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
             }
-
+        }
             // Create the campaign
             const campaign = await create({ ...campaignData, userId: (req as AuthRequest).user._id });
 

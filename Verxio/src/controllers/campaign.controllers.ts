@@ -4,6 +4,7 @@ import AuthRequest from "../interfaces/auth.interface";
 import Profile from "../services/profile.services";
 import Submission from "../services/submission.service";
 import ICampaign from "../interfaces/campaign.interface";
+import { Connection, PublicKey, SystemProgram, TransactionMessage, TransactionConfirmationStrategy, VersionedTransaction} from '@solana/web3.js';
 
 const SubmissionService = new Submission();
 const ProfileService = new Profile();
@@ -16,60 +17,99 @@ const {
 const deployedLink = "https://action.verxio.xyz";
 
 export default class ProductController {
-    async createCampaign(req: Request, res: Response) {
+    async prepareCampaignCreation(req: Request, res: Response) {
         try {
 
             const data = req.body;
             const userId = (req as AuthRequest).user._id;
+            const RPC_URL = `${process.env.SOLANA_RPC_URL}/?api-key=${process.env.API_KEY}`;
+            const connection = new Connection(RPC_URL);
 
-            // if (data.rewardInfo.type === "token") {
-            //     // const signerWalletAdapter = data.signerWalletAdapter;
-            //     // const res = await createDistributorClient((req as AuthRequest).user._id, String(data.rewardInfo.noOfPeople), String(data.rewardInfo.amount));
-            //     // data.rewardInfo.res = res;
-            // }
+            if (data.rewardInfo.type === "token") {
+                const { amount } = data.rewardInfo;
+                const escrowAddress = process.env.ESCROW_WALLET_ADDRESS;
 
-            data.rewardInfo.availableAmount = data.rewardInfo.amount;
-            const campaign = await create({ ...data, userId });
+                  // Create a transaction
+                  const instruction = SystemProgram.transfer({
+                    fromPubkey: new PublicKey(userId!),
+                    toPubkey: new PublicKey(escrowAddress!),
+                    lamports: amount * 1e9 // Convert SOL to lamports
+                });
 
-            // const requiredXp = 200 * campaign.rewardInfo.noOfPeople;
+                const latestBlockhash = await connection.getLatestBlockhash();
 
-            // const profile = await ProfileService.findOne({ _id: userId });
-            // if (profile) {
-            //     if (profile.xp >= requiredXp) {
-            //         profile.xp -= requiredXp;
-            //         profile.save();
+                const messageV0 = new TransactionMessage({
+                    payerKey: new PublicKey(userId!),
+                    recentBlockhash: latestBlockhash.blockhash,
+                    instructions: [instruction]
+                }).compileToV0Message();
 
-            //         campaign.rewardInfo.xp += requiredXp;
-            //         campaign.rewardInfo.availableXP += requiredXp;
-            //         campaign.save();
-            //     } else {
-            //         return res.status(400)
-            //             .send({
-            //                 success: false,
-            //                 message: "Insufficient XP, Campaign saved to drafts",
-            //                 campaign
-            //             })
-            //     }
-            // }
-            const encodedCampaignName = campaign.campaignInfo.title.replace(/\s+/g, '-');
+                const transaction = new VersionedTransaction(messageV0);
 
-            return res.status(200)
-                .send({
-                    success: true,
-                    message: "Campaign created successfully",
-                    campaign: {
-                        ...campaign.toObject(),
-                        blink: `${deployedLink}/${encodedCampaignName}`
-                    }
-                })
+                 // Serialize the transaction and send it to the frontend for signing
+                 const serializedTransaction = Buffer.from(transaction.serialize()).toString('base64');
+
+                 // Instead of creating the campaign here, send the transaction to the frontend
+                 return res.status(200).send({
+                     success: true,
+                     message: "Transaction created. Please sign and submit.",
+                     transaction: serializedTransaction
+                 });
+            }
+
         } catch (error: any) {
-            return res.status(500)
-                .send({
-                    success: false,
-                    message: `Error occured while creating campaign: ${error.message}`
-                })
+            return res.status(500).send({
+                success: false,
+                message: `Error occurred while creating campaign: ${error.message}`
+            });
         }
     }
+
+    // New method to handle the signed transaction and create the campaign
+    async CreateCampaign(req: Request, res: Response) {
+        try {
+            const { signedTransaction, campaignData } = req.body;
+            const connection = new Connection(process.env.SOLANA_RPC_URL!);
+
+            // Deserialize and send the transaction
+            const transaction = VersionedTransaction.deserialize(Buffer.from(signedTransaction, 'base64'));
+            const signature = await connection.sendTransaction(transaction);
+
+            // Wait for confirmation using the new method
+            const latestBlockhash = await connection.getLatestBlockhash();
+            const confirmationStrategy: TransactionConfirmationStrategy = {
+                signature,
+                blockhash: latestBlockhash.blockhash,
+                lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+            };
+
+            const confirmation = await connection.confirmTransaction(confirmationStrategy);
+
+            if (confirmation.value.err) {
+                throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+            }
+
+            // Create the campaign
+            const campaign = await create({ ...campaignData, userId: (req as AuthRequest).user._id });
+
+            const encodedCampaignName = campaign.campaignInfo.title.replace(/\s+/g, '-');
+
+            return res.status(200).send({
+                success: true,
+                message: "Campaign created successfully",
+                campaign: {
+                    ...campaign.toObject(),
+                    blink: `${deployedLink}/${encodedCampaignName}`
+                }
+            });
+        } catch (error: any) {
+            return res.status(500).send({
+                success: false,
+                message: `Error occurred while submitting transaction: ${error.message}`
+            });
+        }
+    }
+
 
     async viewAllCampaigns(req: Request, res: Response) {
         try {

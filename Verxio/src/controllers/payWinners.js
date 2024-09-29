@@ -16,7 +16,7 @@ import { Keypair, Connection, PublicKey, SystemProgram, TransactionMessage, Vers
   const cluster = ICluster.Devnet;
 
 async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
-  const RPC_URL = `https://devnet.helius-rpc.com/?api-key=${process.env.API_KEY}`;
+  const RPC_URL = `${process.env.SOLANA_RPC_URL}/?api-key=${process.env.API_KEY}`;
   const connection = new Connection(RPC_URL);
 
   function envToKeypair(envVarName) {

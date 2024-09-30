@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "build": "npm install && tsc",
-    "start": "ts-node ./src/server.ts",
+    "start": "node dist/server.js",
     "dev": "nodemon ./src/server.ts"
   },
   "dependencies": {

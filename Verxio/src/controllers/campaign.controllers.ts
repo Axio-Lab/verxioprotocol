@@ -73,7 +73,18 @@ export default class ProductController {
 
     async viewAllCampaigns(req: Request, res: Response) {
         try {
-            let campaigns: any = await find({ ...req.query })
+            const { rewards, actions, status } = req.query;
+
+            const query: any = {};
+            if (rewards) query["rewardInfo.type"] = query;
+            if (actions) query["action.actionType"] = actions;
+
+            let campaigns: any = await find(query);
+
+            if (status) {
+                campaigns = campaigns.filter((campaign: any) => campaign.status === status);
+            }
+
             campaigns = await Promise.all(
                 campaigns.map(async (campaign: any) => {
                     const submission = await SubmissionService.count({ campaignId: campaign._id });
@@ -102,7 +113,18 @@ export default class ProductController {
     async viewDevCampaigns(req: Request, res: Response) {
         try {
             const userId = (req as AuthRequest).user._id;
-            let campaigns: any = await find({ ...req.query, userId })
+            const { rewards, actions, status } = req.query;
+
+            const query: any = {};
+            if (rewards) query["rewardInfo.type"] = query;
+            if (actions) query["action.actionType"] = actions;
+
+            let campaigns: any = await find({ ...query, userId })
+
+            if (status) {
+                campaigns = campaigns.filter((campaign: any) => campaign.status === status);
+            }
+
             campaigns = await Promise.all(
                 campaigns.map(async (campaign: any) => {
                     const submission = await SubmissionService.count({ campaignId: campaign._id });

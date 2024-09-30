@@ -1,15 +1,15 @@
 {
   "name": "verxioprotocol",
   "version": "1.0.0",
-  "main": "/src/server.ts",
+  "main": "dist/server.js",
   "description": "",
   "repository": "https://github.com/Axio-Lab/verxioprotocol.git",
   "author": "Adaobi Chuks-Aginam <chuksaginamada@yahoo.com>",
   "license": "MIT",
   "scripts": {
-    "build": "npm install && tsc",
-    "start": "ts-node ./src/server.ts",
-    "dev": "nodemon ./src/server.ts"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon --exec ts-node ./src/server.ts"
   },
   "dependencies": {
     "@lightprotocol/compressed-token": "^0.12.0",

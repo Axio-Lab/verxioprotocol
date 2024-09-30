@@ -13,6 +13,7 @@ export default interface ICampaign {
         fields: {
             description?: string;
             url?: string;
+            title?: string;
             amount?: number;
             quantity?: number;
             address?: string;

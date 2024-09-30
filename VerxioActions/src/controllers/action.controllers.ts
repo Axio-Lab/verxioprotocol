@@ -83,7 +83,7 @@ export default class ActionController {
                   {
                     type: "radio",
                     name: "choice",
-                    label: `${campaign.campaignInfo.description}`,
+                    label: `${campaign.action.fields.title}`,
                     required: true,
                     options
                   }

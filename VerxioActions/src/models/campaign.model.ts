@@ -55,7 +55,8 @@ const campaignSchema = new Schema<ICampaign>({
                         return typeof value.address === 'string' && value.address.trim() !== '' &&
                             typeof value.minAmount === 'number';
                     } else if (actionType === 'Poll') {
-                        return Array.isArray(value.options) && value.options.length > 0;
+                        return Array.isArray(value.options) && value.options.length > 0 &&
+                            typeof value.title === 'string';
                     } else if (actionType === 'Submit-Url') {
                         return true;
                     } else if (actionType === 'Sell-Product') {
@@ -83,13 +84,13 @@ const campaignSchema = new Schema<ICampaign>({
         amount: {
             type: Number,
             required: function () {
-                return this.rewardInfo.type === "Token" || "Verxio-XP";
+                return (this.rewardInfo.type === "Token") || (this.rewardInfo.type === "Verxio-XP");
             }
         },
         availableAmount: {
             type: Number,
             required: function () {
-                return this.rewardInfo.type === "Token" || "Verxio-XP";
+                return (this.rewardInfo.type === "Token") || (this.rewardInfo.type === "Verxio-XP");
             }
         }
     },
@@ -98,6 +99,41 @@ const campaignSchema = new Schema<ICampaign>({
     strict: true,
     timestamps: true,
     versionKey: false
+});
+
+campaignSchema.set('toObject', { virtuals: true });
+campaignSchema.set('toJSON', { virtuals: true });
+
+// Virtual field for status
+campaignSchema.virtual('status').get(function () {
+    const now = new Date();
+    const startDate = new Date(this.campaignInfo.start);
+    const endDate = new Date(this.campaignInfo.end);
+
+    if (!startDate || !endDate) {
+        return 'Upcoming';
+    } else if (now < startDate) {
+        return 'Upcoming';
+    } else if (now >= startDate && now <= endDate) {
+        return 'Active';
+    } else if (now > endDate) {
+        return 'Ended';
+    }
+});
+
+// Virtual for days left
+campaignSchema.virtual('daysLeft').get(function () {
+    const now = new Date();
+    const endDate = new Date(this.campaignInfo.end);
+
+    if (!endDate || now > endDate) {
+        return 0;
+    }
+
+    const timeDiff = endDate.getTime() - now.getTime();
+    const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    return daysLeft;
 });
 
 const Campaign = model(DATABASES.CAMPAIGN, campaignSchema, DATABASES.CAMPAIGN);

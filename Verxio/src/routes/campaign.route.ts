@@ -6,12 +6,16 @@ import authenticate from "../middlewares/authenticate.middleware";
 import parseActionType from "../middlewares/parseActionType.middleware";
 const router = Router();
 const {
+    prepareCampaignCreation,
     createCampaign,
     viewDevCampaigns,
     viewAllCampaigns,
     viewACampaign,
     deleteCampaign,
 } = new CampaignController();
+
+//prepare a campaign
+router.post("/prepare", authenticate, validate(createCampaignSchema), parseActionType, prepareCampaignCreation);
 
 //create a campaign
 router.post("/", authenticate, parseActionType, validate(createCampaignSchema), createCampaign);

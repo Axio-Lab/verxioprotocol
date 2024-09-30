@@ -15,9 +15,7 @@ import { prepareBurnTokensTransaction } from "./actions/burnToken";
 const CampaignService = new Campaign();
 const SubmissionService = new Submission();
 
-const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-  "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
-);
+const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
 
 export default class ActionController {
   async getAction(req: Request, res: Response) {
@@ -138,9 +136,8 @@ export default class ActionController {
         });
       }
 
-      const connection = new Connection(
-        process.env.SOLANA_RPC! || clusterApiUrl("devnet")
-      );
+      const RPC_URL = `${process.env.SOLANA_RPC_URL}/?api-key=${process.env.API_KEY}`;
+      const connection = new Connection(RPC_URL);
 
       // Ensure the receiving account will be rent exempt
       const minimumBalance = await connection.getMinimumBalanceForRentExemption(
@@ -240,6 +237,7 @@ export default class ActionController {
         }).toString('base64'),
         message: `You've successfully participated in ${campaign.campaignInfo.title}`
       };
+
       console.log("Payload:", payload)
       console.log("Transaction:", transaction)
 

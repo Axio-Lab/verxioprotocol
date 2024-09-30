@@ -62,7 +62,18 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@lightprotocol/stateless.js@^0.12.0":
+"@lightprotocol/compressed-token@^0.12.0":
+  version "0.12.0"
+  resolved "https://registry.npmjs.org/@lightprotocol/compressed-token/-/compressed-token-0.12.0.tgz"
+  integrity sha512-Ccx5rceKqTRAr1hUIJ7+amYNsz0u6m+mYsESB2kXqpvVbIutbr0dSpeUOEwXzWOvIShsuAWVLaV2CFEQimTaRQ==
+  dependencies:
+    "@coral-xyz/anchor" "0.29.0"
+    "@solana/spl-token" "^0.4.8"
+    "@solana/web3.js" "^1.95.3"
+    buffer "^6.0.3"
+    tweetnacl "^1.0.3"
+
+"@lightprotocol/stateless.js@^0.12.0", "@lightprotocol/stateless.js@0.12.0":
   version "0.12.0"
   resolved "https://registry.npmjs.org/@lightprotocol/stateless.js/-/stateless.js-0.12.0.tgz"
   integrity sha512-7UNT4skh18Mq7oeErg0lozwlqbwUiiHPGmVAkrfH7zfbP+/3xRwMfGUn3hBqn10AgH/HsRwhgSkB4rN7OLPFnA==

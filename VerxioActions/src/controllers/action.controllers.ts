@@ -50,18 +50,17 @@ export default class ActionController {
           description: `${campaign.campaignInfo.description}`,
           title: `${campaign.campaignInfo.title}`,
           links: {
-            actions: [
-              {
-                label: `Submit Url`,
-                href: `${baseHref}?Url={Url}`,
-                parameters: [
-                  {
-                    name: "Url",
-                    label: "Submit your Url",
-                  },
-                ],
-              },
-            ],
+            actions: [{
+              type: "post",
+              label: `Submit Url`,
+              href: `${baseHref}?Url={Url}`,
+              parameters: [
+                {
+                  name: "Url",
+                  label: "Submit your Url",
+                },
+              ],
+            }]
           },
 
         }
@@ -77,6 +76,7 @@ export default class ActionController {
           links: {
             actions: [
               {
+                type: "post",
                 label: "Submit",
                 href: `${baseHref}?choice={choice}`,
                 parameters: [
@@ -186,6 +186,7 @@ export default class ActionController {
           transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
           const payload: ActionPostResponse = {
+            type: "transaction",
             transaction: transaction.serialize({
               requireAllSignatures: false,
               verifySignatures: true,
@@ -207,6 +208,7 @@ export default class ActionController {
           transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
           const payload: ActionPostResponse = {
+            type: "transaction",
             transaction: transaction.serialize({
               requireAllSignatures: false,
               verifySignatures: true,
@@ -231,6 +233,7 @@ export default class ActionController {
       transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
       const payload: ActionPostResponse = {
+        type: "transaction",
         transaction: transaction.serialize({
           requireAllSignatures: false,
           verifySignatures: true,

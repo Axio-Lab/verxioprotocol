@@ -20,7 +20,7 @@ export default class ProductController {
     async prepareCampaignCreation(req: Request, res: Response) {
         try {
 
-            const data = req.body;
+            const data = req.body.campaignData;
             const userId = (req as AuthRequest).user._id;
             const RPC_URL = `${process.env.SOLANA_RPC_URL}/?api-key=${process.env.API_KEY}`;
             const connection = new Connection(RPC_URL);

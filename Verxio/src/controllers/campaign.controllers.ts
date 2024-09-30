@@ -90,6 +90,8 @@ export default class ProductController {
                     throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
                 }
             }
+
+            campaignData.rewardInfo.availableAmount = campaignData.rewardInfo.amount;
             // Create the campaign
             const campaign = await create({ ...campaignData, userId: (req as AuthRequest).user._id });
 

@@ -4,7 +4,7 @@ import AuthRequest from "../interfaces/auth.interface";
 import Profile from "../services/profile.services";
 import Submission from "../services/submission.service";
 import ICampaign from "../interfaces/campaign.interface";
-import { Connection, PublicKey, SystemProgram, TransactionMessage, TransactionConfirmationStrategy, VersionedTransaction} from '@solana/web3.js';
+import { Connection, PublicKey, SystemProgram, TransactionMessage, TransactionConfirmationStrategy, VersionedTransaction } from '@solana/web3.js';
 
 const SubmissionService = new Submission();
 const ProfileService = new Profile();
@@ -29,8 +29,8 @@ export default class ProductController {
                 const { amount } = data.rewardInfo;
                 const escrowAddress = process.env.ESCROW_WALLET_ADDRESS;
 
-                  // Create a transaction
-                  const instruction = SystemProgram.transfer({
+                // Create a transaction
+                const instruction = SystemProgram.transfer({
                     fromPubkey: new PublicKey(userId!),
                     toPubkey: new PublicKey(escrowAddress!),
                     lamports: amount * 1e9 // Convert SOL to lamports
@@ -46,15 +46,15 @@ export default class ProductController {
 
                 const transaction = new VersionedTransaction(messageV0);
 
-                 // Serialize the transaction and send it to the frontend for signing
-                 const serializedTransaction = Buffer.from(transaction.serialize()).toString('base64');
+                // Serialize the transaction and send it to the frontend for signing
+                const serializedTransaction = Buffer.from(transaction.serialize()).toString('base64');
 
-                 // Instead of creating the campaign here, send the transaction to the frontend
-                 return res.status(200).send({
-                     success: true,
-                     message: "Transaction created. Please sign and submit.",
-                     transaction: serializedTransaction
-                 });
+                // Instead of creating the campaign here, send the transaction to the frontend
+                return res.status(200).send({
+                    success: true,
+                    message: "Transaction created. Please sign and submit.",
+                    transaction: serializedTransaction
+                });
             }
 
         } catch (error: any) {
@@ -66,30 +66,30 @@ export default class ProductController {
     }
 
     // New method to handle the signed transaction and create the campaign
-    async CreateCampaign(req: Request, res: Response) {
+    async createCampaign(req: Request, res: Response) {
         try {
             const { signedTransaction, campaignData } = req.body;
-            
-            if (campaignData.rewardInfo.type === "token"){
-            const connection = new Connection(process.env.SOLANA_RPC_URL!);
-            // Deserialize and send the transaction
-            const transaction = VersionedTransaction.deserialize(Buffer.from(signedTransaction, 'base64'));
-            const signature = await connection.sendTransaction(transaction);
 
-            // Wait for confirmation using the new method
-            const latestBlockhash = await connection.getLatestBlockhash();
-            const confirmationStrategy: TransactionConfirmationStrategy = {
-                signature,
-                blockhash: latestBlockhash.blockhash,
-                lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-            };
+            if (campaignData.rewardInfo.type === "token") {
+                const connection = new Connection(process.env.SOLANA_RPC_URL!);
+                // Deserialize and send the transaction
+                const transaction = VersionedTransaction.deserialize(Buffer.from(signedTransaction, 'base64'));
+                const signature = await connection.sendTransaction(transaction);
 
-            const confirmation = await connection.confirmTransaction(confirmationStrategy);
+                // Wait for confirmation using the new method
+                const latestBlockhash = await connection.getLatestBlockhash();
+                const confirmationStrategy: TransactionConfirmationStrategy = {
+                    signature,
+                    blockhash: latestBlockhash.blockhash,
+                    lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+                };
 
-            if (confirmation.value.err) {
-                throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+                const confirmation = await connection.confirmTransaction(confirmationStrategy);
+
+                if (confirmation.value.err) {
+                    throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+                }
             }
-        }
             // Create the campaign
             const campaign = await create({ ...campaignData, userId: (req as AuthRequest).user._id });
 

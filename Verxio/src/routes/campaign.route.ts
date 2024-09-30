@@ -15,7 +15,7 @@ const {
 } = new CampaignController();
 
 //prepare a campaign
-router.post("/prepare", authenticate, validate(prepareCampaignSchema), parseActionType, prepareCampaignCreation);
+router.post("/prepare", authenticate, parseActionType, validate(prepareCampaignSchema), prepareCampaignCreation);
 
 //create a campaign
 router.post("/", authenticate, parseActionType, validate(createCampaignSchema), createCampaign);

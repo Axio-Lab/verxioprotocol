@@ -30,7 +30,7 @@ export default class SubmissionController {
 
     async selectWinners(req: Request, res: Response) {
         try {
-            const winnersIds = req.body;
+            const winnersIds = req.body.winners;
             const campaignId = req.params.campaignId;
             const userId = (req as AuthRequest).user._id;
 

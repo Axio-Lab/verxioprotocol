@@ -18,6 +18,11 @@ const submissionSchema = new Schema<ISubmission>({
         required: true,
         trim: true
     },
+    isWinner: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
 }, {
     strict: true,
     timestamps: true,

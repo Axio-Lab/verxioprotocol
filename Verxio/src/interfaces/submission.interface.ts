@@ -3,4 +3,5 @@ export default interface ICampaign {
     userId: string;
     campaignId: string;
     submission: string;
+    isWinner: boolean;
 }

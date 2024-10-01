@@ -15,6 +15,10 @@ export default class SubmissionService {
         return await Submission.find(params, "_id userId submission");
     }
 
+    async updateMany(params: {}, update: {}) {
+        return await Submission.updateMany(params, update);
+    }
+
     async count(params: {}) {
         return await Submission.countDocuments(params);
     }

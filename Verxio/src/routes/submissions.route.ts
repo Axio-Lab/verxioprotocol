@@ -9,7 +9,7 @@ const {
 const router = express.Router();
 
 
-//transfer Submission
+//fetch Submissions
 router.get("/:campaignId", fetchSubmission);
 
 export default router;

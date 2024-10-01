@@ -38,8 +38,8 @@ const prepareCampaignSchema = Joi.object({
     campaignData: Joi.object({
         campaignInfo: Joi.object({
             title: Joi.string().required().trim(),
-            start: Joi.string().required().trim(),
-            end: Joi.string().required().trim(),
+            start: Joi.date().required(),
+            end: Joi.date().required(),
             description: Joi.string().required().trim(),
             banner: Joi.string().required().trim()
         }).required(),
@@ -97,8 +97,8 @@ const createCampaignSchema = Joi.object({
     campaignData: Joi.object({
         campaignInfo: Joi.object({
             title: Joi.string().required().trim(),
-            start: Joi.string().required().trim(),
-            end: Joi.string().required().trim(),
+            start: Joi.date().required(),
+            end: Joi.date().required(),
             description: Joi.string().required().trim(),
             banner: Joi.string().required().trim()
         }).required(),

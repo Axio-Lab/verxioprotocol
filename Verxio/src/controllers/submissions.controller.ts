@@ -12,12 +12,12 @@ export default class SubmissionController {
 
     async fetchSubmission(req: Request, res: Response) {
         try {
-            const submission = await SubmissionService.find({ campaignId: req.params.campaignId });
+            const submissions = await SubmissionService.find({ campaignId: req.params.campaignId });
 
             return res.status(201).send({
                 success: true,
                 message: "Participants fetched succesfully.",
-                data: { count: submission.length, ...submission }
+                data: { count: submissions.length, submissions }
             });
 
         } catch (error: any) {

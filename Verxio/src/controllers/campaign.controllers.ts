@@ -60,7 +60,7 @@ export default class ProductController {
         } catch (error: any) {
             return res.status(500).send({
                 success: false,
-                message: `Error occurred while creating campaign: ${error.message}`
+                message: `Error occurred while preparing transaction: ${error.message}`
             });
         }
     }
@@ -108,7 +108,7 @@ export default class ProductController {
         } catch (error: any) {
             return res.status(500).send({
                 success: false,
-                message: `Error occurred while submitting transaction: ${error.message}`
+                message: `Error occurred while creating campaign: ${error.message}`
             });
         }
     }

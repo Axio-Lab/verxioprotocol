@@ -10,7 +10,7 @@ const prepareCampaignSchema = Joi.object({
             banner: Joi.string().required().trim()
         }).required(),
         action: Joi.object({
-            actionType: Joi.string().valid('Burn-Token', 'Compress-Token', 'Decompress-Token', 'Poll', 'Submit-Url', 'Sell-Product').required().trim(),
+            // actionType: Joi.string().valid('Burn-Token', 'Compress-Token', 'Decompress-Token', 'Poll', 'Submit-Url', 'Sell-Product').required().trim(),
             fields: Joi.object().custom((value, helpers) => {
                 const { actionType } = helpers.state.ancestors[0];
 

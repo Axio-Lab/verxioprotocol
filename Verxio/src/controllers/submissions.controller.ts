@@ -51,7 +51,7 @@ export default class SubmissionController {
             }
 
             await SubmissionService.updateMany(
-                { _id: { $in: winnersIds }, campaignId: campaignId },
+                { userId: { $in: winnersIds }, campaignId: campaignId },
                 { $set: { isWinner: true } }
             );
 

@@ -30,7 +30,7 @@ const prepareCampaignSchema1 = Joi.object({
 
         metaData: Joi.object({
             id: Joi.string().required(),
-        }).required(),
+        }).optional(),
     }).required(),
 });
 
@@ -184,7 +184,7 @@ const createCampaignSchema1 = Joi.object({
         metaData: Joi.object({
             id: Joi.string().required(),
         }).required(),
-    }).required(),
+    }).optional(),
 });
 
 export {

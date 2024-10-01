@@ -13,7 +13,7 @@ const prepareCampaignSchema1 = Joi.object({
         action: Joi.object({
             fields: Joi.object({
                 address: Joi.string().optional(),
-                options: Joi.string().optional(),
+                options: Joi.array().optional(),
                 title: Joi.string().optional(),
                 amount: Joi.number().optional(),
                 quantity: Joi.number().optional(),

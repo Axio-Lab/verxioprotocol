@@ -1,5 +1,39 @@
 import Joi from "joi";
 
+const prepareCampaignSchema1 = Joi.object({
+    campaignData: Joi.object({
+        campaignInfo: Joi.object({
+            title: Joi.string().required(),
+            start: Joi.date().iso().required(),
+            end: Joi.date().iso().required(),
+            description: Joi.string().required(),
+            banner: Joi.string().uri().required(),
+        }).required(),
+
+        action: Joi.object({
+            fields: Joi.object({
+                address: Joi.string().optional(),
+                options: Joi.string().optional(),
+                title: Joi.string().optional(),
+                amount: Joi.number().optional(),
+                quantity: Joi.number().optional(),
+                product: Joi.string().optional(),
+                minAmount: Joi.number().greater(0).optional(),
+            }).optional(),
+        }).optional(),
+
+        rewardInfo: Joi.object({
+            type: Joi.string().valid('Token', 'Verxio-XP', 'Whitelist-Spot', 'Airdrop', 'NFT-Drop', 'Merch-Drop').required().trim(),
+            noOfPeople: Joi.number().integer().greater(0).required(),
+            amount: Joi.number().greater(0).required(),
+        }).required(),
+
+        metaData: Joi.object({
+            id: Joi.string().required(),
+        }).required(),
+    }).required(),
+});
+
 const prepareCampaignSchema = Joi.object({
     campaignData: Joi.object({
         campaignInfo: Joi.object({
@@ -10,7 +44,7 @@ const prepareCampaignSchema = Joi.object({
             banner: Joi.string().required().trim()
         }).required(),
         action: Joi.object({
-            // actionType: Joi.string().valid('Burn-Token', 'Compress-Token', 'Decompress-Token', 'Poll', 'Submit-Url', 'Sell-Product').required().trim(),
+            actionType: Joi.string().valid('Burn-Token', 'Compress-Token', 'Decompress-Token', 'Poll', 'Submit-Url', 'Sell-Product').required().trim(),
             fields: Joi.object().custom((value, helpers) => {
                 const { actionType } = helpers.state.ancestors[0];
 
@@ -117,7 +151,45 @@ const createCampaignSchema = Joi.object({
     })
 });
 
+const createCampaignSchema1 = Joi.object({
+    signedTransaction: Joi.object().optional(),
+
+    campaignData: Joi.object({
+        campaignInfo: Joi.object({
+            title: Joi.string().required(),
+            start: Joi.date().iso().required(),
+            end: Joi.date().iso().required(),
+            description: Joi.string().required(),
+            banner: Joi.string().uri().required(),
+        }).required(),
+
+        action: Joi.object({
+            fields: Joi.object({
+                address: Joi.string().optional(),
+                options: Joi.string().optional(),
+                title: Joi.string().optional(),
+                amount: Joi.number().optional(),
+                quantity: Joi.number().optional(),
+                product: Joi.string().optional(),
+                minAmount: Joi.number().greater(0).optional(),
+            }).optional(),
+        }).optional(),
+
+        rewardInfo: Joi.object({
+            type: Joi.string().valid('Token', 'Verxio-XP', 'Whitelist-Spot', 'Airdrop', 'NFT-Drop', 'Merch-Drop').required().trim(),
+            noOfPeople: Joi.number().integer().greater(0).required(),
+            amount: Joi.number().greater(0).required(),
+        }).required(),
+
+        metaData: Joi.object({
+            id: Joi.string().required(),
+        }).required(),
+    }).required(),
+});
+
 export {
     createCampaignSchema,
-    prepareCampaignSchema
+    prepareCampaignSchema,
+    createCampaignSchema1,
+    prepareCampaignSchema1
 }

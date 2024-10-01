@@ -1,7 +1,7 @@
 import { Router } from "express";
 import CampaignController from '../controllers/campaign.controllers';
 import validate from "../middlewares/validate.middleware";
-import { createCampaignSchema, prepareCampaignSchema } from "../schemas/campaign.schema";
+import { createCampaignSchema, createCampaignSchema1, prepareCampaignSchema, prepareCampaignSchema1 } from "../schemas/campaign.schema";
 import authenticate from "../middlewares/authenticate.middleware";
 import parseActionType from "../middlewares/parseActionType.middleware";
 const router = Router();
@@ -15,10 +15,10 @@ const {
 } = new CampaignController();
 
 //prepare a campaign
-router.post("/prepare", authenticate, validate(prepareCampaignSchema), parseActionType, prepareCampaignCreation);
+router.post("/prepare", validate(prepareCampaignSchema1), parseActionType, validate(prepareCampaignSchema), prepareCampaignCreation);
 
 //create a campaign
-router.post("/", authenticate, validate(createCampaignSchema), parseActionType, createCampaign);
+router.post("/", authenticate, validate(createCampaignSchema1), parseActionType, validate(createCampaignSchema), createCampaign);
 
 //view all Campaigns
 router.get("/all", viewAllCampaigns);

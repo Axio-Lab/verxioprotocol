@@ -56,7 +56,7 @@ export default class SubmissionController {
             );
 
             const winners = await SubmissionService.find({
-                _id: { $in: winnersIds },
+                userId: { $in: winnersIds },
                 campaignId: campaignId,
                 isWinner: true
             });

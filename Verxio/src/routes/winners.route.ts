@@ -13,7 +13,7 @@ const router = express.Router();
 
 
 //select winners
-router.get("/:campaignId", authenticate, validate(selectWinnersSchema), selectWinners);
+router.post("/:campaignId", authenticate, validate(selectWinnersSchema), selectWinners);
 
 //fetch winners
 router.get("/:campaignId", fetchWinners);

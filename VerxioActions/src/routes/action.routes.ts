@@ -7,7 +7,7 @@ const {
 } = new ActionController();
 
 //get product action
-router.get("/", (_req: Request, res: Response) => {
+router.get("/actions.json", (_req: Request, res: Response) => {
     const payload = {
         rules: [
             { pathPattern: '/*', apiPath: '/api/actions/*' },

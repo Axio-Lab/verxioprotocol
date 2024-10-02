@@ -3,8 +3,8 @@ export default interface ICampaign {
     userId: string;
     campaignInfo: {
         title: string;
-        start: string;
-        end: string;
+        start: Date;
+        end: Date;
         description: string;
         banner: string;
     };

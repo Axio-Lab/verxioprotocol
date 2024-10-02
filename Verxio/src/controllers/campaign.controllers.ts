@@ -119,7 +119,7 @@ export default class ProductController {
             const { rewards, actions, status } = req.query;
 
             const query: any = {};
-            if (rewards) query["rewardInfo.type"] = query;
+            if (rewards) query["rewardInfo.type"] = rewards;
             if (actions) query["action.actionType"] = actions;
 
             let campaigns: any = await find(query);

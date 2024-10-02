@@ -25,12 +25,12 @@ const campaignSchema = new Schema<ICampaign>({
             trim: true
         },
         start: {
-            type: String,
+            type: Date,
             required: true,
             trim: true
         },
         end: {
-            type: String,
+            type: Date,
             required: true,
             trim: true
         }
@@ -110,6 +110,7 @@ campaignSchema.virtual('status').get(function () {
     const startDate = new Date(this.campaignInfo.start);
     const endDate = new Date(this.campaignInfo.end);
 
+    console.log(startDate.toString(), endDate.toString(), now.toString());
     if (!startDate || !endDate) {
         return 'Upcoming';
     } else if (now < startDate) {

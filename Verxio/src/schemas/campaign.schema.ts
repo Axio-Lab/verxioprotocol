@@ -25,11 +25,11 @@ const prepareCampaignSchema1 = Joi.object({
         rewardInfo: Joi.object({
             type: Joi.string().valid('Token', 'Verxio-XP', 'Whitelist-Spot', 'Airdrop', 'NFT-Drop', 'Merch-Drop').required().trim(),
             noOfPeople: Joi.number().integer().greater(0).required(),
-            amount: Joi.number().greater(0).required(),
+            amount: Joi.number().greater(0).optional(),
         }).required(),
 
         metaData: Joi.object({
-            id: Joi.string().required(),
+            id: Joi.string().optional(),
         }).optional(),
     }).required(),
 });
@@ -178,13 +178,13 @@ const createCampaignSchema1 = Joi.object({
         rewardInfo: Joi.object({
             type: Joi.string().valid('Token', 'Verxio-XP', 'Whitelist-Spot', 'Airdrop', 'NFT-Drop', 'Merch-Drop').required().trim(),
             noOfPeople: Joi.number().integer().greater(0).required(),
-            amount: Joi.number().greater(0).required(),
+            amount: Joi.number().greater(0).optional(),
         }).required(),
 
         metaData: Joi.object({
-            id: Joi.string().required(),
-        }).required(),
-    }).optional(),
+            id: Joi.string().optional(),
+        }).optional(),
+    }).required(),
 });
 
 export {

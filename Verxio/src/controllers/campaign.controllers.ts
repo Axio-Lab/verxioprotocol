@@ -15,7 +15,7 @@ const {
     find,
     findOne
 } = new CampaignService();
-const deployedLink = "https://action.verxio.xyz/api/actions";
+const deployedLink = "https://action.verxio.xyz";
 
 export default class ProductController {
     async prepareCampaignCreation(req: Request, res: Response) {

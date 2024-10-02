@@ -12,6 +12,7 @@ const {
     viewAllCampaigns,
     viewACampaign,
     deleteCampaign,
+    payWinners
 } = new CampaignController();
 
 //prepare a campaign
@@ -19,6 +20,9 @@ router.post("/prepare", authenticate, validate(prepareCampaignSchema1), parseAct
 
 //create a campaign
 router.post("/", authenticate, validate(createCampaignSchema1), parseActionType, validate(createCampaignSchema), createCampaign);
+
+//pay winners
+router.post("/pay", authenticate, payWinners);
 
 //view all Campaigns
 router.get("/all", viewAllCampaigns);

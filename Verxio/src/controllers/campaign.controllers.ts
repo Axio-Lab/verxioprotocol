@@ -5,6 +5,7 @@ import Profile from "../services/profile.services";
 import Submission from "../services/submission.service";
 import ICampaign from "../interfaces/campaign.interface";
 import { Connection, PublicKey, SystemProgram, TransactionMessage, TransactionConfirmationStrategy, VersionedTransaction } from '@solana/web3.js';
+import payWinnersAndWithdraw from "../services/payWinners";
 
 const SubmissionService = new Submission();
 const ProfileService = new Profile();
@@ -209,6 +210,39 @@ export default class ProductController {
                 .send({
                     success: false,
                     message: `Error occured while fetching campaign info: ${error.message}`
+                })
+        }
+    }
+
+    async payWinners(req: Request, res: Response) {
+        try {
+            const campaign = await findOne({ _id: req.params.campaignId })
+            if (campaign?.rewardInfo.type === "Token") {
+                const winners = await SubmissionService.find({ campaignId: req.params.campaignId, isWinner: true });
+                const winnersAddress = winners.reduce<string[]>((acc, win) => {
+                    acc.push(win.userId);
+                    return acc;
+                }, []);
+                const paidWinners = await payWinnersAndWithdraw(campaign?.rewardInfo.amount, winnersAddress);
+
+                return res.status(200)
+                    .send({
+                        success: true,
+                        message: "Users paid successfully",
+                        data: paidWinners
+                    })
+            }
+
+            return res.status(409)
+                .send({
+                    success: false,
+                    message: "Not a token campaign"
+                })
+        } catch (error: any) {
+            return res.status(500)
+                .send({
+                    success: false,
+                    message: `Error occured while while paying users: ${error.message}`
                 })
         }
     }

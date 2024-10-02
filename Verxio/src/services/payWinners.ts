@@ -5,28 +5,28 @@ import { BN } from "bn.js";
 import { StreamflowSolana, getBN, ICluster } from '@streamflow/stream';
 import { Keypair, Connection, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 
-  // Constants for fee percentages
-  const TOTAL_FEE_PERCENTAGE = 0.01; // 1% total fee
-  const STREAMFLOW_FEE_PERCENTAGE = 0.0019; // 0.19% Streamflow fee
-  const TREASURY_FEE_PERCENTAGE = TOTAL_FEE_PERCENTAGE - STREAMFLOW_FEE_PERCENTAGE; // 0.8% treasury fee
-  const TREASURY_WALLET = new PublicKey(process.env.TREASURY_WALLET);
+// Constants for fee percentages
+const TOTAL_FEE_PERCENTAGE = 0.01; // 1% total fee
+const STREAMFLOW_FEE_PERCENTAGE = 0.0019; // 0.19% Streamflow fee
+const TREASURY_FEE_PERCENTAGE = TOTAL_FEE_PERCENTAGE - STREAMFLOW_FEE_PERCENTAGE; // 0.8% treasury fee
+const TREASURY_WALLET = new PublicKey(process.env.TREASURY_WALLET!);
 
 
-  const BUFFER_TIME = 60; // 1 minute buffer
-  const cluster = ICluster.Devnet;
+const BUFFER_TIME = 60; // 1 minute buffer
+const cluster = ICluster.Devnet;
 
-async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
+async function payWinnersAndWithdraw(totalAmount: number, winnerAddresses: string[]) {
   const RPC_URL = `${process.env.SOLANA_RPC_URL}/?api-key=${process.env.API_KEY}`;
   const connection = new Connection(RPC_URL);
 
-  function envToKeypair(envVarName) {
+  function envToKeypair(envVarName: string) {
     const envVarValue = process.env[envVarName];
-    const keyArray = envVarValue.replace(/^\[|\]$/g, '').split(',').map(Number);
+    const keyArray = envVarValue!.replace(/^\[|\]$/g, '').split(',').map(Number);
     const keyUint8Array = new Uint8Array(keyArray);
     const keypair = Keypair.fromSecretKey(keyUint8Array);
     return keypair;
   }
-  
+
   const escrowPayout = envToKeypair("PRIVATE_KEY");
 
   // Calculate fee amounts
@@ -54,52 +54,52 @@ async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
   }));
 
   // Prepare stream parameters
-  const createStreamParams = {
+  const createStreamParams: any = {
     recipients: recipients,
-    tokenId: "So11111111111111111111111111111111111111112", 
-    start: Math.floor(Date.now() / 1000) + BUFFER_TIME, 
+    tokenId: "So11111111111111111111111111111111111111112",
+    start: Math.floor(Date.now() / 1000) + BUFFER_TIME,
     period: 1,
-    cliff: Math.floor(Date.now() / 1000) + BUFFER_TIME, 
+    cliff: Math.floor(Date.now() / 1000) + BUFFER_TIME,
     canTopup: false,
     cancelableBySender: false,
     cancelableByRecipient: false,
     transferableBySender: false,
     transferableByRecipient: true,
     automaticWithdrawal: false,
-    withdrawalFrequency: 0, 
+    withdrawalFrequency: 0,
     partner: null,
   };
 
-    const solanaParams = {
-      sender: escrowPayout, 
-      isNative: true, // We're using native SOL
-    };
+  const solanaParams = {
+    sender: escrowPayout,
+    isNative: true, // We're using native SOL
+  };
 
   try {
     // Step 1: Create paymnt streams
     console.log("Creating streams for winners...");
     const { txs, errors } = await solanaClient.createMultiple(createStreamParams, solanaParams);
     console.log(errors, "errors")
-       
-       // Step 2: Send treasury fee
+
+    // Step 2: Send treasury fee
     const instruction = SystemProgram.transfer({
-         fromPubkey: escrowPayout.publicKey,
-         toPubkey: TREASURY_WALLET,
-         lamports: getBN(treasuryFeeAmount, 9),
-       });
-   
+      fromPubkey: escrowPayout.publicKey,
+      toPubkey: TREASURY_WALLET,
+      lamports: getBN(treasuryFeeAmount, 9) as any
+    });
+
     const latestBlockhash = await connection.getLatestBlockhash();
-   
+
     const messageV0 = new TransactionMessage({
-         payerKey: escrowPayout.publicKey,
-         recentBlockhash: latestBlockhash.blockhash,
-         instructions: [instruction],
-       }).compileToV0Message();
-   
+      payerKey: escrowPayout.publicKey,
+      recentBlockhash: latestBlockhash.blockhash,
+      instructions: [instruction],
+    }).compileToV0Message();
+
     const transaction = new VersionedTransaction(messageV0);
-   
-       transaction.sign([escrowPayout]);
-   
+
+    transaction.sign([escrowPayout]);
+
     const txid = await connection.sendTransaction(transaction);
 
     return {
@@ -112,6 +112,7 @@ async function payWinnersAndWithdraw(totalAmount, winnerAddresses) {
     throw error;
   }
 }
+
 export default payWinnersAndWithdraw;
 
 // Example usage

@@ -15,7 +15,7 @@ const {
     find,
     findOne
 } = new CampaignService();
-const deployedLink = "https://action.verxio.xyz";
+const deployedLink = "https://action.verxio.xyz/api/actions";
 
 export default class ProductController {
     async prepareCampaignCreation(req: Request, res: Response) {
@@ -131,10 +131,12 @@ export default class ProductController {
 
             campaigns = await Promise.all(
                 campaigns.map(async (campaign: any) => {
+                    const encodedCampaignName = campaign!.campaignInfo.title.replace(/\s+/g, '-');
                     const submission = await SubmissionService.count({ campaignId: campaign._id });
                     return {
                         ...campaign.toObject(),
-                        submission
+                        submission,
+                        blink: `${deployedLink}/${encodedCampaignName}`
                     };
                 })
             );
@@ -171,10 +173,12 @@ export default class ProductController {
 
             campaigns = await Promise.all(
                 campaigns.map(async (campaign: any) => {
+                    const encodedCampaignName = campaign!.campaignInfo.title.replace(/\s+/g, '-');
                     const submission = await SubmissionService.count({ campaignId: campaign._id });
                     return {
                         ...campaign.toObject(),
-                        submission
+                        submission,
+                        blink: `${deployedLink}/${encodedCampaignName}`
                     };
                 })
             );
@@ -198,12 +202,15 @@ export default class ProductController {
         try {
             const campaign = await findOne({ _id: req.params.campaignId })
             const submission = await SubmissionService.count({ campaignId: req.params.campaignId });
+            const encodedCampaignName = campaign!.campaignInfo.title.replace(/\s+/g, '-');
 
             return res.status(200)
                 .send({
                     success: true,
                     message: "Info fetched successfully",
-                    data: { ...campaign?.toObject(), submission }
+                    data: {
+                        ...campaign?.toObject(), submission, blink: `${deployedLink}/${encodedCampaignName}`
+                    }
                 })
         } catch (error: any) {
             return res.status(500)

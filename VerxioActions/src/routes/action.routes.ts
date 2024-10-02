@@ -10,14 +10,14 @@ const {
 router.get("/", (_req: Request, res: Response) => {
     const payload = {
         rules: [
-            { pathPattern: '/*', apiPath: '/*' },
-            { pathPattern: '/**', apiPath: '/**' },
+            { pathPattern: '/*', apiPath: '/api/actions/*' },
+            { pathPattern: '/api/actions/**', apiPath: '/api/actions/**' },
         ],
     };
     res.json(payload);
 });
-router.get("/:name", getAction);
-router.options("/:name", getAction);
+router.get("/api/actions/:name", getAction);
+router.options("/api/actions/:name", getAction);
 
 //post product action
 router.post("/:name", postAction);

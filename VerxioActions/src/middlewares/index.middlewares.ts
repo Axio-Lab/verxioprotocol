@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import asyncError from "./errors.middlewares";
 import indexRoutes from "../routes/index.routes";
+import { actionCorsMiddleware } from "@solana/actions/lib/types/utils";
 
 export default (app: Application) => {
   app.use(morgan('combined'));
@@ -20,5 +21,6 @@ export default (app: Application) => {
   app.use(helmet());
   app.use(urlencoded());
   app.use(asyncError);
+  // app.use(actionCorsMiddleware());
   indexRoutes(app);
 };

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import ActionController from '../controllers/action.controllers';
 const router = Router();
 const {
@@ -7,6 +7,15 @@ const {
 } = new ActionController();
 
 //get product action
+router.get("/", (_req: Request, res: Response) => {
+    const payload = {
+        rules: [
+            { pathPattern: '/*', apiPath: '/api/actions/*' },
+            { pathPattern: '/api/actions/**', apiPath: '/api/actions/**' },
+        ],
+    };
+    res.json(payload);
+});
 router.get("/:name", getAction);
 router.options("/:name", getAction);
 

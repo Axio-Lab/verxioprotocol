@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Campaign from "../services/campaign.service";
 import Submission from "../services/submission.service";
+import Profile from "../services/profile.services";
 import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
 import {
   clusterApiUrl,
@@ -14,6 +15,7 @@ import { prepareBurnTokensTransaction } from "./actions/burnToken";
 
 const CampaignService = new Campaign();
 const SubmissionService = new Submission();
+const ProfileService = new Profile();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
 
@@ -240,6 +242,15 @@ export default class ActionController {
         }).toString('base64'),
         message: `You've successfully participated in ${campaign.campaignInfo.title}`
       };
+
+      // finds user on the db
+      let profile = await ProfileService.findOne({ _id: account });
+      if (!profile) {
+        //create a new user if not found
+        profile = await ProfileService.create({ _id: account.toString() });
+      }
+      // reward the user with xp
+      profile!.xp += 500;
 
       console.log("Payload:", payload)
       console.log("Transaction:", transaction)

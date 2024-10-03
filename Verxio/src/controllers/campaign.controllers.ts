@@ -226,11 +226,11 @@ export default class ProductController {
             const campaign = await findOne({ _id: req.params.campaignId })
             if (campaign?.rewardInfo.type === "Token") {
                 const winners = await SubmissionService.find({ campaignId: req.params.campaignId, isWinner: true });
-                const winnersAddress = winners.reduce<string[]>((acc, win) => {
+                const winnersAddresses = winners.reduce<string[]>((acc, win) => {
                     acc.push(win.userId);
                     return acc;
                 }, []);
-                const paidWinners = await payWinnersAndWithdraw(campaign?.rewardInfo.amount, winnersAddress);
+                const paidWinners = await payWinnersAndWithdraw(campaign?.rewardInfo.amount, winnersAddresses);
 
                 return res.status(200)
                     .send({

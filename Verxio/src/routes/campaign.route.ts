@@ -22,7 +22,7 @@ router.post("/prepare", authenticate, validate(prepareCampaignSchema1), parseAct
 router.post("/", authenticate, validate(createCampaignSchema1), parseActionType, validate(createCampaignSchema), createCampaign);
 
 //pay winners
-router.post("/pay", authenticate, payWinners);
+router.post("/pay/:campaignId", authenticate, payWinners);
 
 //view all Campaigns
 router.get("/all", viewAllCampaigns);

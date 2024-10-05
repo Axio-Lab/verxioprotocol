@@ -20,6 +20,6 @@ router.get("/api/actions/:name", getAction);
 router.options("/api/actions/:name", getAction);
 
 //post product action
-router.post("/:name", postAction);
+router.post("/api/actions/:name", postAction);
 
 export default router;

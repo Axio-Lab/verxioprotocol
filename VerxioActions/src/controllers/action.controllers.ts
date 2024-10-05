@@ -251,6 +251,7 @@ export default class ActionController {
       }
       // reward the user with xp
       profile!.xp += 500;
+      await profile?.save();
 
       console.log("Payload:", payload)
       console.log("Transaction:", transaction)

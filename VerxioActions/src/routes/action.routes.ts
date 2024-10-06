@@ -10,8 +10,8 @@ const {
 router.get("/actions.json", (_req: Request, res: Response) => {
     const payload = {
         rules: [
-            { pathPattern: '/*', apiPath: '/api/actions/*' },
-            // { pathPattern: '/api/actions/**', apiPath: '/api/actions/**' },
+            { pathPattern: '/*', apiPath: 'http://action.verxio.xyz/api/actions/*' },
+            { pathPattern: '/api/actions/**', apiPath: 'http://action.verxio.xyz/api/actions/**' },
         ],
     };
     res.json(payload);

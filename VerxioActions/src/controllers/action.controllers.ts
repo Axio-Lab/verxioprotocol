@@ -12,6 +12,7 @@ import {
   Transaction
 } from "@solana/web3.js";
 import { prepareBurnTokensTransaction } from "./actions/burnToken";
+import { convert } from 'html-to-text';
 
 const CampaignService = new Campaign();
 const SubmissionService = new Submission();
@@ -22,6 +23,7 @@ const headers = createActionHeaders({
   chainId: "devenet", // or chainId: "devnet"
   actionVersion: "2.2.3"
 });
+
 export default class ActionController {
   async getAction(req: Request, res: Response) {
     try {
@@ -40,39 +42,14 @@ export default class ActionController {
         return res.status(404).json("Invalid campaign title")
       }
 
-      const userAgent = req.headers['user-agent'];
-
-      // Check if the request is from a social media bot by checking user agent or other clues
-      const isSocialMediaBot = /facebookexternalhit|twitterbot|linkedinbot/i.test(userAgent!);
-
-      if (isSocialMediaBot) {
-        // Serve an HTML response with Open Graph metadata
-        const html = `
-          <html>
-            <head>
-              <meta property="og:title" content="${campaign.campaignInfo.title}" />
-              <meta property="og:description" content="${campaign.campaignInfo.description}" />
-              <meta property="og:image" content="${campaign.campaignInfo.banner}" />
-              <meta property="og:url" content="${baseHref}" />
-              <meta property="og:type" content="website" />
-              <title>${campaign.campaignInfo.title}</title>
-            </head>
-            <body>
-              <h1>${campaign.campaignInfo.title}</h1>
-              <p>${campaign.campaignInfo.description}</p>
-            </body>
-          </html>
-        `;
-        return res.status(200).send(html);
-      }
-
       let payload: ActionGetResponse;
 
+      const description = convert(campaign.campaignInfo.description)
       if (campaign.action.actionType === "Sell-Product") {
         payload = {
           icon: campaign.campaignInfo.banner,
           label: `Buy Now (${campaign.action.fields.amount} SOL)`,
-          description: `${campaign.campaignInfo.description}`,
+          description,
           title: `${campaign.campaignInfo.title}`,
           disabled: (campaign?.action.fields.quantity! <= 0) ? true : false
         }
@@ -80,7 +57,7 @@ export default class ActionController {
         payload = {
           icon: campaign.campaignInfo.banner,
           label: `Submit Url`,
-          description: `${campaign.campaignInfo.description}`,
+          description,
           title: `${campaign.campaignInfo.title}`,
           links: {
             actions: [{
@@ -104,7 +81,7 @@ export default class ActionController {
         payload = {
           icon: campaign.campaignInfo.banner,
           label: `Poll`,
-          description: `${campaign.campaignInfo.description}`,
+          description,
           title: `${campaign.campaignInfo.title}`,
           links: {
             actions: [

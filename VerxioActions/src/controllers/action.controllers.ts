@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Campaign from "../services/campaign.service";
 import Submission from "../services/submission.service";
 import Profile from "../services/profile.services";
-import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
+import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse, createActionHeaders } from "@solana/actions";
 import {
   clusterApiUrl,
   Connection,
@@ -18,7 +18,10 @@ const SubmissionService = new Submission();
 const ProfileService = new Profile();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
-
+const headers = createActionHeaders({
+  chainId: "devenet", // or chainId: "devnet"
+  actionVersion: "2.2.3", // the desired spec version
+});
 export default class ActionController {
   async getAction(req: Request, res: Response) {
     try {
@@ -103,7 +106,12 @@ export default class ActionController {
         }
       }
 
-      res.set(ACTIONS_CORS_HEADERS);
+      res.set({
+        ...ACTIONS_CORS_HEADERS,
+        "X-Action-Version": "2.1.3",
+        "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+      });
+      res.set(headers);
       return res.json(payload);
 
     } catch (error: any) {
@@ -198,7 +206,13 @@ export default class ActionController {
           console.log("Payload:", payload)
           console.log("Transaction:", transaction)
 
-          res.set(ACTIONS_CORS_HEADERS);
+          res.set({
+            ...ACTIONS_CORS_HEADERS,
+            "X-Action-Version": "2.1.3",
+            "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+          });
+          res.set(headers);
+
           return res.status(200).json(payload);
         }
         console.log(req.query.Url)
@@ -220,7 +234,13 @@ export default class ActionController {
           console.log("Payload:", payload)
           console.log("Transaction:", transaction)
 
-          res.set(ACTIONS_CORS_HEADERS);
+          res.set({
+            ...ACTIONS_CORS_HEADERS,
+            "X-Action-Version": "2.1.3",
+            "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+          });
+          res.set(headers);
+
           return res.status(200).json(payload);
         }
         console.log(req.query.choice)
@@ -256,7 +276,13 @@ export default class ActionController {
       console.log("Payload:", payload)
       console.log("Transaction:", transaction)
 
-      res.set(ACTIONS_CORS_HEADERS);
+      res.set({
+        ...ACTIONS_CORS_HEADERS,
+        "X-Action-Version": "2.1.3",
+        "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+      });
+      res.set(headers);
+
       return res.status(200).json(payload);
 
     } catch (error: any) {

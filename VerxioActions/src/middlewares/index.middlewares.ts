@@ -12,11 +12,13 @@ export default (app: Application) => {
   app.use(morgan('combined'));
   // CORS middleware
   app.options("*", cors());
-  app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "OPTIONS"],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }));
+  app.use(
+    cors({
+      origin: '*',
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Encoding'],
+      methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+    }),
+  );
   app.use(json());
   app.use(helmet());
   app.use(urlencoded());

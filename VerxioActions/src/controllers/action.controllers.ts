@@ -223,7 +223,7 @@ export default class ActionController {
           res.set(ACTIONS_CORS_HEADERS);
           return res.status(200).json(payload);
         }
-        console.log(req.query.Url)
+        console.log(req.query.choice)
         await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.choice as string })
 
       } else {

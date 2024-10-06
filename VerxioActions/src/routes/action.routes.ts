@@ -11,7 +11,7 @@ router.get("/actions.json", (_req: Request, res: Response) => {
     const payload = {
         rules: [
             { pathPattern: '/*', apiPath: '/api/actions/*' },
-            { pathPattern: '/api/actions/**', apiPath: '/api/actions/**' },
+            // { pathPattern: '/api/actions/**', apiPath: '/api/actions/**' },
         ],
     };
     res.json(payload);

@@ -25,8 +25,10 @@ const headers = createActionHeaders({
 export default class ActionController {
   async getAction(req: Request, res: Response) {
     try {
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+
       const baseHref = new URL(
-        `${req.protocol}://${req.get('host')}${req.originalUrl}`
+        `${protocol}://${req.get('host')}${req.originalUrl}`
       ).toString();
 
       const campaignName = (req.params.name.replace(/-/g, ' '));

@@ -114,7 +114,6 @@ export default class ProductController {
         }
     }
 
-
     async viewAllCampaigns(req: Request, res: Response) {
         try {
             const { rewards, actions, status } = req.query;

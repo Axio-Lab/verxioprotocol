@@ -20,7 +20,7 @@ const ProfileService = new Profile();
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
 const headers = createActionHeaders({
   chainId: "devenet", // or chainId: "devnet"
-  actionVersion: "2.2.3", // the desired spec version
+  actionVersion: "2.2.3"
 });
 export default class ActionController {
   async getAction(req: Request, res: Response) {
@@ -38,6 +38,32 @@ export default class ActionController {
 
       if (!campaign) {
         return res.status(404).json("Invalid campaign title")
+      }
+
+      const userAgent = req.headers['user-agent'];
+
+      // Check if the request is from a social media bot by checking user agent or other clues
+      const isSocialMediaBot = /facebookexternalhit|twitterbot|linkedinbot/i.test(userAgent!);
+
+      if (isSocialMediaBot) {
+        // Serve an HTML response with Open Graph metadata
+        const html = `
+          <html>
+            <head>
+              <meta property="og:title" content="${campaign.campaignInfo.title}" />
+              <meta property="og:description" content="${campaign.campaignInfo.description}" />
+              <meta property="og:image" content="${campaign.campaignInfo.banner}" />
+              <meta property="og:url" content="${baseHref}" />
+              <meta property="og:type" content="website" />
+              <title>${campaign.campaignInfo.title}</title>
+            </head>
+            <body>
+              <h1>${campaign.campaignInfo.title}</h1>
+              <p>${campaign.campaignInfo.description}</p>
+            </body>
+          </html>
+        `;
+        return res.status(200).send(html);
       }
 
       let payload: ActionGetResponse;

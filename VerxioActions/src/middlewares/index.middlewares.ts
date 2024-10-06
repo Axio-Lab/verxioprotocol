@@ -11,7 +11,11 @@ import { actionCorsMiddleware } from "@solana/actions/lib/types/utils";
 export default (app: Application) => {
   app.use(morgan('combined'));
   // CORS middleware
-  app.options("*", cors());
+  app.options("*", cors({
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Encoding'],
+    methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  }));
   app.use(
     cors({
       origin: '*',

@@ -20,7 +20,7 @@ const ProfileService = new Profile();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
 const headers = createActionHeaders({
-  chainId: "devenet", // or chainId: "devnet"
+  chainId: "mainnet", // or chainId: "devnet"
   actionVersion: "2.2.3"
 });
 
@@ -114,7 +114,7 @@ export default class ActionController {
       res.set({
         ...ACTIONS_CORS_HEADERS,
         "X-Action-Version": "2.1.3",
-        "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+        "X-Blockchain-Ids": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
       });
       res.set(headers);
       return res.json(payload);
@@ -214,7 +214,7 @@ export default class ActionController {
           res.set({
             ...ACTIONS_CORS_HEADERS,
             "X-Action-Version": "2.1.3",
-            "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+            "X-Blockchain-Ids": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
           });
           res.set(headers);
 
@@ -242,7 +242,7 @@ export default class ActionController {
           res.set({
             ...ACTIONS_CORS_HEADERS,
             "X-Action-Version": "2.1.3",
-            "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+            "X-Blockchain-Ids": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
           });
           res.set(headers);
 
@@ -284,7 +284,7 @@ export default class ActionController {
       res.set({
         ...ACTIONS_CORS_HEADERS,
         "X-Action-Version": "2.1.3",
-        "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+        "X-Blockchain-Ids": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
       });
       res.set(headers);
 

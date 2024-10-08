@@ -1,553 +1,568 @@
-// import { Request, Response } from "express";
-// import ProductService from "../services/product.service";
-// import Campaign from "../services/campaign.service";
-// import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
-// import {
-//   clusterApiUrl,
-//   Connection,
-//   LAMPORTS_PER_SOL,
-//   PublicKey,
-//   SystemProgram,
-//   Transaction,
-// } from "@solana/web3.js";
-// import { prepareBurnTokensTransaction } from "./actions/burnToken";
-// import { prepareCompressTokenTransaction } from "./actions/compressToken";
-// import { prepareDecompressTokenTransaction } from "./actions/decompressToken";
+import { Request, Response } from "express";
+import Campaign from "../services/campaign.service";
+import Submission from "../services/submission.service";
+import Profile from "../services/profile.services";
+import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse, createActionHeaders } from "@solana/actions";
+import {
+  clusterApiUrl,
+  Connection,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction
+} from "@solana/web3.js";
+import { prepareBurnTokensTransaction } from "./actions/burnToken";
+import { convert } from 'html-to-text';
+import { burn, createBurnInstruction, getAssociatedTokenAddress, getOrCreateAssociatedTokenAccount, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+import { getCompressedTokens, buildCompressSplTokenTx, buildDecompressSplTokenTx } from '../services/compression.service';
 
+const CampaignService = new Campaign();
+const SubmissionService = new Submission();
+const ProfileService = new Profile();
 
-// const {
-//   getProductByQuery
-// } = new ProductService();
-// const CampaignService = new Campaign();
+const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
+const headers = createActionHeaders({
+  chainId: "devenet", // or chainId: "devnet"
+  actionVersion: "2.2.3"
+});
 
-// const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-//   "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
-// );
+export default class ActionController {
+  async getAction(req: Request, res: Response) {
+    try {
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
 
-// export default class ActionController {
-//   async getProductAction(req: Request, res: Response) {
-//     try {
-//       const baseHref = new URL(
-//         `${req.protocol}://${req.get('host')}${req.originalUrl}`
-//       ).toString();
+      const baseHref = new URL(
+        `${protocol}://${req.get('host')}${req.originalUrl}`
+      ).toString();
 
-//       const productName = (req.params.name.replace(/-/g, ' '));
-//       const product = await getProductByQuery({
-//         name: productName
-//       });
+      const campaignName = (req.params.name.replace(/-/g, ' '));
+      const campaign = await CampaignService.findOne({
+        "campaignInfo.title": campaignName
+      });
 
-//       if (!product) {
-//         return res.status(404).json("Invalid product name")
-//       }
-//       const disabled = (product?.quantity! <= 0) ? true : false;
+      if (!campaign) {
+        return res.status(404).json("Invalid campaign title")
+      }
 
-//       let payload: ActionGetResponse;
-//       if (product?.payAnyPrice) {
-//         payload = {
-//           title: `${product?.name}`,
-//           icon: product?.image as unknown as string,
-//           description: `${product?.description}`,
-//           label: `Buy Now`,
-//           disabled,
-//           links: {
-//             actions: [
-//               {
-//                 label: `Buy Now`,
-//                 href: `${baseHref}?amount={amount}`,
-//                 parameters: [
-//                   {
-//                     name: "amount",
-//                     label: "Enter a custom USD amount"
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//       } else {
-//         payload = {
-//           icon: product?.image as unknown as string,
-//           label: `Buy Now (${product?.price} SOL)`,
-//           description: `${product?.description}`,
-//           title: `${product?.name}`,
-//           disabled
-//         }
-//       }
+      let disabled = false;
+      if ((campaign as any).status === "Active") disabled = true;
 
-//       res.set(ACTIONS_CORS_HEADERS);
+      let payload: ActionGetResponse;
 
-//       return res.json(payload);
+      const description = convert(campaign.campaignInfo.description)
+      if (campaign.action.actionType === "Sell-Product") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Buy Now (${campaign.action.fields.amount} SOL)`,
+          description,
+          title: `${campaign.campaignInfo.title}`,
+          disabled: !disabled ? disabled : (campaign?.action.fields.quantity! <= 0) ? true : false
+        }
+      } else if (campaign.action.actionType === "Submit-Url") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Submit Url`,
+          description,
+          title: `${campaign.campaignInfo.title}`,
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: `Submit Url`,
+              href: `${baseHref}?Url={Url}`,
+              parameters: [
+                {
+                  name: "Url",
+                  label: "Submit your Url",
+                },
+              ],
+            }]
+          }
+        }
+      } else if (campaign.action.actionType === "Poll") {
+        const options: any = campaign.action.fields.options?.map(
+          (option: string, index: number) => ({ label: option, value: index.toString() })
+        );
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          label: `Poll`,
+          description,
+          title: `${campaign.campaignInfo.title}`,
+          disabled,
+          links: {
+            actions: [
+              {
+                type: "post",
+                label: "Submit",
+                href: `${baseHref}?choice={choice}`,
+                parameters: [
+                  {
+                    type: "radio",
+                    name: "choice",
+                    label: `${campaign.action.fields.title}`,
+                    required: true,
+                    options
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      } else if (campaign.action.actionType === "Compress-Token") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          description,
+          label: "Compress Token",
+          title: `${campaign.campaignInfo.title}`,
+          error: { message: "This link is not implemented! " },
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: "Compress Token",
+              href: `${baseHref}?amount={amount}`,
+              parameters: [
+                {
+                  name: "amount",
+                  label: "Input amount",
+                },
+              ],
+            }]
+          },
+        }
+      } else if (campaign.action.actionType === "Decompress-Token") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          description,
+          label: "Decompress Token",
+          title: `${campaign.campaignInfo.title}`,
+          error: { message: "This link is not implemented! " },
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: "Decompress Token",
+              href: `${baseHref}?amount={amount}`,
+              parameters: [
+                {
+                  name: "amount",
+                  label: "Input amount",
+                },
+              ],
+            }]
+          },
+        }
+      } else if (campaign.action.actionType === "Burn-Token") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          description,
+          label: "Burn Token",
+          title: `${campaign.campaignInfo.title}`,
+          error: { message: "This link is not implemented! " },
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: "Burn Token",
+              href: `${baseHref}?amount={amount}`,
+              parameters: [
+                {
+                  name: "amount",
+                  label: "Input amount",
+                },
+              ],
+            }]
+          },
+        }
+      } else {
+        payload = {
+          icon: "campaign.action.icon",
+          label: "campaign.action.label",
+          description: "campaign.action.description",
+          title: "campaign.action.title"
+        }
+      }
 
-//     } catch (error: any) {
-//       return res.status(500)
-//         .send({
-//           success: false,
-//           message: `Error: ${error.message}`
-//         })
-//     }
-//   }
+      res.set({
+        ...ACTIONS_CORS_HEADERS,
+        "X-Action-Version": "2.1.3",
+        "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+      });
+      res.set(headers);
+      return res.json(payload);
 
-//   async postProductAction(req: Request, res: Response) {
-//     try {
-//       const productName = (req.params.name.replace(/-/g, ' '));
-//       const product = await getProductByQuery({
-//         name: productName
-//       });
+    } catch (error: any) {
+      return res.status(500)
+        .send({
+          success: false,
+          message: `Error: ${error.message}`
+        })
+    }
+  }
 
-//       if (!product) {
-//         return res.status(404).json("Invalid product name")
-//       }
+  async postAction(req: Request, res: Response) {
+    try {
+      const campaignName = (req.params.name.replace(/-/g, ' '));
+      const campaign = await CampaignService.findOne({
+        "campaignInfo.title": campaignName
+      });
 
-//       const body: ActionPostRequest = req.body;
+      if (!campaign) {
+        return res.status(404).json("Invalid campaign title")
+      }
 
-//       // Validate the client-provided input
-//       let account: PublicKey;
-//       try {
-//         account = new PublicKey(body.account);
-//       } catch (err) {
-//         return res.status(400).json({
-//           success: false,
-//           message: 'Invalid "account" provided',
-//         });
-//       }
+      const body: ActionPostRequest = req.body;
 
-//       const connection = new Connection(
-//         process.env.SOLANA_RPC! || clusterApiUrl("devnet")
-//       );
+      let account: PublicKey;
+      try {
+        account = new PublicKey(body.account);
+      } catch (err) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid "account" provided',
+        });
+      }
 
-//       // Ensure the receiving account will be rent exempt
-//       const minimumBalance = await connection.getMinimumBalanceForRentExemption(
-//         0 // Note: simple accounts that just store native SOL have `0` bytes of data
-//       );
+      const RPC_URL = `${process.env.SOLANA_RPC_URL}/?api-key=${process.env.API_KEY}`;
+      const connection = new Connection(RPC_URL);
 
-//       let price;
-//       if (product?.payAnyPrice) {
-//         price = parseFloat(req.query.amount as any);
-//         if (price <= 0) throw new Error("amount is too small");
-//       } else {
-//         price = product?.price!;
-//       }
+      // Ensure the receiving account will be rent exempt
+      const minimumBalance = await connection.getMinimumBalanceForRentExemption(
+        0 // Note: simple accounts that just store native SOL have `0` bytes of data
+      );
 
-//       if (price * LAMPORTS_PER_SOL < minimumBalance) {
-//         throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
-//       }
+      const transaction = new Transaction();
 
-//       const sellerPubkey: PublicKey = new PublicKey(
-//         product?.userId as string
-//       );
+      if (campaign.action.actionType === "Sell-Product") {
+        const price = campaign.action.fields.amount;
 
-//       const transaction = new Transaction();
+        if (!price) {
+          return res.status(404).json("No price specified")
+        }
 
-//       // Transfer 90% of the funds to the seller's address
-//       transaction.add(
-//         SystemProgram.transfer({
-//           fromPubkey: account,
-//           toPubkey: sellerPubkey,
-//           lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
-//         }),
-//       );
+        if (price * LAMPORTS_PER_SOL < minimumBalance) {
+          throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
+        }
 
-//       // Transfer 10% of the funds to the default SOL address
-//       transaction.add(
-//         SystemProgram.transfer({
-//           fromPubkey: account,
-//           toPubkey: DEFAULT_SOL_ADDRESS,
-//           lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
-//         }),
-//       );
+        const sellerPubkey: PublicKey = new PublicKey(
+          campaign.userId
+        );
 
-//       // Set the end user as the fee payer
-//       transaction.feePayer = account;
-//       transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+        // Transfer 90% of the funds to the seller's address
+        transaction.add(
+          SystemProgram.transfer({
+            fromPubkey: account,
+            toPubkey: sellerPubkey,
+            lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
+          }),
+        );
 
-//       const payload: ActionPostResponse = {
-//         transaction: transaction.serialize({
-//           requireAllSignatures: false,
-//           verifySignatures: true,
-//         }).toString('base64'),
-//         message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
-//       };
-//       console.log("Payload:", payload)
-//       console.log("Transaction:", transaction)
+        // Transfer 10% of the funds to the default SOL address
+        transaction.add(
+          SystemProgram.transfer({
+            fromPubkey: account,
+            toPubkey: DEFAULT_SOL_ADDRESS,
+            lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
+          }),
+        );
+      } else if (campaign.action.actionType === "Submit-Url") {
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.status(200).json(payload);
+        const foundSubmission = await SubmissionService.findOne({ campaignId: campaign._id, userId: account.toString() });
+        if (foundSubmission) {
+          transaction.feePayer = account;
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`,
-//       });
-//     }
-//   }
+          const payload: ActionPostResponse = {
+            type: "transaction",
+            transaction: transaction.serialize({
+              requireAllSignatures: false,
+              verifySignatures: true,
+            }).toString('base64'),
+            message: `You've already participated in ${campaign.campaignInfo.title}`
+          };
+          console.log("Payload:", payload)
+          console.log("Transaction:", transaction)
 
-//   async getBurnAction(req: Request, res: Response) {
-//     try {
-//       const campaignName = (req.params.title.replace(/-/g, ' '));
-//       const campaign = await CampaignService.findOne({
-//         "campaignInfo.title": campaignName
-//       });
+          res.set({
+            ...ACTIONS_CORS_HEADERS,
+            "X-Action-Version": "2.1.3",
+            "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+          });
+          res.set(headers);
 
-//       if (!campaign) {
-//         return res.status(404).json("Invalid campaign title")
-//       }
+          return res.status(200).json(payload);
+        }
+        console.log(req.query.Url)
+        await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.Url as string })
+      } else if (campaign.action.actionType === "Poll") {
+        const foundSubmission = await SubmissionService.findOne({ campaignId: campaign._id, userId: account.toString() });
+        if (foundSubmission) {
+          transaction.feePayer = account;
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-//       const payload: ActionGetResponse = {
-//         icon: campaign?.campaignInfo.banner as unknown as string,
-//         label: `Burn Token`,
-//         description: `${campaign?.campaignInfo.description}`,
-//         title: `${campaign?.campaignInfo.title}`,
-//       };
-//       res.set(ACTIONS_CORS_HEADERS);
+          const payload: ActionPostResponse = {
+            type: "transaction",
+            transaction: transaction.serialize({
+              requireAllSignatures: false,
+              verifySignatures: true,
+            }).toString('base64'),
+            message: `You've already participated in ${campaign.campaignInfo.title}`
+          };
+          console.log("Payload:", payload)
+          console.log("Transaction:", transaction)
 
-//       return res.json(payload);
+          res.set({
+            ...ACTIONS_CORS_HEADERS,
+            "X-Action-Version": "2.1.3",
+            "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+          });
+          res.set(headers);
 
-//     } catch (error: any) {
-//       return res.status(500)
-//         .send({
-//           success: false,
-//           message: `Error: ${error.message}`
-//         })
-//     }
-//   }
+          return res.status(200).json(payload);
+        }
+        console.log(req.query.choice)
+        await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.choice as string })
 
-//   async postBurnAction(req: Request, res: Response) {
-//     try {
-//       const campaignName = (req.params.title.replace(/-/g, ' '));
-//       const campaign = await CampaignService.findOne({
-//         "campaignInfo.title": campaignName
-//       });
+      } else if (campaign.action.actionType === "Compress-Token") {
+        const amount = Number(req.query.amount);
+        const mintAddress = new PublicKey(campaign.action.fields.address!);
 
-//       if (!campaign) {
-//         return res.status(404).json("Invalid campaign title")
-//       }
-      
-//       const body: ActionPostRequest = req.body;
-      
-//       // Validate the client-provided input
-//       let account: PublicKey;
-//       try {
-//         account = new PublicKey(body.account);
-//       } catch (err) {
-//         return res.status(400).json({
-//           success: false,
-//           message: 'Invalid "account" provided',
-//         });
-//       }
-      
-//       const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
+        // Build the Compress token transaction
+        const compressTransaction = await buildCompressSplTokenTx(account.toString(), amount, mintAddress.toString());
+        
+        // Add the compress instruction to the transaction
+        transaction.add(...compressTransaction.instructions);
 
-//       const payload: ActionPostResponse = {
-//         transaction: transaction.serialize({
-//           requireAllSignatures: false,
-//           verifySignatures: true,
-//         }).toString('base64'),
-//         message: `You've successfully minted token`,
-//       };
-//       console.log("Payload:", payload)
-//       console.log("Transaction:", transaction)
+      } else if (campaign.action.actionType === "Decompress-Token") {
+        const amount = Number(req.query.amount);
+        const mintAddress = new PublicKey(campaign.action.fields.address!);
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.status(200).json(payload);
+        // Fetch valid compressed token accounts
+        const validTokenAccounts = await getCompressedTokens(account.toString(), mintAddress.toString());
 
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`,
-//       });
-//     }
-//   }
+        // Find the maximum amount that can be decompressed
+        const maxCompressedAmount = Math.max(...validTokenAccounts.map(token => token.parsed.amount.toNumber()));
 
-//   async getPollAction(req: Request, res: Response) {
-//     try {
-//       const campaignName = (req.params.title.replace(/-/g, ' '));
-//       const campaign = await CampaignService.findOne({
-//         "campaignInfo.title": campaignName
-//       });
+        // Ensure the requested amount doesn't exceed the available compressed tokens
+        const decompressAmount = Math.min(amount, maxCompressedAmount);
 
-//       if (!campaign) {
-//         return res.status(404).json("Invalid campaign title");
-//       }
+        // Build the Decompress token transaction
+        const decompressTransaction = await buildDecompressSplTokenTx(account.toString(), mintAddress.toString(), decompressAmount);
 
-//       const payload: ActionGetResponse = {
-//         icon: campaign?.campaignInfo.banner as unknown as string,
-//         label: `Vote in Poll`,
-//         description: `${campaign?.campaignInfo.description}`,
-//         title: `${campaign?.campaignInfo.title}`,
-//         links: {
-//           actions: campaign.pollOptions.map((option, index) => ({
-//             label: option,
-//             href: `/api/poll/${campaign._id}/vote/${index}`,
-//           }))
-//         }
-//       };
+        // Add the decompress instruction to the transaction
+        transaction.add(...decompressTransaction.instructions);
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`
-//       });
-//     }
-//   }
+      } else if (campaign.action.actionType === "Burn-Token") {
+        const associatedTokenAddress = await getAssociatedTokenAddress(
+          new PublicKey(campaign.action.fields.address!),
+          account
+        );
 
-//   async postPollAction(req: Request, res: Response) {
-//     try {
-//       const campaignId = req.params.campaignId;
-//       const voteIndex = parseInt(req.params.voteIndex);
-//       const body: ActionPostRequest = req.body;
+        const amount = Number(req.query.amount);
+        const burnInstruction = createBurnInstruction(
+          associatedTokenAddress,
+          new PublicKey(campaign.action.fields.address!),
+          account,
+          amount
+        );
 
-//       // Validate the client-provided input
-//       let account: PublicKey;
-//       try {
-//         account = new PublicKey(body.account);
-//       } catch (err) {
-//         return res.status(400).json({
-//           success: false,
-//           message: 'Invalid "account" provided',
-//         });
-//       }
+        transaction.add(burnInstruction);
+      }
 
-//       // Here you would implement the logic to record the vote
-//       // For this example, we'll just simulate it
-//       await CampaignService.recordVote(campaignId, voteIndex, account.toString());
+      // Set the end user as the fee payer
+      transaction.feePayer = account;
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-//       const currentResults = await CampaignService.getPollResults(campaignId);
+      const payload: ActionPostResponse = {
+        type: "transaction",
+        transaction: transaction.serialize({
+          requireAllSignatures: false,
+          verifySignatures: true,
+        }).toString('base64'),
+        message: `You've successfully participated in ${campaign.campaignInfo.title}`
+      };
 
-//       const payload: ActionPostResponse = {
-//         transaction: "simulated_transaction_base64", // Replace with actual transaction if needed
-//         message: "Your vote has been recorded!",
-//         links: {
-//           next: {
-//             type: "inline",
-//             action: {
-//               type: "completed",
-//               title: "Poll Results",
-//               description: "Current poll results",
-//               icon: "https://example.com/poll-icon.png",
-//               label: "View Results",
-//               content: JSON.stringify(currentResults),
-//             }
-//           }
-//         }
-//       };
+      // finds user on the db
+      let profile = await ProfileService.findOne({ _id: account });
+      if (!profile) {
+        //create a new user if not found
+        profile = await ProfileService.create({ _id: account.toString() });
+      }
+      // reward the user with xp
+      profile!.xp += 500;
+      await profile?.save();
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.status(200).json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`,
-//       });
-//     }
-//   }
+      console.log("Payload:", payload)
+      console.log("Transaction:", transaction)
 
-//   async getSubmitUrlAction(req: Request, res: Response) {
-//     try {
-//       const payload: ActionGetResponse = {
-//         icon: "https://example.com/submit-url-icon.png",
-//         label: "Submit URL",
-//         description: "Submit a URL for the campaign",
-//         title: "URL Submission",
-//         links: {
-//           actions: [
-//             {
-//               href: "/api/submit-url",
-//               label: "Submit",
-//               parameters: [
-//                 {
-//                   type: "url",
-//                   name: "url",
-//                   label: "Enter URL",
-//                   required: true,
-//                 },
-//                 {
-//                   type: "select",
-//                   name: "category",
-//                   label: "Select Category",
-//                   required: true,
-//                   options: [
-//                     { label: "News", value: "news" },
-//                     { label: "Blog", value: "blog" },
-//                     { label: "Social Media", value: "social" },
-//                   ],
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//       };
+      res.set({
+        ...ACTIONS_CORS_HEADERS,
+        "X-Action-Version": "2.1.3",
+        "X-Blockchain-Ids": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+      });
+      res.set(headers);
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`
-//       });
-//     }
-//   }
+      return res.status(200).json(payload);
 
-//   async postSubmitUrlAction(req: Request, res: Response) {
-//     try {
-//       const { url, category } = req.body;
-//       // Implement URL submission logic here
+    } catch (error: any) {
+      return res.status(500).send({
+        success: false,
+        message: `Error: ${error.message}`,
+      });
+    }
+  }
 
-//       const payload: ActionPostResponse = {
-//         transaction: "simulated_transaction_base64", // Replace with actual transaction if needed
-//         message: "URL submitted successfully!",
-//       };
+  // async getBurnAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.status(200).json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`,
-//       });
-//     }
-//   }
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
 
-//   async getCompressTokenAction(req: Request, res: Response) {
-//     try {
-//       const payload: ActionGetResponse = {
-//         icon: "https://example.com/compress-token-icon.png",
-//         label: "Compress Token",
-//         description: "Compress your token",
-//         title: "Token Compression",
-//         links: {
-//           actions: [
-//             {
-//               href: "/api/compress-token",
-//               label: "Compress",
-//               parameters: [
-//                 {
-//                   type: "text",
-//                   name: "tokenAddress",
-//                   label: "Token Address",
-//                   required: true,
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//       };
+  //     const payload: ActionGetResponse = {
+  //       icon: campaign?.campaignInfo.banner as unknown as string,
+  //       label: `Burn Token`,
+  //       description: `${campaign?.campaignInfo.description}`,
+  //       title: `${campaign?.campaignInfo.title}`,
+  //     };
+  //     res.set(ACTIONS_CORS_HEADERS);
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`
-//       });
-//     }
-//   }
+  //     return res.json(payload);
 
-//   async postCompressTokenAction(req: Request, res: Response) {
-//     try {
-//       const { tokenAddress } = req.body;
-//       const body: ActionPostRequest = req.body;
-      
-//       let account: PublicKey;
-//       try {
-//         account = new PublicKey(body.account);
-//       } catch (err) {
-//         return res.status(400).json({
-//           success: false,
-//           message: 'Invalid "account" provided',
-//         });
-//       }
-//       const minimum_amount = 1000000;
-//       const transaction = await prepareCompressTokenTransaction(tokenAddress, minimum_amount, account, );
+  //   } catch (error: any) {
+  //     return res.status(500)
+  //       .send({
+  //         success: false,
+  //         message: `Error: ${error.message}`
+  //       })
+  //   }
+  // }
 
-//       const payload: ActionPostResponse = {
-//         transaction: transaction.serialize({
-//           requireAllSignatures: false,
-//           verifySignatures: true,
-//         }).toString('base64'),
-//         message: "Token compression transaction prepared",
-//       };
+  // async postBurnAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.status(200).json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`,
-//       });
-//     }
-//   }
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
 
-//   async getDecompressTokenAction(req: Request, res: Response) {
-//     try {
-//       const payload: ActionGetResponse = {
-//         icon: "https://example.com/decompress-token-icon.png",
-//         label: "Decompress Token",
-//         description: "Decompress your token",
-//         title: "Token Decompression",
-//         links: {
-//           actions: [
-//             {
-//               href: "/api/decompress-token",
-//               label: "Decompress",
-//               parameters: [
-//                 {
-//                   type: "text",
-//                   name: "tokenAddress",
-//                   label: "Token Address",
-//                   required: true,
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//       };
+  //     const body: ActionPostRequest = req.body;
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`
-//       });
-//     }
-//   }
+  //     // Validate the client-provided input
+  //     let account: PublicKey;
+  //     try {
+  //       account = new PublicKey(body.account);
+  //     } catch (err) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: 'Invalid "account" provided',
+  //       });
+  //     }
 
-//   async postDecompressTokenAction(req: Request, res: Response) {
-//     try {
-//       const { tokenAddress } = req.body;
-//       const body: ActionPostRequest = req.body;
-      
-//       let account: PublicKey;
-//       try {
-//         account = new PublicKey(body.account);
-//       } catch (err) {
-//         return res.status(400).json({
-//           success: false,
-//           message: 'Invalid "account" provided',
-//         });
-//       }
-      
-//       const minimum_amount = 1000000;
+  //     const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
 
-//       const transaction = await prepareDecompressTokenTransaction(tokenAddress, minimum_amount, account);
+  //     const payload: ActionPostResponse = {
+  //       transaction: transaction.serialize({
+  //         requireAllSignatures: false,
+  //         verifySignatures: true,
+  //       }).toString('base64'),
+  //       message: `You've successfully minted token`,
+  //     };
+  //     console.log("Payload:", payload)
+  //     console.log("Transaction:", transaction)
 
-//       const payload: ActionPostResponse = {
-//         transaction: transaction.serialize({
-//           requireAllSignatures: false,
-//           verifySignatures: true,
-//         }).toString('base64'),
-//         message: "Token decompression transaction prepared",
-//       };
+  //     res.set(ACTIONS_CORS_HEADERS);
+  //     return res.status(200).json(payload);
 
-//       res.set(ACTIONS_CORS_HEADERS);
-//       return res.status(200).json(payload);
-//     } catch (error: any) {
-//       return res.status(500).send({
-//         success: false,
-//         message: `Error: ${error.message}`,
-//       });
-//     }
-//   }
-// }
+  //   } catch (error: any) {
+  //     return res.status(500).send({
+  //       success: false,
+  //       message: `Error: ${error.message}`,
+  //     });
+  //   }
+  // }
+
+  // async getUrlAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
+
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
+
+  //     const payload: ActionGetResponse = {
+  //       icon: campaign?.campaignInfo.banner as unknown as string,
+  //       label: `Burn Token`,
+  //       description: `${campaign?.campaignInfo.description}`,
+  //       title: `${campaign?.campaignInfo.title}`,
+  //     };
+  //     res.set(ACTIONS_CORS_HEADERS);
+
+  //     return res.json(payload);
+
+  //   } catch (error: any) {
+  //     return res.status(500)
+  //       .send({
+  //         success: false,
+  //         message: `Error: ${error.message}`
+  //       })
+  //   }
+  // }
+
+  // async postUrlAction(req: Request, res: Response) {
+  //   try {
+  //     const campaignName = (req.params.title.replace(/-/g, ' '));
+  //     const campaign = await CampaignService.findOne({
+  //       "campaignInfo.title": campaignName
+  //     });
+
+  //     if (!campaign) {
+  //       return res.status(404).json("Invalid campaign title")
+  //     }
+
+  //     const body: ActionPostRequest = req.body;
+
+  //     // Validate the client-provided input
+  //     let account: PublicKey;
+  //     try {
+  //       account = new PublicKey(body.account);
+  //     } catch (err) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: 'Invalid "account" provided',
+  //       });
+  //     }
+
+  //     const transaction = await prepareBurnTokensTransaction(campaign.actions.action.url, campaign.actions.action.amount, account)
+
+  //     const payload: ActionPostResponse = {
+  //       transaction: transaction.serialize({
+  //         requireAllSignatures: false,
+  //         verifySignatures: true,
+  //       }).toString('base64'),
+  //       message: `You've successfully minted token`,
+  //     };
+  //     console.log("Payload:", payload)
+  //     console.log("Transaction:", transaction)
+
+  //     res.set(ACTIONS_CORS_HEADERS);
+  //     return res.status(200).json(payload);
+
+  //   } catch (error: any) {
+  //     return res.status(500).send({
+  //       success: false,
+  //       message: `Error: ${error.message}`,
+  //     });
+  //   }
+  // }
+}

@@ -74,3 +74,4 @@ graph TD
 
 - [Verxio Backend Endpoints](https://github.com/Axio-Lab/verxioprotocol/tree/main/Verxio)
 - [Verxio Actions](https://github.com/Axio-Lab/verxioprotocol/tree/main/VerxioActions)
+- [Verxio Client](https://github.com/Axio-Lab/verxio-lite)

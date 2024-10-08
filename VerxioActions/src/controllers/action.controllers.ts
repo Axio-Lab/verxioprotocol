@@ -13,6 +13,7 @@ import {
 } from "@solana/web3.js";
 import { prepareBurnTokensTransaction } from "./actions/burnToken";
 import { convert } from 'html-to-text';
+import { CompressedTokenProgram } from "@lightprotocol/compressed-token";
 
 const CampaignService = new Campaign();
 const SubmissionService = new Submission();
@@ -42,6 +43,9 @@ export default class ActionController {
         return res.status(404).json("Invalid campaign title")
       }
 
+      let disabled = false;
+      if ((campaign as any).status === "Active") disabled = true;
+
       let payload: ActionGetResponse;
 
       const description = convert(campaign.campaignInfo.description)
@@ -51,7 +55,7 @@ export default class ActionController {
           label: `Buy Now (${campaign.action.fields.amount} SOL)`,
           description,
           title: `${campaign.campaignInfo.title}`,
-          disabled: (campaign?.action.fields.quantity! <= 0) ? true : false
+          disabled: !disabled ? disabled : (campaign?.action.fields.quantity! <= 0) ? true : false
         }
       } else if (campaign.action.actionType === "Submit-Url") {
         payload = {
@@ -59,6 +63,7 @@ export default class ActionController {
           label: `Submit Url`,
           description,
           title: `${campaign.campaignInfo.title}`,
+          disabled,
           links: {
             actions: [{
               type: "post",
@@ -71,8 +76,7 @@ export default class ActionController {
                 },
               ],
             }]
-          },
-
+          }
         }
       } else if (campaign.action.actionType === "Poll") {
         const options: any = campaign.action.fields.options?.map(
@@ -83,6 +87,7 @@ export default class ActionController {
           label: `Poll`,
           description,
           title: `${campaign.campaignInfo.title}`,
+          disabled,
           links: {
             actions: [
               {
@@ -101,6 +106,28 @@ export default class ActionController {
               }
             ]
           }
+        }
+      } else if (campaign.action.actionType === "Compress-Token") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          description,
+          label: "Compress Token",
+          title: `${campaign.campaignInfo.title}`,
+          error: { message: "This link is not implemented! " },
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: "Compress Token",
+              href: `${baseHref}?amount={amount}`,
+              parameters: [
+                {
+                  name: "amount",
+                  label: "Input amount",
+                },
+              ],
+            }]
+          },
         }
       } else {
         payload = {
@@ -251,8 +278,17 @@ export default class ActionController {
         console.log(req.query.choice)
         await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.choice as string })
 
-      } else {
+      } else if (campaign.action.actionType === "Compress-Token") {
+        const compressIx = await CompressedTokenProgram.compress({
+          payer: account,
+          owner: account,
+          source: account,
+          toAddress: account,
+          amount: req.query.amount,
+          mint: account,
+        });
 
+        transaction.add(compressIx)
       }
 
       // Set the end user as the fee payer

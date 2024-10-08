@@ -14,6 +14,7 @@ import {
 import { prepareBurnTokensTransaction } from "./actions/burnToken";
 import { convert } from 'html-to-text';
 import { CompressedTokenProgram } from "@lightprotocol/compressed-token";
+import { createBurnInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 
 const CampaignService = new Campaign();
 const SubmissionService = new Submission();
@@ -119,6 +120,50 @@ export default class ActionController {
             actions: [{
               type: "post",
               label: "Compress Token",
+              href: `${baseHref}?amount={amount}`,
+              parameters: [
+                {
+                  name: "amount",
+                  label: "Input amount",
+                },
+              ],
+            }]
+          },
+        }
+      } else if (campaign.action.actionType === "Decompress-Token") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          description,
+          label: "Decompress Token",
+          title: `${campaign.campaignInfo.title}`,
+          error: { message: "This link is not implemented! " },
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: "Decompress Token",
+              href: `${baseHref}?amount={amount}`,
+              parameters: [
+                {
+                  name: "amount",
+                  label: "Input amount",
+                },
+              ],
+            }]
+          },
+        }
+      } else if (campaign.action.actionType === "Burn-Token") {
+        payload = {
+          icon: campaign.campaignInfo.banner,
+          description,
+          label: "Burn Token",
+          title: `${campaign.campaignInfo.title}`,
+          error: { message: "This link is not implemented! " },
+          disabled,
+          links: {
+            actions: [{
+              type: "post",
+              label: "Burn Token",
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
@@ -289,6 +334,28 @@ export default class ActionController {
         });
 
         transaction.add(compressIx)
+      } else if (campaign.action.actionType === "Decompress-Token") {
+        // const decompressIx = await CompressedTokenProgram.decompress({
+
+        // });
+
+        // transaction.add(decompressIx)
+      } else if (campaign.action.actionType === "Burn-Token") {
+        const associatedTokenAddress = await getAssociatedTokenAddress(
+          new PublicKey(campaign.action.fields.address!),
+          account
+        );
+
+        const amount = Number(req.query.amount);
+        const burnInstruction = createBurnInstruction(
+          associatedTokenAddress,
+          new PublicKey(campaign.action.fields.address!),
+          account,
+          amount
+        );
+
+
+        transaction.add(burnInstruction);
       }
 
       // Set the end user as the fee payer

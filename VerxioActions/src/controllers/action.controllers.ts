@@ -115,7 +115,7 @@ export default class ActionController {
           description,
           label: "Compress Token",
           title: `${campaign.campaignInfo.title}`,
-          error: { message: "This link is not implemented! " },
+          // error: { message: "This link is not implemented! " },
           disabled,
           links: {
             actions: [{
@@ -124,6 +124,7 @@ export default class ActionController {
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
+                  type: "text",
                   name: "amount",
                   label: "Input amount",
                 },

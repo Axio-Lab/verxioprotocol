@@ -147,6 +147,7 @@ export default class ActionController {
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
+                  type: "text",
                   name: "amount",
                   label: "Input amount",
                 },
@@ -169,6 +170,7 @@ export default class ActionController {
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
+                  type: "text",
                   name: "amount",
                   label: "Input amount",
                 },

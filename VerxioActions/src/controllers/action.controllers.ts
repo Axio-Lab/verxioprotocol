@@ -15,6 +15,7 @@ import { prepareBurnTokensTransaction } from "./actions/burnToken";
 import { convert } from 'html-to-text';
 import { CompressedTokenProgram } from "@lightprotocol/compressed-token";
 import { createBurnInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { buildCompressSplTokenTx, buildDecompressSplTokenTx, getCompressedTokens } from "../services/compression.service";
 
 const CampaignService = new Campaign();
 const SubmissionService = new Submission();
@@ -324,22 +325,34 @@ export default class ActionController {
         await SubmissionService.create({ campaignId: campaign._id, userId: account.toString(), submission: req.query.choice as string })
 
       } else if (campaign.action.actionType === "Compress-Token") {
-        const compressIx = await CompressedTokenProgram.compress({
-          payer: account,
-          owner: account,
-          source: account,
-          toAddress: account,
-          amount: req.query.amount,
-          mint: account,
-        });
+        const amount = Number(req.query.amount);
+        const mintAddress = new PublicKey(campaign.action.fields.address!);
 
-        transaction.add(compressIx)
+        // Build the Compress token transaction
+        const compressTransaction = await buildCompressSplTokenTx(account.toString(), amount, mintAddress.toString());
+
+        // Add the compress instruction to the transaction
+        transaction.add(...compressTransaction.instructions);
+
       } else if (campaign.action.actionType === "Decompress-Token") {
-        // const decompressIx = await CompressedTokenProgram.decompress({
+        const amount = Number(req.query.amount);
+        const mintAddress = new PublicKey(campaign.action.fields.address!);
 
-        // });
+        // Fetch valid compressed token accounts
+        const validTokenAccounts = await getCompressedTokens(account.toString(), mintAddress.toString());
 
-        // transaction.add(decompressIx)
+        // Find the maximum amount that can be decompressed
+        const maxCompressedAmount = Math.max(...validTokenAccounts.map(token => token.parsed.amount.toNumber()));
+
+        // Ensure the requested amount doesn't exceed the available compressed tokens
+        const decompressAmount = Math.min(amount, maxCompressedAmount);
+
+        // Build the Decompress token transaction
+        const decompressTransaction = await buildDecompressSplTokenTx(account.toString(), mintAddress.toString(), decompressAmount);
+
+        // Add the decompress instruction to the transaction
+        transaction.add(...decompressTransaction.instructions);
+
       } else if (campaign.action.actionType === "Burn-Token") {
         const associatedTokenAddress = await getAssociatedTokenAddress(
           new PublicKey(campaign.action.fields.address!),
@@ -353,8 +366,6 @@ export default class ActionController {
           account,
           amount
         );
-
-
         transaction.add(burnInstruction);
       }
 

@@ -54,28 +54,6 @@ graph TD
     G --> R
 ```
 
-## 🛠 Workflow
-
-1. First, the user creates a new profile by connecting their wallet.
-   They should complete their identity verification with Reclaim Protocol before they can participate in campaigns or create campaigns.
-2. Then the user can now generate an API key for creating and managing campaigns
-3. The user can create a new campaign, save participants as a custom audience, pick winners, and SOL payout for reward distribution with Streamflow.
-4. Finally, the user can share their campaign call-to-action as blink actions.
-
-## 🪛 Integration
-
-[streamflow-stream](https://docs.streamflow.finance/en/articles/9675301-javascript-sdk) - Interact with the protocol to create streams and vesting contracts. Token reward payout to the winner is initiated with Streamflow.
-
-[reclaim-protocol](https://www.reclaimprotocol.org/) - used for ZkProof identification to prevent spam, and bots and ensure real human interactions.
-
-[light-protocol](https://lightprotocol.com/) - Used the compression APIs to create several ad campaign templates.
-
-## 🌐 Repo URLs
-
-- [Verxio Backend Endpoints](https://github.com/Axio-Lab/verxioprotocol/tree/main/Verxio)
-- [Verxio Actions](https://github.com/Axio-Lab/verxioprotocol/tree/main/VerxioActions)
-- [Verxio Client](https://github.com/Axio-Lab/verxio-lite)
-
 <h2>API Endpoints</h2>
 <h3>Authentication</h3>
 <p>To access authenticated routes, include an API key in the request headers using the <code>X-API-Key</code> key. The <code>authenticate</code> middleware verifies the API key as follows:</p>
@@ -302,3 +280,9 @@ graph TD
   </li>
   <li><strong>Response:</strong> List of submissions.</li>
 </ul>
+
+## 🌐 Repo URLs
+
+- [Verxio Backend Endpoints](https://github.com/Axio-Lab/verxioprotocol/tree/main/Verxio)
+- [Verxio Actions](https://github.com/Axio-Lab/verxioprotocol/tree/main/VerxioActions)
+- [Verxio Client](https://github.com/Axio-Lab/verxio-lite)

@@ -138,7 +138,7 @@ export default class ActionController {
           description,
           label: "Decompress Token",
           title: `${campaign.campaignInfo.title}`,
-          error: { message: "This link is not implemented! " },
+          // error: { message: "This link is not implemented! " },
           disabled,
           links: {
             actions: [{
@@ -161,7 +161,7 @@ export default class ActionController {
           description,
           label: "Burn Token",
           title: `${campaign.campaignInfo.title}`,
-          error: { message: "This link is not implemented! " },
+          // error: { message: "This link is not implemented! " },
           disabled,
           links: {
             actions: [{

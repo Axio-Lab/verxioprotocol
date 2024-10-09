@@ -326,6 +326,7 @@ export default class ActionController {
 
       } else if (campaign.action.actionType === "Compress-Token") {
         const amount = Number(req.query.amount);
+        if (amount < campaign.action.fields.amount!) return res.status(404).json("Amount specified is lower than the minimun required amount")
         const mintAddress = new PublicKey(campaign.action.fields.address!);
 
         // Build the Compress token transaction
@@ -336,6 +337,7 @@ export default class ActionController {
 
       } else if (campaign.action.actionType === "Decompress-Token") {
         const amount = Number(req.query.amount);
+        if (amount < campaign.action.fields.amount!) return res.status(404).json("Amount specified is lower than the minimun required amount")
         const mintAddress = new PublicKey(campaign.action.fields.address!);
 
         // Fetch valid compressed token accounts

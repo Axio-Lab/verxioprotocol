@@ -46,7 +46,7 @@ export default class ActionController {
       }
 
       let disabled = false;
-      if ((campaign as any).status === "Active") disabled = true;
+      if ((campaign as any).status !== "Active") disabled = true;
 
       let payload: ActionGetResponse;
 

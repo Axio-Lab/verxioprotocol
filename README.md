@@ -77,7 +77,7 @@ graph TD
 - [Verxio Client](https://github.com/Axio-Lab/verxio-lite)
 
 <h2>API Endpoints</h2>
-<h2>Authentication</h2>
+<h3>Authentication</h3>
 <p>To access authenticated routes, include an API key in the request headers using the <code>X-API-Key</code> key. The <code>authenticate</code> middleware verifies the API key as follows:</p>
 <ol>
     <li>If the API key is missing, a <strong>401 Unauthorized</strong> response is returned.</li>
@@ -87,7 +87,8 @@ graph TD
 </ol>
 <p>Ensure your API keys are securely stored within your codebase.</p>
 
-<h3>1. Generate API Key</h3>
+<h3>Endpoints</h3>
+<h4>1. Generate API Key</h4>
 <ul>
   <li><strong>Method:</strong> POST</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:userId</code></li>
@@ -100,7 +101,7 @@ graph TD
   <li><strong>Response:</strong> API key generation confirmation.</li>
 </ul>
 
-<h3>2. Invalidate API Key</h3>
+<h4>2. Invalidate API Key</h4>
 <ul>
   <li><strong>Method:</strong> PATCH</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:userId</code></li>
@@ -113,7 +114,7 @@ graph TD
   <li><strong>Response:</strong> Confirmation of API key invalidation.</li>
 </ul>
 
-<h3>3. Create a Campaign</h3>
+<h4>3. Create a Campaign</h4>
 <ul>
   <li><strong>Method:</strong> POST</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/</code></li>
@@ -171,7 +172,7 @@ graph TD
   <li><strong>Response:</strong> Campaign creation confirmation.</li>
 </ul>
 
-<h3>4. Pay Winners</h3>
+<h4>4. Pay Winners</h4>
 <ul>
   <li><strong>Method:</strong> POST</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/pay/:campaignId</code></li>
@@ -184,7 +185,7 @@ graph TD
   <li><strong>Response:</strong> Payment transaction details.</li>
 </ul>
 
-<h3>5. View All Campaigns</h3>
+<h4>5. View All Campaigns</h4>
 <ul>
   <li><strong>Method:</strong> GET</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/all</code></li>
@@ -199,7 +200,7 @@ graph TD
   <li><strong>Response:</strong> List of all campaigns.</li>
 </ul>
 
-<h3>6. View Developer's Campaigns</h3>
+<h4>6. View Developer's Campaigns</h4>
 <ul>
   <li><strong>Method:</strong> GET</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/</code></li>
@@ -214,7 +215,7 @@ graph TD
   <li><strong>Response:</strong> List of developer's campaigns.</li>
 </ul>
 
-<h3>7. View a Campaign</h3>
+<h4>7. View a Campaign</h4>
 <ul>
   <li><strong>Method:</strong> GET</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:campaignId</code></li>
@@ -227,7 +228,7 @@ graph TD
   <li><strong>Response:</strong> Campaign details.</li>
 </ul>
 
-<h3>8. Verify User</h3>
+<h4>8. Verify User</h4>
 <ul>
   <li><strong>Method:</strong> POST</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/verify-user</code></li>
@@ -235,7 +236,7 @@ graph TD
   <li><strong>Response:</strong> User verification status.</li>
 </ul>
 
-<h3>9. Create or Fetch a Profile</h3>
+<h4>9. Create or Fetch a Profile</h4>
 <ul>
   <li><strong>Method:</strong> POST</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:userAddress</code></li>
@@ -248,7 +249,7 @@ graph TD
   <li><strong>Response:</strong> Profile data.</li>
 </ul>
 
-<h3>10. Get a Profile</h3>
+<h4>10. Get a Profile</h4>
 <ul>
   <li><strong>Method:</strong> GET</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:userAddress</code></li>
@@ -261,7 +262,7 @@ graph TD
   <li><strong>Response:</strong> Profile data.</li>
 </ul>
 
-<h3>11. Select Winners</h3>
+<h4>11. Select Winners</h4>
 <ul>
   <li><strong>Method:</strong> POST</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:campaignId</code></li>
@@ -276,7 +277,7 @@ graph TD
   <li><strong>Response:</strong> Confirmation of winner selection.</li>
 </ul>
 
-<h3>12. Fetch Winners</h3>
+<h4>12. Fetch Winners</h4>
 <ul>
   <li><strong>Method:</strong> GET</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:campaignId</code></li>
@@ -289,7 +290,7 @@ graph TD
   <li><strong>Response:</strong> List of winners.</li>
 </ul>
 
-<h3>13. Fetch Submissions</h3>
+<h4>13. Fetch Submissions</h4>
 <ul>
   <li><strong>Method:</strong> GET</li>
   <li><strong>Endpoint:</strong> <code>/api/v1/:campaignId</code></li>

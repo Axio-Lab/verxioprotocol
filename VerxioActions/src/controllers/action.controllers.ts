@@ -46,7 +46,7 @@ export default class ActionController {
       }
 
       let disabled = false;
-      if ((campaign as any).status === "Active") disabled = true;
+      if ((campaign as any).status !== "Active") disabled = true;
 
       let payload: ActionGetResponse;
 
@@ -115,7 +115,7 @@ export default class ActionController {
           description,
           label: "Compress Token",
           title: `${campaign.campaignInfo.title}`,
-          error: { message: "This link is not implemented! " },
+          // error: { message: "This link is not implemented! " },
           disabled,
           links: {
             actions: [{
@@ -124,6 +124,7 @@ export default class ActionController {
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
+                  type: "text",
                   name: "amount",
                   label: "Input amount",
                 },
@@ -137,7 +138,7 @@ export default class ActionController {
           description,
           label: "Decompress Token",
           title: `${campaign.campaignInfo.title}`,
-          error: { message: "This link is not implemented! " },
+          // error: { message: "This link is not implemented! " },
           disabled,
           links: {
             actions: [{
@@ -146,6 +147,7 @@ export default class ActionController {
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
+                  type: "text",
                   name: "amount",
                   label: "Input amount",
                 },
@@ -159,7 +161,7 @@ export default class ActionController {
           description,
           label: "Burn Token",
           title: `${campaign.campaignInfo.title}`,
-          error: { message: "This link is not implemented! " },
+          // error: { message: "This link is not implemented! " },
           disabled,
           links: {
             actions: [{
@@ -168,6 +170,7 @@ export default class ActionController {
               href: `${baseHref}?amount={amount}`,
               parameters: [
                 {
+                  type: "text",
                   name: "amount",
                   label: "Input amount",
                 },

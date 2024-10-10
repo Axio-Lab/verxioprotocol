@@ -23,8 +23,8 @@ const ProfileService = new Profile();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(process.env.TREASURY_WALLET!);
 const headers = createActionHeaders({
-  chainId: "devenet", // or chainId: "devnet"
-  actionVersion: "2.2.3"
+  chainId: "devnet",
+  actionVersion: "2.1.3"
 });
 
 export default class ActionController {
@@ -195,7 +195,7 @@ export default class ActionController {
       res.set(headers);
       return res.json(payload);
 
-    } catch (error: any) {
+    } catch (error: any) { 
       return res.status(500)
         .send({
           success: false,

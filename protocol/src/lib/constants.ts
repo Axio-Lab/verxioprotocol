@@ -1,4 +1,4 @@
-import { LoyaltyProgramTier } from '@/types/loyalty-program-tier'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
 
 export const DEFAULT_TIER: LoyaltyProgramTier = {
   name: 'Grind',

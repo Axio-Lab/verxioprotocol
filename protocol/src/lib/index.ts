@@ -1,10 +1,10 @@
 import { KeypairSigner, PublicKey as UmiPublicKey } from '@metaplex-foundation/umi'
 import { fetchCollection, writeData } from '@metaplex-foundation/mpl-core'
-import { toBase58 } from '@/utils/to-base58'
+import { toBase58 } from '@utils/to-base58'
 import { ATTRIBUTE_KEYS, DEFAULT_TIER, PLUGIN_TYPES } from './constants'
-import { validateCollectionState } from '@/utils/validate-collection-state'
-import { VerxioContext } from '@/types/verxio-context'
-import { LoyaltyProgramTier } from '@/types/loyalty-program-tier'
+import { validateCollectionState } from '@utils/validate-collection-state'
+import { VerxioContext } from '@schemas/verxio-context'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
 
 export async function getCollectionAttribute(context: VerxioContext, attributeKey: string): Promise<any> {
   validateCollectionState(context)

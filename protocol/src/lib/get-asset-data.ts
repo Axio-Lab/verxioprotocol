@@ -1,7 +1,7 @@
 import { PublicKey as UmiPublicKey } from '@metaplex-foundation/umi'
 import { fetchAsset } from '@metaplex-foundation/mpl-core'
-import { VerxioContext } from '@/types/verxio-context'
-import { PLUGIN_TYPES } from '@/lib/constants'
+import { VerxioContext } from '@schemas/verxio-context'
+import { PLUGIN_TYPES } from '@lib/constants'
 
 export interface AssetData {
   xp: number

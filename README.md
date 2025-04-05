@@ -247,30 +247,13 @@ const tiers = await getProgramTiers(context)
 
 ## Context Management
 
-The `VerxioContext` interface defines the protocol's context:
+The `VerxioContext` interface defines the loyalty program's context:
 
 ```typescript
 interface VerxioContext {
   umi: Umi
   programAuthority: PublicKey
   collectionAddress?: PublicKey
-}
-```
-
-## Error Handling
-
-The protocol uses descriptive error messages. Always wrap calls in try-catch:
-
-```typescript
-try {
-  await issueLoyaltyPass(context, {
-    collectionAddress,
-    recipient,
-    passName,
-    passMetadataUri,
-  })
-} catch (error) {
-  console.error(`Failed to issue pass: ${error}`)
 }
 ```
 

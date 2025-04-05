@@ -2,7 +2,7 @@ import { Keypair, publicKey } from '@metaplex-foundation/umi'
 import { fromWeb3JsKeypair } from '@metaplex-foundation/umi-web3js-adapters'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { Keypair as Web3JsKeypair } from '@solana/web3.js'
-import { VerxioContext } from '@/types/verxio-context'
+import { VerxioContext } from '@/schemas/verxio-context'
 import { FIXTURE_FEE_PAYER } from '../fixtures/fee-payer'
 
 export function getTestContext(config: { endpoint?: string } = {}): {

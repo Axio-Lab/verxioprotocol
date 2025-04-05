@@ -1,7 +1,7 @@
 import { PublicKey as UmiPublicKey } from '@metaplex-foundation/umi'
 import { transferV1 } from '@metaplex-foundation/mpl-core'
-import { VerxioContext } from '@/types/verxio-context'
-import { validateCollectionState } from '@/utils/validate-collection-state'
+import { VerxioContext } from '@schemas/verxio-context'
+import { validateCollectionState } from '@utils/validate-collection-state'
 
 export async function approveTransfer(
   context: VerxioContext,

@@ -1,8 +1,8 @@
-import { VerxioContext } from '@/types/verxio-context'
+import { VerxioContext } from '@schemas/verxio-context'
 import { generateSigner, KeypairSigner, PublicKey, publicKey } from '@metaplex-foundation/umi'
 import { create, ExternalPluginAdapterSchema, writeData } from '@metaplex-foundation/mpl-core'
-import { ATTRIBUTE_KEYS, DEFAULT_PASS_DATA, PLUGIN_TYPES } from '@/lib/constants'
-import { toBase58 } from '@/utils/to-base58'
+import { ATTRIBUTE_KEYS, DEFAULT_PASS_DATA, PLUGIN_TYPES } from '@lib/constants'
+import { toBase58 } from '@utils/to-base58'
 
 export interface IssueLoyaltyPassConfig {
   collectionAddress: PublicKey

@@ -1,5 +1,5 @@
-import { VerxioContext } from '@/types/verxio-context'
-import { validateCollectionState } from '@/utils/validate-collection-state'
+import { VerxioContext } from '@schemas/verxio-context'
+import { validateCollectionState } from '@utils/validate-collection-state'
 import { ATTRIBUTE_KEYS } from './constants'
 import { getCollectionAttribute } from './index'
 

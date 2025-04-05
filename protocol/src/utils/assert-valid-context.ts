@@ -1,4 +1,4 @@
-import { VerxioContext } from '@/types/verxio-context'
+import { VerxioContext } from '@/schemas/verxio-context'
 
 export function assertValidContext(context: VerxioContext): context is VerxioContext {
   if (!context) {

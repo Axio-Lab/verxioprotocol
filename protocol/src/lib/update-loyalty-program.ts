@@ -1,11 +1,11 @@
 import { PublicKey } from '@metaplex-foundation/umi'
 import { updateCollectionPlugin } from '@metaplex-foundation/mpl-core'
-import { VerxioContext } from '@/types/verxio-context'
-import { ATTRIBUTE_KEYS, PLUGIN_TYPES } from '@/lib/constants'
-import { LoyaltyProgramTier } from '@/types/loyalty-program-tier'
-import { assertValidContext } from '@/utils/assert-valid-context'
+import { VerxioContext } from '@schemas/verxio-context'
+import { ATTRIBUTE_KEYS, PLUGIN_TYPES } from '@lib/constants'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
+import { assertValidContext } from '@utils/assert-valid-context'
 import { getCollectionAttribute } from './index'
-import { toBase58 } from '@/utils/to-base58'
+import { toBase58 } from '@utils/to-base58'
 
 export interface UpdateLoyaltyProgramConfig {
   collectionAddress: PublicKey

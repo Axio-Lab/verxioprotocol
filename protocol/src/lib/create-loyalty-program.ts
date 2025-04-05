@@ -1,10 +1,10 @@
 import { generateSigner, KeypairSigner, PublicKey } from '@metaplex-foundation/umi'
 import { createCollection, CreateCollectionArgsPlugin, PluginAuthority } from '@metaplex-foundation/mpl-core'
-import { ATTRIBUTE_KEYS, PLUGIN_TYPES } from '@/lib/constants'
-import { VerxioContext } from '@/types/verxio-context'
-import { toBase58 } from '@/utils/to-base58'
-import { LoyaltyProgramTier } from '@/types/loyalty-program-tier'
-import { assertValidContext } from '@/utils/assert-valid-context'
+import { ATTRIBUTE_KEYS, PLUGIN_TYPES } from '@lib/constants'
+import { VerxioContext } from '@schemas/verxio-context'
+import { toBase58 } from '@utils/to-base58'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
+import { assertValidContext } from '@utils/assert-valid-context'
 
 export interface CreateLoyaltyProgramConfig {
   collectionSigner?: KeypairSigner

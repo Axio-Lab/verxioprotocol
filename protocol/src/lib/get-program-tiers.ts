@@ -1,6 +1,6 @@
-import { VerxioContext } from '@/types/verxio-context'
-import { LoyaltyProgramTier } from '@/types/loyalty-program-tier'
-import { validateCollectionState } from '@/utils/validate-collection-state'
+import { VerxioContext } from '@schemas/verxio-context'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
+import { validateCollectionState } from '@utils/validate-collection-state'
 import { ATTRIBUTE_KEYS } from './constants'
 import { getCollectionAttribute } from './index'
 

@@ -1,7 +1,7 @@
 import { KeypairSigner, PublicKey as UmiPublicKey } from '@metaplex-foundation/umi'
 import { fetchAsset } from '@metaplex-foundation/mpl-core'
-import { VerxioContext } from '@/types/verxio-context'
-import { ATTRIBUTE_KEYS } from '@/lib/constants'
+import { VerxioContext } from '@schemas/verxio-context'
+import { ATTRIBUTE_KEYS } from '@lib/constants'
 import { getCollectionAttribute, calculateNewTier, updatePassData } from './index'
 
 export interface AwardLoyaltyPointsConfig {

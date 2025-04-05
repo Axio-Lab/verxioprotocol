@@ -1,4 +1,4 @@
-import { VerxioContext } from '@/types/verxio-context'
+import { VerxioContext } from '@/schemas/verxio-context'
 import { createLoyaltyProgram, CreateLoyaltyProgramConfig } from '@/lib/create-loyalty-program'
 import { KeypairSigner, PublicKey, publicKey } from '@metaplex-foundation/umi'
 

@@ -1,9 +1,9 @@
-import { VerxioContext } from '@/types/verxio-context'
+import { VerxioContext } from '@schemas/verxio-context'
 import { KeypairSigner, PublicKey } from '@metaplex-foundation/umi'
 import { fetchAsset } from '@metaplex-foundation/mpl-core'
 import { getCollectionAttribute, calculateNewTier, updatePassData } from './index'
 import { ATTRIBUTE_KEYS } from './constants'
-import { LoyaltyProgramTier } from '../types/loyalty-program-tier'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
 
 export interface RevokeLoyaltyPointsConfig {
   passAddress: PublicKey

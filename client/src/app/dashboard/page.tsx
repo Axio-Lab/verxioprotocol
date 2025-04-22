@@ -8,6 +8,7 @@ import Link from 'next/link'
 import MyLoyaltyPasses from '@/components/dashboard/MyLoyaltyPass'
 import { useEffect, useState, useRef } from 'react'
 import { useNetwork } from '@/lib/network-context'
+import { DashboardButton } from '@/app/dashboard/dashboard-button'
 
 interface ProgramStats {
   totalPrograms: number
@@ -70,6 +71,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
               Organization Dashboard
             </h1>
+            <DashboardButton />
             <button
               onClick={toggleDashboard}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"

@@ -45,7 +45,7 @@ export function createTestLoyaltyProgramConfig(
 // Create a new loyalty program with a generated collection signer an default config.
 export async function createTestLoyaltyProgram(
   context: VerxioContext,
-): Promise<{ collection: KeypairSigner; signature: string }> {
+): Promise<{ collection: KeypairSigner; signature: string; updateAuthority?: KeypairSigner }> {
   return await createLoyaltyProgram(
     context,
     createTestLoyaltyProgramConfig({ programAuthority: context.programAuthority }),

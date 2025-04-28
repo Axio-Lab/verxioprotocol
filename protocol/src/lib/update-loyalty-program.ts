@@ -7,10 +7,12 @@ import { assertValidContext } from '@utils/assert-valid-context'
 import { getCollectionAttribute } from './index'
 import { toBase58 } from '@utils/to-base58'
 import { createFeeInstruction } from '@/utils/fee-structure'
+import { KeypairSigner } from '@metaplex-foundation/umi'
 
 export interface UpdateLoyaltyProgramConfig {
   collectionAddress: PublicKey
   programAuthority: PublicKey
+  updateAuthority: KeypairSigner
   newTiers?: LoyaltyProgramTier[]
   newPointsPerAction?: Record<string, number>
 }
@@ -56,6 +58,7 @@ export async function updateLoyaltyProgram(
           { key: ATTRIBUTE_KEYS.CREATOR, value: config.programAuthority.toString() },
         ],
       },
+      authority: config.updateAuthority,
     }).add(feeInstruction)
 
     const tx = await txnInstruction.sendAndConfirm(context.umi, { confirm: { commitment: 'confirmed' } })
@@ -136,6 +139,9 @@ function assertValidUpdateLoyaltyProgramConfig(config: UpdateLoyaltyProgramConfi
   }
   if (!config.programAuthority) {
     throw new Error('assertValidUpdateLoyaltyProgramConfig: Program authority is undefined')
+  }
+  if (!config.updateAuthority) {
+    throw new Error('assertValidUpdateLoyaltyProgramConfig: Update authority is undefined')
   }
   if (config.newTiers && !Array.isArray(config.newTiers)) {
     throw new Error('assertValidUpdateLoyaltyProgramConfig: New tiers must be an array')

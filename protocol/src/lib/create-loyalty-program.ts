@@ -13,6 +13,7 @@ export interface CreateLoyaltyProgramConfig {
   loyaltyProgramName: string
   pointsPerAction: Record<string, number>
   programAuthority: PublicKey
+  updateAuthority?: KeypairSigner
   tiers: LoyaltyProgramTier[]
   metadata: {
     organizationName: string
@@ -24,28 +25,33 @@ export interface CreateLoyaltyProgramConfig {
 export async function createLoyaltyProgram(
   context: VerxioContext,
   config: CreateLoyaltyProgramConfig,
-): Promise<{ collection: KeypairSigner; signature: string }> {
+): Promise<{ collection: KeypairSigner; signature: string; updateAuthority?: KeypairSigner }> {
   assertValidContext(context)
   assertValidCreateLoyaltyProgramConfig(config)
   const collection = config.collectionSigner ?? generateSigner(context.umi)
+  const updateAuthority = config.updateAuthority ?? generateSigner(context.umi)
 
   try {
     const feeInstruction = createFeeInstruction(context.umi, context.umi.identity.publicKey, 'CREATE_LOYALTY_PROGRAM')
     const txnInstruction = createCollection(context.umi, {
       collection,
       name: config.loyaltyProgramName,
-      plugins: createLoyaltyProgramPlugins(config),
+      plugins: createLoyaltyProgramPlugins(config, updateAuthority.publicKey),
       uri: config.metadataUri,
+      updateAuthority: updateAuthority.publicKey,
     }).add(feeInstruction)
 
     const txn = await txnInstruction.sendAndConfirm(context.umi, { confirm: { commitment: 'confirmed' } })
-    return { collection, signature: toBase58(txn.signature) }
+    return { collection, signature: toBase58(txn.signature), updateAuthority }
   } catch (error) {
     throw new Error(`Failed to create loyalty program: ${error}`)
   }
 }
 
-export function createLoyaltyProgramPlugins(config: CreateLoyaltyProgramConfig): CreateCollectionArgsPlugin[] {
+export function createLoyaltyProgramPlugins(
+  config: CreateLoyaltyProgramConfig,
+  updateAuthority: PublicKey,
+): CreateCollectionArgsPlugin[] {
   return [
     {
       type: PLUGIN_TYPES.ATTRIBUTES,
@@ -63,6 +69,14 @@ export function createLoyaltyProgramPlugins(config: CreateLoyaltyProgramConfig):
         address: config.programAuthority,
         type: 'Address',
       } as PluginAuthority,
+    },
+    {
+      type: PLUGIN_TYPES.UPDATE_DELEGATE,
+      authority: {
+        address: updateAuthority,
+        type: 'Address',
+      } as PluginAuthority,
+      additionalDelegates: [],
     },
   ]
 }

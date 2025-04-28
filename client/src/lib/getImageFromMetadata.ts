@@ -13,26 +13,23 @@ export async function getImageFromMetadata(metadataUri: string): Promise<string>
     // Fetch the metadata
     const response = await fetch(metadataUri)
     if (!response.ok) {
-      throw new Error('Failed to fetch metadata')
+      return loadingAsset.src
     }
 
     const metadata = await response.json()
+    const imageUrl = metadata.image
 
-    // Check if image URL exists in metadata
-    if (!metadata.image) {
-      throw new Error('No image URL found in metadata')
+    if (!imageUrl) {
+      return loadingAsset.src
     }
 
     // Cache the result
-    imageCache.set(metadataUri, metadata.image)
+    imageCache.set(metadataUri, imageUrl)
 
-    // Return the image URL
-    return metadata.image
+    return imageUrl
   } catch (error) {
-    console.error('Error fetching image from metadata:', error)
-    // Cache the fallback
+    // Silently handle the error and return the loading asset
     imageCache.set(metadataUri, loadingAsset.src)
-    // Return loading asset path as fallback
     return loadingAsset.src
   }
 }

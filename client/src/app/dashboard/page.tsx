@@ -7,19 +7,15 @@ import { useDashboard } from './DashboardContext'
 import Link from 'next/link'
 import MyLoyaltyPasses from '@/components/dashboard/MyLoyaltyPass'
 import { useEffect, useState, useRef } from 'react'
-
-interface ProgramStats {
-  totalPrograms: number
-  activePasses: number
-  totalMembers: number
-  totalPoints: number
-}
+import { useNetwork } from '@/lib/network-context'
+import { getProgramStats, ProgramStats } from '@/app/actions/program'
 
 export default function DashboardPage() {
   const { connected, publicKey: walletPublicKey } = useWallet()
   const { isOrganization, setIsOrganization } = useDashboard()
   const [stats, setStats] = useState<ProgramStats | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const { network } = useNetwork()
   const mounted = useRef(true)
 
   useEffect(() => {
@@ -31,12 +27,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchStats() {
-      if (!walletPublicKey) return
+      if (!walletPublicKey || !network) return
 
       setIsLoading(true)
       try {
-        const response = await fetch(`/api/getProgramStats?creator=${walletPublicKey.toString()}`)
-        const data = await response.json()
+        const data = await getProgramStats(walletPublicKey.toString(), network)
         if (mounted.current) {
           setStats(data)
         }
@@ -50,7 +45,7 @@ export default function DashboardPage() {
     }
 
     fetchStats()
-  }, [walletPublicKey])
+  }, [walletPublicKey, network])
 
   if (!connected) {
     return null
@@ -65,7 +60,9 @@ export default function DashboardPage() {
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold text-white orbitron">Organization Dashboard</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+              Organization Dashboard
+            </h1>
             <button
               onClick={toggleDashboard}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
@@ -177,7 +174,9 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-white orbitron">My Loyalty Cards</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+            My Loyalty Cards
+          </h1>
           <button
             onClick={toggleDashboard}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"

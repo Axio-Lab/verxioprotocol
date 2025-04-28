@@ -11,6 +11,10 @@ import { WalletButton } from '@/components/layout/buttonConfig'
 import LoyaltyCardCustomizer from '@/components/loyalty/LoyaltyCardCustomizer'
 import ProgramCard from '@/components/loyalty/ProgramCard'
 import demoSample from '@/app/public/demoSample.png'
+import airbillspay from '@/app/public/brandlogo/airbillspay.png'
+import nectarfi from '@/app/public/brandlogo/nectarfi.svg'
+import XDegen from '@/app/public/brandlogo/XDegen.svg'
+import superteamNG from '@/app/public/brandlogo/superteamNG.png'
 
 export default function Landing() {
   const [showCustomizer, setShowCustomizer] = useState(false)
@@ -128,10 +132,15 @@ export default function Landing() {
               transition={{ duration: 0.5, delay: 0.6 }}
             >
               <p className="text-white/50 uppercase tracking-wider text-sm mb-4">TRUSTED BY LEADING BRANDS</p>
-              <div className="grid grid-cols-3 gap-8 opacity-50">
-                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
-                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
-                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
+              <div className="relative w-full overflow-hidden">
+                <div className="inline-flex w-[200%] animate-marquee">
+                  <div className="flex w-1/2 justify-around items-center">
+                    <img src={airbillspay.src} alt="AirbillsPay" className="h-8 w-auto object-contain opacity-40" />
+                    <img src={superteamNG.src} alt="SuperteamNG" className="h-12 w-auto object-contain opacity-40" />
+                    <img src={nectarfi.src} alt="NectarFi" className="h-10 w-auto object-contain opacity-40" />
+                    <img src={XDegen.src} alt="XDegen" className="h-6 w-auto object-contain opacity-40" />
+                  </div>
+                </div>
               </div>
             </motion.div>
           </div>

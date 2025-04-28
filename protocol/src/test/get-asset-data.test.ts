@@ -18,6 +18,7 @@ describe('get-asset-data', () => {
   let collection: KeypairSigner | undefined
   let loyaltyPass: KeypairSigner | undefined
   let passSigner: KeypairSigner | undefined
+  let authority: KeypairSigner | undefined
 
   beforeEach(async () => {
     // Create a new collection and loyalty pass for each test
@@ -25,21 +26,23 @@ describe('get-asset-data', () => {
     collection = created.collection
     context.collectionAddress = collection.publicKey
     passSigner = generateSigner(context.umi)
-
+    authority = created.updateAuthority
     const passResult = await issueLoyaltyPass(context, {
       collectionAddress: collection.publicKey,
       passName: 'Test Pass',
       passMetadataUri: 'https://arweave.net/123abc',
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
+      updateAuthority: authority!,
     })
+
     loyaltyPass = passResult.asset
 
     // Award some initial points
     await awardLoyaltyPoints(context, {
       passAddress: loyaltyPass.publicKey,
       action: 'swap',
-      signer: passSigner,
+      signer: authority!,
       multiplier: 100,
     })
   })

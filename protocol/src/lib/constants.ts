@@ -19,6 +19,7 @@ export const PLUGIN_TYPES = {
   ATTRIBUTES: 'Attributes',
   APP_DATA: 'AppData',
   PERMANENT_TRANSFER_DELEGATE: 'PermanentTransferDelegate',
+  UPDATE_DELEGATE: 'UpdateDelegate',
 } as const
 
 export const ATTRIBUTE_KEYS = {

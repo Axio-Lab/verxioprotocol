@@ -18,6 +18,7 @@ describe('revoke-loyalty-points', () => {
   let collection: KeypairSigner | undefined
   let loyaltyPass: KeypairSigner | undefined
   let passSigner: KeypairSigner | undefined
+  let authority: KeypairSigner | undefined
 
   beforeEach(async () => {
     // Create a new collection and loyalty pass for each test
@@ -25,6 +26,7 @@ describe('revoke-loyalty-points', () => {
     collection = created.collection
     context.collectionAddress = collection.publicKey
     passSigner = generateSigner(context.umi)
+    authority = created.updateAuthority
 
     const passResult = await issueLoyaltyPass(context, {
       collectionAddress: collection.publicKey,
@@ -32,6 +34,7 @@ describe('revoke-loyalty-points', () => {
       passMetadataUri: 'https://arweave.net/123abc',
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
+      updateAuthority: authority!,
     })
     loyaltyPass = passResult.asset
 
@@ -39,7 +42,7 @@ describe('revoke-loyalty-points', () => {
     await awardLoyaltyPoints(context, {
       passAddress: loyaltyPass.publicKey,
       action: 'swap',
-      signer: passSigner,
+      signer: authority!,
       multiplier: 100, // Award enough points for testing
     })
   })
@@ -47,13 +50,13 @@ describe('revoke-loyalty-points', () => {
   describe('expected usage', () => {
     it('should revoke points for a valid amount', async () => {
       expect.assertions(3)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         pointsToRevoke: 50,
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT
@@ -67,13 +70,13 @@ describe('revoke-loyalty-points', () => {
 
     it('should not allow points to go below 0', async () => {
       expect.assertions(3)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         pointsToRevoke: 100000, // Try to revoke more points than available (we have ~60000)
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT
@@ -87,13 +90,13 @@ describe('revoke-loyalty-points', () => {
 
     it('should update tier when points are reduced below threshold', async () => {
       expect.assertions(4)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         pointsToRevoke: 59950, // Revoke more points to ensure we drop below 100 (we have ~60000)
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT
@@ -110,13 +113,13 @@ describe('revoke-loyalty-points', () => {
   describe('unexpected usage: config validation', () => {
     it('should throw an error if pass address is invalid', async () => {
       expect.assertions(2)
-      if (!passSigner) throw new Error('Test setup failed')
+      if (!authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: generateSigner(context.umi).publicKey,
         pointsToRevoke: 50,
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT & ASSERT
@@ -131,13 +134,13 @@ describe('revoke-loyalty-points', () => {
 
     it('should throw an error if points to revoke is not a positive number', async () => {
       expect.assertions(2)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: loyaltyPass.publicKey,
         pointsToRevoke: 0,
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT & ASSERT

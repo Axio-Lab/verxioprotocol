@@ -18,7 +18,7 @@ describe('approve-transfer', () => {
   let loyaltyPass: KeypairSigner | undefined
   let passSigner: KeypairSigner | undefined
   let newOwner: KeypairSigner | undefined
-
+  let authority: KeypairSigner | undefined
   beforeEach(async () => {
     // Create a new collection and loyalty pass for each test
     const created = await createTestLoyaltyProgram(context)
@@ -26,6 +26,7 @@ describe('approve-transfer', () => {
     context.collectionAddress = collection.publicKey
     passSigner = generateSigner(context.umi)
     newOwner = generateSigner(context.umi)
+    authority = created.updateAuthority
 
     const passResult = await issueLoyaltyPass(context, {
       collectionAddress: collection.publicKey,
@@ -33,6 +34,7 @@ describe('approve-transfer', () => {
       passMetadataUri: 'https://arweave.net/123abc',
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
+      updateAuthority: authority!,
     })
     loyaltyPass = passResult.asset
   })

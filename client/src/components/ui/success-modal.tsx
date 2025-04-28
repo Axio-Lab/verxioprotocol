@@ -8,10 +8,13 @@ interface SuccessModalProps {
   title: string
   message: string
   transactionSignature?: string
+  network?: string
 }
 
-export function SuccessModal({ isOpen, onClose, title, message, transactionSignature }: SuccessModalProps) {
-  const explorerUrl = transactionSignature ? `https://solscan.io/tx/${transactionSignature}?cluster=devnet` : undefined
+export function SuccessModal({ isOpen, onClose, title, message, transactionSignature, network }: SuccessModalProps) {
+  const explorerUrl = transactionSignature
+    ? `https://solscan.io/tx/${transactionSignature}${network === 'devnet' ? '?cluster=devnet' : ''}`
+    : undefined
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

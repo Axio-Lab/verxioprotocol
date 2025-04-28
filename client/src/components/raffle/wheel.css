@@ -1,0 +1,47 @@
+.wheel {
+  transform-origin: center;
+  transition: transform 0.3s ease-out;
+}
+
+.wheel-segment {
+  transition: all 0.3s ease-out;
+}
+
+.wheel-segment:hover {
+  filter: brightness(1.2);
+  transform: scale(1.02);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wheel.spinning {
+  animation: spin 3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wheel-segment::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+.wheel-segment::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}

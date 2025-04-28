@@ -1,71 +1,71 @@
-import { CreateLoyaltyProgramParams } from '@/lib/methods/createLoyaltyProgram'
+import { storeMetadata } from '@/app/actions/metadata'
 
-export async function generateNftMetadata(
-  params: CreateLoyaltyProgramParams,
-  imageUri: string,
-  creatorAddress: string,
-  fileType: string = 'image/png', // allow override if needed
-): Promise<{ metadata: any; uri: string }> {
-  const { loyaltyProgramName, metadata, tiers, pointsPerAction } = params
-
-  const attributes = [
-    ...Object.entries(pointsPerAction).map(([action, points]) => ({
-      trait_type: `Points - ${action}`,
-      value: points,
-    })),
-    ...tiers.flatMap((tier, index) => [
-      {
-        trait_type: `Tier ${index + 1} Name`,
-        value: tier.name || 'Unnamed Tier',
-      },
-      {
-        trait_type: `Tier ${index + 1} XP Required`,
-        value: tier.xpRequired,
-      },
-      {
-        trait_type: `Tier ${index + 1} Rewards`,
-        value: tier.rewards?.join(', ') || 'None',
-      },
-    ]),
-  ]
-
-  const metadataObj = {
-    name: loyaltyProgramName,
-    symbol: 'VERXIO',
-    description:
-      'This NFT represents membership in the Verxio loyalty program. Unlock perks, rewards, and access based on your engagement.',
-    image: imageUri,
-    attributes,
-    properties: {
-      files: [{ uri: imageUri, type: fileType }],
-      category: fileType.startsWith('video') ? 'video' : 'image',
-      creators: [
-        {
-          address: creatorAddress,
-          share: 100,
-        },
-      ],
-      ...metadata,
-    },
+interface MetadataInput {
+  loyaltyProgramName: string
+  metadata: {
+    organizationName: string
+    brandColor: string
   }
+  tiers: Array<{
+    name: string
+    xpRequired: number
+    rewards: string[]
+  }>
+  pointsPerAction: Record<string, number>
+  metadataUri: string
+}
 
+export async function generateNftMetadata(data: MetadataInput, imageUri: string, creator: string, mimeType?: string) {
   try {
-    const response = await fetch('/api/metadata', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(metadataObj),
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to upload metadata')
+    if (!data || !imageUri || !creator) {
+      throw new Error('Missing required data')
     }
 
-    const uri = await response.json()
-    return { metadata: metadataObj, uri }
+    const metadata = {
+      name: data.loyaltyProgramName,
+      symbol: 'VERXIO',
+      description: `Loyalty Program for ${data.metadata.organizationName}`,
+      image: imageUri,
+      properties: {
+        files: [
+          {
+            uri: imageUri,
+            type: mimeType || 'image/png',
+          },
+        ],
+        category: 'image',
+        creators: [
+          {
+            address: creator,
+            share: 100,
+          },
+        ],
+      },
+      attributes: [
+        {
+          trait_type: 'Organization',
+          value: data.metadata.organizationName,
+        },
+        {
+          trait_type: 'Brand Color',
+          value: data.metadata.brandColor,
+        },
+      ],
+      program: {
+        name: data.loyaltyProgramName,
+        metadata: data.metadata,
+        tiers: data.tiers,
+        pointsPerAction: data.pointsPerAction,
+      },
+    }
+
+    const formData = new FormData()
+    formData.append('metadata', JSON.stringify(metadata))
+
+    const result = await storeMetadata(metadata)
+    return { uri: result }
   } catch (error) {
-    console.error('Error uploading metadata:', error)
-    throw new Error('Failed to upload metadata to IPFS')
+    console.error('Error generating NFT metadata:', error)
+    throw new Error('Failed to generate NFT metadata')
   }
 }

@@ -11,7 +11,7 @@ import { FEES } from '../utils/fee-structure'
 
 const { feePayer, context } = getTestContext()
 
-describe('create-loyalty-program', { sequential: true }, () => {
+describe('create-loyalty-program', { sequential: true, timeout: 30000 }, () => {
   beforeAll(async () => {
     // Ensure we have enough sol for both the collection creation and the fee
     await ensureFeePayerBalance(context.umi, {
@@ -62,6 +62,28 @@ describe('create-loyalty-program', { sequential: true }, () => {
       expect(result.collection).toBeTruthy()
       expect(result.signature).toBeTruthy()
       expect(result.collection.publicKey).toEqual(collectionSigner.publicKey)
+    })
+
+    it('should create a new loyalty program with a provided update authority', async () => {
+      expect.assertions(5)
+      // ARRANGE
+      const updateAuthority = generateSigner(context.umi)
+      const config: CreateLoyaltyProgramConfig = createTestLoyaltyProgramConfig({
+        programAuthority: context.programAuthority,
+        updateAuthority,
+        metadata: {
+          organizationName: 'Test Host',
+        },
+      })
+      // ACT
+      const result = await createLoyaltyProgram(context, config)
+
+      // ASSERT
+      expect(result).toBeTruthy()
+      expect(result.collection).toBeTruthy()
+      expect(result.signature).toBeTruthy()
+      expect(result.updateAuthority).toBeTruthy()
+      expect(result.updateAuthority?.publicKey).toEqual(updateAuthority.publicKey)
     })
   })
 

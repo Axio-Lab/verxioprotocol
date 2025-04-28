@@ -8,7 +8,7 @@ import { useVerxioProgram } from '@/lib/methods/initializeProgram'
 import { getProgramDetails } from '@verxioprotocol/core'
 import { publicKey } from '@metaplex-foundation/umi'
 import Link from 'next/link'
-import { ArrowLeft, Share2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import ProgramCard from '@/components/loyalty/ProgramCard'
 import { ProgramActions } from '@/components/program/ProgramActions'
 import { getImageFromMetadata } from '@/lib/getImageFromMetadata'
@@ -63,18 +63,6 @@ export default function ProgramPage() {
     fetchProgram()
   }, [context, programId])
 
-  const shareProgram = async () => {
-    try {
-      await navigator.share({
-        title: program?.name,
-        text: 'Join our loyalty program!',
-        url: window.location.href,
-      })
-    } catch (error) {
-      console.error('Error sharing:', error)
-    }
-  }
-
   if (!program) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black via-purple-950/20 to-black flex items-center justify-center">
@@ -97,9 +85,6 @@ export default function ProgramPage() {
           </Link>
           <h1 className="text-3xl font-bold text-white">{program.name}</h1>
         </div>
-        <Button onClick={shareProgram} variant="outline" size="icon">
-          <Share2 className="h-4 w-4" />
-        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_450px]">

@@ -1,7 +1,7 @@
 {
   "name": "@verxioprotocol/core",
-  "version": "0.0.8",
-  "description": "On-chain infrastructure powered by Metaplex CORE for creating and managing loyalty programs",
+  "version": "0.0.9",
+  "description": "Opensource infrastructure powering on-chain loyalty across Solana with Metaplex Core",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

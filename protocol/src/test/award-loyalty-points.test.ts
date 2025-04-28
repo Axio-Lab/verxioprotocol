@@ -19,6 +19,7 @@ describe('award-loyalty-points', () => {
   let collection: KeypairSigner | undefined
   let loyaltyPass: KeypairSigner | undefined
   let passSigner: KeypairSigner | undefined
+  let authority: KeypairSigner | undefined
 
   beforeEach(async () => {
     // Create a new collection and loyalty pass for each test
@@ -26,6 +27,7 @@ describe('award-loyalty-points', () => {
     collection = created.collection
     context.collectionAddress = collection.publicKey
     passSigner = generateSigner(context.umi)
+    authority = created.updateAuthority
 
     const passResult = await issueLoyaltyPass(context, {
       collectionAddress: collection.publicKey,
@@ -33,6 +35,7 @@ describe('award-loyalty-points', () => {
       passMetadataUri: 'https://arweave.net/123abc',
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
+      updateAuthority: authority!,
     })
     loyaltyPass = passResult.asset
   })
@@ -40,13 +43,13 @@ describe('award-loyalty-points', () => {
   describe('expected usage', () => {
     it('should award points for a valid action', async () => {
       expect.assertions(3)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         action: 'swap',
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT
@@ -60,13 +63,13 @@ describe('award-loyalty-points', () => {
 
     it('should apply multiplier to points', async () => {
       expect.assertions(3)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         action: 'swap',
-        signer: passSigner,
+        signer: authority,
         multiplier: 2,
       }
 
@@ -81,13 +84,13 @@ describe('award-loyalty-points', () => {
 
     it('should accumulate points across multiple actions', async () => {
       expect.assertions(4)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         action: 'swap',
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT
@@ -103,13 +106,13 @@ describe('award-loyalty-points', () => {
 
     it('should update tier when points threshold is reached', async () => {
       expect.assertions(5)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         action: 'swap',
-        signer: passSigner,
+        signer: authority,
         multiplier: 1000, // Large multiplier to ensure tier update
       }
 
@@ -132,13 +135,13 @@ describe('award-loyalty-points', () => {
   describe('unexpected usage: config validation', () => {
     it('should throw an error if pass address is invalid', async () => {
       expect.assertions(2)
-      if (!passSigner) throw new Error('Test setup failed')
+      if (!passSigner || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: generateSigner(context.umi).publicKey,
         action: 'swap',
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT & ASSERT
@@ -153,13 +156,13 @@ describe('award-loyalty-points', () => {
 
     it('should throw an error if action is not defined in points per action', async () => {
       expect.assertions(2)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: loyaltyPass.publicKey,
         action: 'invalid_action',
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT & ASSERT
@@ -174,13 +177,13 @@ describe('award-loyalty-points', () => {
 
     it('should throw an error if action is undefined in points per action configuration', async () => {
       expect.assertions(2)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: loyaltyPass.publicKey,
         action: 'purchase', // This action is not defined in createTestLoyaltyProgram
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT & ASSERT
@@ -195,7 +198,7 @@ describe('award-loyalty-points', () => {
 
     it('should throw an error if points per action configuration is missing', async () => {
       expect.assertions(2)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       // Create a new collection with minimal points configuration
@@ -215,7 +218,7 @@ describe('award-loyalty-points', () => {
       const invalidConfig = {
         passAddress: loyaltyPass.publicKey,
         action: 'swap',
-        signer: passSigner,
+        signer: authority,
       }
 
       // ACT & ASSERT
@@ -230,7 +233,7 @@ describe('award-loyalty-points', () => {
 
     it('should throw an error if signer is not the pass owner', async () => {
       expect.assertions(2)
-      if (!loyaltyPass) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidSigner = generateSigner(context.umi)

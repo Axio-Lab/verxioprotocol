@@ -1,13 +1,14 @@
 import { issueLoyaltyPass } from '@verxioprotocol/core'
 import { VerxioContext } from '@verxioprotocol/core'
-import { publicKey, generateSigner } from '@metaplex-foundation/umi'
+import { publicKey } from '@metaplex-foundation/umi'
 
 export interface IssueLoyaltyPassParams {
   collectionAddress: string
   recipient: string
   passName: string
   passMetadataUri: string
-  assetSigner?: any // Optional: Provide a signer for the pass
+  assetSigner: any // Required: Provide a signer for the pass
+  updateAuthority: any // Required: Provide an update authority for the pass
 }
 
 export interface IssueLoyaltyPassResult {
@@ -25,7 +26,8 @@ export const issueNewLoyaltyPass = async (
       recipient: publicKey(params.recipient),
       passName: params.passName,
       passMetadataUri: params.passMetadataUri,
-      assetSigner: params.assetSigner || generateSigner(context.umi),
+      assetSigner: params.assetSigner,
+      updateAuthority: params.updateAuthority,
     })
 
     return result

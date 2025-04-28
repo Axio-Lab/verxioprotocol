@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, Users, Trophy, Settings, Copy, LogOut } from 'lucide-react'
+import { LayoutDashboard, Building2, Users, Trophy, Settings, Copy, LogOut, Gift, Award } from 'lucide-react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -21,6 +21,19 @@ export default function DashboardNav({ isOrganization }: DashboardNavProps) {
       title: 'Overview',
       href: '/dashboard',
       icon: LayoutDashboard,
+      exact: true,
+    },
+    {
+      title: 'Contests',
+      href: '/dashboard/contest',
+      icon: Award,
+      exact: false,
+    },
+    {
+      title: 'Raffles',
+      href: '/dashboard/raffle',
+      icon: Gift,
+      exact: false,
     },
   ]
 
@@ -29,26 +42,37 @@ export default function DashboardNav({ isOrganization }: DashboardNavProps) {
       title: 'Overview',
       href: '/dashboard',
       icon: LayoutDashboard,
+      exact: true,
     },
     {
       title: 'Programs',
       href: '/dashboard/programs',
       icon: Building2,
+      exact: false,
+    },
+    {
+      title: 'Contests',
+      href: '/dashboard/contest',
+      icon: Award,
+      exact: false,
+    },
+    {
+      title: 'Raffles',
+      href: '/dashboard/raffle',
+      icon: Gift,
+      exact: false,
     },
     {
       title: 'Members',
       href: '/dashboard/members',
       icon: Users,
+      exact: false,
     },
     {
       title: 'Leaderboard',
       href: '/dashboard/leaderboard',
       icon: Trophy,
-    },
-    {
-      title: 'Settings',
-      href: '/dashboard/settings',
-      icon: Settings,
+      exact: false,
     },
   ]
 
@@ -72,7 +96,10 @@ export default function DashboardNav({ isOrganization }: DashboardNavProps) {
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href) &&
+                (item.href === '/dashboard' || pathname.startsWith(`${item.href}/`) || pathname === item.href)
             return (
               <Link
                 key={item.href}

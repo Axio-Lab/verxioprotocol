@@ -2,39 +2,21 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Users, Gift, FileText, Key, Loader2 } from 'lucide-react'
+import { Plus, Users, Gift, FileText, Key, Loader2, Copy, Check } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState, useRef } from 'react'
-import { getProgramDetails } from '@verxioprotocol/core'
-import { useVerxioProgram } from '@/lib/methods/initializeProgram'
-import { publicKey } from '@metaplex-foundation/umi'
+import { useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-
-interface ProgramTier {
-  name: string
-  xpRequired: number
-  rewards: string[]
-}
-
-interface ProgramDetails {
-  name: string
-  uri: string
-  collectionAddress: string
-  updateAuthority: string
-  numMinted: number
-  creator: string
-  tiers: ProgramTier[]
-  pointsPerAction: Record<string, number>
-}
+import { useNetwork } from '@/lib/network-context'
+import { getPrograms, ProgramWithDetails } from '@/app/actions/program'
+import { toast } from 'sonner'
 
 export default function ProgramsPage() {
-  const [programs, setPrograms] = useState<ProgramDetails[]>([])
+  const [programs, setPrograms] = useState<ProgramWithDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const context = useVerxioProgram()
+  const [copiedProgramId, setCopiedProgramId] = useState<string | null>(null)
   const { publicKey: walletPublicKey } = useWallet()
-  const isFetching = useRef(false)
-  const mounted = useRef(true)
+  const { network } = useNetwork()
 
   const PROGRAMS_PER_PAGE = 9
   const totalPages = Math.ceil(programs.length / PROGRAMS_PER_PAGE)
@@ -42,55 +24,34 @@ export default function ProgramsPage() {
   const endIndex = startIndex + PROGRAMS_PER_PAGE
   const currentPrograms = programs.slice(startIndex, endIndex)
 
-  useEffect(() => {
-    mounted.current = true
-    return () => {
-      mounted.current = false
+  const copyToClipboard = async (text: string, programId: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedProgramId(programId)
+      setTimeout(() => setCopiedProgramId(null), 2000)
+      toast.success('Address copied to clipboard')
+    } catch (err) {
+      toast.error('Failed to copy address')
     }
-  }, [])
+  }
 
   useEffect(() => {
     async function fetchPrograms() {
-      if (!context || !walletPublicKey || isFetching.current) return
+      if (!walletPublicKey || !network) return
 
-      isFetching.current = true
       setIsLoading(true)
-
       try {
-        // First fetch programs from database
-        const response = await fetch(`/api/getPrograms?creator=${walletPublicKey.toString()}`)
-        const dbPrograms = await response.json()
-
-        // Then fetch program details for each program
-        const programsWithDetails = await Promise.all(
-          dbPrograms.map(async (program: any) => {
-            try {
-              context.collectionAddress = publicKey(program.publicKey)
-              const details = await getProgramDetails(context)
-              return details
-            } catch (error) {
-              console.error(`Error fetching details for program ${program.publicKey}:`, error)
-              return null
-            }
-          }),
-        )
-
-        // Only update state if component is still mounted
-        if (mounted.current) {
-          setPrograms(programsWithDetails.filter(Boolean))
-        }
+        const data = await getPrograms(walletPublicKey.toString(), network)
+        setPrograms(data)
       } catch (error) {
         console.error('Error fetching programs:', error)
       } finally {
-        if (mounted.current) {
-          setIsLoading(false)
-        }
-        isFetching.current = false
+        setIsLoading(false)
       }
     }
 
     fetchPrograms()
-  }, [context?.collectionAddress, walletPublicKey?.toString()])
+  }, [walletPublicKey, network])
 
   if (isLoading) {
     return (
@@ -106,7 +67,9 @@ export default function ProgramsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white orbitron">Loyalty Programs</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+          Loyalty Programs
+        </h1>
         <Link href="/dashboard/programs/new">
           <Button className="bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white hover:opacity-90 orbitron">
             <Plus className="mr-2 h-4 w-4" />
@@ -127,29 +90,56 @@ export default function ProgramsPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {currentPrograms.map((program) => (
-              <Link href={`/dashboard/programs/${program.collectionAddress}`} key={program.collectionAddress}>
+              <Link
+                href={`/dashboard/programs/${program.details.collectionAddress}`}
+                key={program.details.collectionAddress}
+              >
                 <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20 hover:border-slate-700/40 transition-all cursor-pointer">
                   <CardHeader className="flex flex-col items-center space-y-2 pb-2">
-                    <CardTitle className="text-xl text-white text-center">{program.name}</CardTitle>
+                    <CardTitle className="text-xl text-white text-center">{program.details.name}</CardTitle>
                     <p className="text-sm text-white/50">
-                      {program.creator.slice(0, 4)}...{program.creator.slice(-4)}
+                      {program.details.creator.slice(0, 4)}...{program.details.creator.slice(-4)}
                     </p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
+                          <Key className="h-4 w-4 text-[#7000FF]" />
+                          <span className="text-sm text-white/70">Fee Address</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-white">
+                            {program.details.feeAddress.slice(0, 6)}...{program.details.feeAddress.slice(-4)}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault()
+                              copyToClipboard(program.details.feeAddress, program.details.collectionAddress)
+                            }}
+                            className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                          >
+                            {copiedProgramId === program.details.collectionAddress ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Copy className="h-4 w-4 text-white/70" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
                           <Users className="h-4 w-4 text-[#0085FF]" />
                           <span className="text-sm text-white/70">Total Members</span>
                         </div>
-                        <span className="text-sm font-medium text-white">{program.numMinted}</span>
+                        <span className="text-sm font-medium text-white">{program.details.numMinted}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <FileText className="h-4 w-4 text-[#00FFE0]" />
                           <span className="text-sm text-white/70">URI</span>
                         </div>
-                        <span className="text-sm font-medium text-white">{program.uri.slice(0, 10)}...</span>
+                        <span className="text-sm font-medium text-white">{program.details.uri.slice(0, 10)}...</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -157,7 +147,7 @@ export default function ProgramsPage() {
                           <span className="text-sm text-white/70">Authority</span>
                         </div>
                         <span className="text-sm font-medium text-white">
-                          {program.updateAuthority.slice(0, 4)}...{program.updateAuthority.slice(-4)}
+                          {program.details.updateAuthority.slice(0, 4)}...{program.details.updateAuthority.slice(-4)}
                         </span>
                       </div>
                     </div>

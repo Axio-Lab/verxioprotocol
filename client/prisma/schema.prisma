@@ -18,9 +18,12 @@ model LoyaltyProgram {
   creator     String   
   publicKey   String 
   privateKey  String   ///@encrypted
-  signature   String 
+  signature   String
+  network     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  programAuthorityPrivate String   ///@encrypted
+  programAuthorityPublic  String
 }
 
 model LoyaltyPass {
@@ -29,7 +32,53 @@ model LoyaltyPass {
   recipient   String  
   publicKey   String 
   privateKey  String   ///@encrypted
+  network     String
   signature   String 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Raffle {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  prizeType       PrizeType
+  prizeDetails    Json     // Stores different prize details based on type
+  startDate       DateTime
+  endDate         DateTime
+  drawDate        DateTime
+  status          RaffleStatus @default(UPCOMING)
+  entryCost       Int?      // XP cost to enter, null if free
+  minTier         String?   // Minimum tier required
+  numWinners      Int       // Number of winners to pick
+  winners         RaffleWinner[]
+  
+  programAddress  String    // The loyalty program address
+  creator         String    // Wallet address of creator 
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model RaffleWinner {
+  id              String   @id @default(cuid())
+  raffleId        String
+  raffle          Raffle @relation(fields: [raffleId], references: [id])
+  passPublicKey   String   // Winner's loyalty pass public key
+  position        Int      // 1st, 2nd, 3rd place etc.
+  claimed         Boolean @default(false)
+  claimedAt       DateTime?
+}
+
+enum PrizeType {
+  TOKEN
+  MERCH
+  NFT
+  OTHER
+}
+
+enum RaffleStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }

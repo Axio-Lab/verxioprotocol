@@ -17,13 +17,14 @@ describe('gift-loyalty-points', () => {
   let collection: KeypairSigner | undefined
   let loyaltyPass: KeypairSigner | undefined
   let passSigner: KeypairSigner | undefined
-
+  let authority: KeypairSigner | undefined
   beforeEach(async () => {
     // Create a new collection and loyalty pass for each test
     const created = await createTestLoyaltyProgram(context)
     collection = created.collection
     context.collectionAddress = collection.publicKey
     passSigner = generateSigner(context.umi)
+    authority = created.updateAuthority
 
     const passResult = await issueLoyaltyPass(context, {
       collectionAddress: collection.publicKey,
@@ -31,6 +32,7 @@ describe('gift-loyalty-points', () => {
       passMetadataUri: 'https://arweave.net/123abc',
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
+      updateAuthority: authority!,
     })
     loyaltyPass = passResult.asset
   })
@@ -38,13 +40,13 @@ describe('gift-loyalty-points', () => {
   describe('expected usage', () => {
     it('should gift points for a valid amount with a reason', async () => {
       expect.assertions(3)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         pointsToGift: 50,
-        signer: passSigner,
+        signer: authority,
         action: 'bonus',
       }
 
@@ -59,13 +61,13 @@ describe('gift-loyalty-points', () => {
 
     it('should update tier when points exceed threshold', async () => {
       expect.assertions(4)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         passAddress: loyaltyPass.publicKey,
         pointsToGift: 1000, // Gift enough points to exceed a tier threshold
-        signer: passSigner,
+        signer: authority,
         action: 'promotion',
       }
 
@@ -83,13 +85,13 @@ describe('gift-loyalty-points', () => {
   describe('unexpected usage: config validation', () => {
     it('should throw an error if pass address is invalid', async () => {
       expect.assertions(2)
-      if (!passSigner) throw new Error('Test setup failed')
+      if (!passSigner || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: generateSigner(context.umi).publicKey,
         pointsToGift: 50,
-        signer: passSigner,
+        signer: authority,
         action: 'invalid',
       }
 
@@ -105,13 +107,13 @@ describe('gift-loyalty-points', () => {
 
     it('should throw an error if points to gift is not a positive number', async () => {
       expect.assertions(2)
-      if (!loyaltyPass || !passSigner) throw new Error('Test setup failed')
+      if (!loyaltyPass || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         passAddress: loyaltyPass.publicKey,
         pointsToGift: 0,
-        signer: passSigner,
+        signer: authority,
         action: 'zero',
       }
 

@@ -14,7 +14,7 @@ import {
 import { useParams } from 'next/navigation'
 import { Providers } from '../../providers'
 import Link from 'next/link'
-import { KeypairSigner, signerIdentity } from '@metaplex-foundation/umi'
+import { generateSigner, KeypairSigner, signerIdentity } from '@metaplex-foundation/umi'
 import { createSignerFromWalletAdapter } from '@metaplex-foundation/umi-signer-wallet-adapters'
 import { ActionPanel } from '../../components/ActionPanel'
 import { toast } from 'react-toastify'
@@ -116,12 +116,14 @@ function MintPageContent() {
 
       setLoading(true)
       toast.info('Initiating loyalty pass issuance via issueLoyaltyPass()')
+      const authority = generateSigner(verxio.umi)
 
       const result = await issueLoyaltyPass(verxio, {
         collectionAddress: verxio.collectionAddress!,
         recipient: targetUmiPubkey,
         passName: `${programDetails.name} Loyalty Pass`,
         passMetadataUri: programDetails.uri,
+        updateAuthority: authority,
       })
 
       setMintedPass({

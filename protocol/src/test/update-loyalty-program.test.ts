@@ -16,23 +16,25 @@ describe('update-loyalty-program', () => {
   })
 
   let collection: KeypairSigner | undefined
-
+  let authority: KeypairSigner | undefined
   beforeEach(async () => {
     // Create a new collection for each test
     const created = await createTestLoyaltyProgram(context)
     collection = created.collection
+    authority = created.updateAuthority
     context.collectionAddress = collection.publicKey
   })
 
   describe('expected usage', () => {
     it('should update points per action configuration', async () => {
       expect.assertions(4)
-      if (!collection) throw new Error('Test setup failed')
+      if (!collection || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         collectionAddress: collection.publicKey,
         programAuthority: context.programAuthority,
+        updateAuthority: authority,
         newPointsPerAction: {
           swap: 700, // Update existing action
           purchase: 2900, // Add new action
@@ -54,12 +56,13 @@ describe('update-loyalty-program', () => {
 
     it('should update tier configuration', async () => {
       expect.assertions(5)
-      if (!collection) throw new Error('Test setup failed')
+      if (!collection || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         collectionAddress: collection.publicKey,
         programAuthority: context.programAuthority,
+        updateAuthority: authority,
         newTiers: [
           { name: 'Grind', xpRequired: 0, rewards: ['nothing for you!'] }, // Grind tier must exist
           { name: 'Bronze', xpRequired: 400, rewards: ['free item'] }, // Update existing tier
@@ -85,12 +88,13 @@ describe('update-loyalty-program', () => {
 
     it('should update both tiers and points per action', async () => {
       expect.assertions(6)
-      if (!collection) throw new Error('Test setup failed')
+      if (!collection || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const config = {
         collectionAddress: collection.publicKey,
         programAuthority: context.programAuthority,
+        updateAuthority: authority,
         newTiers: [
           { name: 'Grind', xpRequired: 0, rewards: ['nothing for you!'] },
           { name: 'Bronze', xpRequired: 400, rewards: ['free item'] },
@@ -124,12 +128,13 @@ describe('update-loyalty-program', () => {
   describe('unexpected usage: config validation', () => {
     it('should throw an error if collection address is invalid', async () => {
       expect.assertions(2)
-      if (!collection) throw new Error('Test setup failed')
+      if (!collection || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         collectionAddress: generateSigner(context.umi).publicKey,
         programAuthority: context.programAuthority,
+        updateAuthority: authority,
         newPointsPerAction: { swap: 700 },
       }
 
@@ -145,12 +150,13 @@ describe('update-loyalty-program', () => {
 
     it('should throw an error if trying to remove Grind tier', async () => {
       expect.assertions(2)
-      if (!collection) throw new Error('Test setup failed')
+      if (!collection || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         collectionAddress: collection.publicKey,
         programAuthority: context.programAuthority,
+        updateAuthority: authority,
         newTiers: [
           { name: 'Bronze', xpRequired: 400, rewards: ['free item'] },
           { name: 'Silver', xpRequired: 1000, rewards: ['5% cashback'] },
@@ -170,12 +176,13 @@ describe('update-loyalty-program', () => {
 
     it('should throw an error if points per action value is negative', async () => {
       expect.assertions(2)
-      if (!collection) throw new Error('Test setup failed')
+      if (!collection || !authority) throw new Error('Test setup failed')
 
       // ARRANGE
       const invalidConfig = {
         collectionAddress: collection.publicKey,
         programAuthority: context.programAuthority,
+        updateAuthority: authority,
         newPointsPerAction: {
           swap: -100,
         },

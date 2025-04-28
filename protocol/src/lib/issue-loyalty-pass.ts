@@ -11,6 +11,7 @@ export interface IssueLoyaltyPassConfig {
   passName: string
   passMetadataUri: string
   assetSigner?: KeypairSigner
+  updateAuthority: KeypairSigner
 }
 
 export async function issueLoyaltyPass(
@@ -29,6 +30,7 @@ export async function issueLoyaltyPass(
       name: config.passName,
       uri: config.passMetadataUri,
       owner: config.recipient,
+      authority: config.updateAuthority,
       collection: {
         publicKey: config.collectionAddress,
       },
@@ -37,7 +39,7 @@ export async function issueLoyaltyPass(
           type: PLUGIN_TYPES.APP_DATA,
           dataAuthority: {
             type: 'Address',
-            address: asset.publicKey,
+            address: config.updateAuthority.publicKey,
           },
           schema: ExternalPluginAdapterSchema.Json,
         },
@@ -46,22 +48,25 @@ export async function issueLoyaltyPass(
           attributeList: [{ key: ATTRIBUTE_KEYS.TYPE, value: `${config.passName} loyalty pass` }],
         },
       ],
-    }).add(feeInstruction)
+    })
+      .add(feeInstruction)
+      .add(
+        writeData(context.umi, {
+          key: {
+            type: PLUGIN_TYPES.APP_DATA,
+            dataAuthority: {
+              type: 'Address',
+              address: config.updateAuthority.publicKey,
+            },
+          },
+          authority: config.updateAuthority,
+          data: new TextEncoder().encode(JSON.stringify(DEFAULT_PASS_DATA)),
+          asset: publicKey(asset.publicKey),
+          collection: config.collectionAddress,
+        }),
+      )
 
     const tx = await txnInstruction.sendAndConfirm(context.umi, { confirm: { commitment: 'confirmed' } })
-    await writeData(context.umi, {
-      key: {
-        type: PLUGIN_TYPES.APP_DATA,
-        dataAuthority: {
-          type: 'Address',
-          address: asset.publicKey,
-        },
-      },
-      authority: asset,
-      data: new TextEncoder().encode(JSON.stringify(DEFAULT_PASS_DATA)),
-      asset: publicKey(asset.publicKey),
-      collection: config.collectionAddress,
-    }).sendAndConfirm(context.umi)
 
     return {
       asset,

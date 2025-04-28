@@ -20,6 +20,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Info, Upload } from 'lucide-react'
 import { generateImageUri } from '@/lib/metadata/generateImageUri'
 import { generateNftMetadata } from '@/lib/metadata/generateNftMetadata'
+import { useNetwork } from '@/lib/network-context'
+import { storeLoyaltyProgram } from '@/app/actions/program'
+import { generateSigner } from '@metaplex-foundation/umi'
 
 const colorOptions = [
   { name: 'Purple', value: 'purple' },
@@ -37,9 +40,11 @@ interface LoyaltyCardCustomizerProps {
 
 export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCardCustomizerProps) {
   const { connected, publicKey: address } = useWallet()
+  const { network } = useNetwork()
   const context = useVerxioProgram()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('basics')
   const [formData, setFormData] = useState({
     loyaltyProgramName: '',
     description: '',
@@ -145,8 +150,28 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
     setFormData({ ...formData, pointsPerAction: rest })
   }
 
+  const handleNext = () => {
+    if (activeTab === 'basics') {
+      setActiveTab('rewards')
+    } else if (activeTab === 'rewards') {
+      setActiveTab('appearance')
+    }
+  }
+
+  const handleBack = () => {
+    if (activeTab === 'appearance') {
+      setActiveTab('rewards')
+    } else if (activeTab === 'rewards') {
+      setActiveTab('basics')
+    }
+  }
+
+  const isBasicsValid = formData.loyaltyProgramName && formData.description && formData.metadata.organizationName
+  const isRewardsValid = formData.tiers.length > 0 && formData.tiers.every((tier) => tier.name && tier.xpRequired >= 0)
+  const isAppearanceValid = formData.metadata.brandColor
+
   const handleSave = async () => {
-    if (!connected) {
+    if (!connected || !address) {
       toast.error('Please connect your wallet to save the loyalty program')
       return
     }
@@ -195,7 +220,7 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
           metadataUri: imageUri,
         },
         imageUri,
-        address?.toString() || '',
+        address.toString(),
         formData.bannerImage?.type,
       )
 
@@ -210,23 +235,15 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
         pointsPerAction: formData.pointsPerAction,
       })
 
-      // Store in database
-      if (!address) {
-        toast.error('No account address available')
-        return
-      }
-
-      await fetch('/api/storeLoyaltyProgram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          creator: address?.toString(),
-          publicKey: result.collection.publicKey.toString(),
-          privateKey: bs58.encode(result.collection.secretKey),
-          signature: result.signature,
-        }),
+      // Store in database using server action
+      await storeLoyaltyProgram({
+        creator: address.toString(),
+        publicKey: result.collection.publicKey.toString(),
+        privateKey: bs58.encode(result.collection.secretKey),
+        signature: result.signature,
+        network: network,
+        programAuthorityPrivate: bs58.encode(result.updateAuthority!.secretKey),
+        programAuthorityPublic: result.updateAuthority!.publicKey.toString(),
       })
 
       setSuccessData({
@@ -276,7 +293,7 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
       <div className="lg:w-1/2 space-y-6">
         <Card className="bg-verxio-dark border-verxio-purple/20">
           <CardContent className="pt-6">
-            <Tabs defaultValue="basics" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-3 mb-6 bg-verxio-dark/50">
                 <TabsTrigger value="basics" className="pixel-font">
                   Basics
@@ -539,38 +556,49 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
                   </div>
                 </div>
               </TabsContent>
+
+              <div className="flex justify-between mt-8">
+                {activeTab !== 'basics' && (
+                  <Button type="button" variant="outline" onClick={handleBack} className="pixel-font">
+                    Back
+                  </Button>
+                )}
+                <div className="flex gap-4">
+                  {activeTab !== 'appearance' ? (
+                    <Button
+                      type="button"
+                      onClick={handleNext}
+                      disabled={
+                        (activeTab === 'basics' && !isBasicsValid) || (activeTab === 'rewards' && !isRewardsValid)
+                      }
+                      className="pixel-font bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white hover:opacity-90"
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      onClick={handleSave}
+                      disabled={isLoading || !isAppearanceValid || !connected}
+                      className="pixel-font bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white hover:opacity-90"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                          Creating Program...
+                        </div>
+                      ) : connected ? (
+                        'Create Loyalty Program'
+                      ) : (
+                        'Connect Wallet to Create'
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
             </Tabs>
           </CardContent>
         </Card>
-
-        <Button
-          className={`w-full pixel-font bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white hover:opacity-90 py-6 px-8 rounded-lg text-sm ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
-          onClick={handleSave}
-          disabled={!connected || isLoading}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Creating Program...
-            </div>
-          ) : connected ? (
-            'Create Loyalty Program'
-          ) : (
-            'Connect Wallet to Create'
-          )}
-        </Button>
       </div>
 
       <div className="lg:w-1/2">
@@ -625,6 +653,7 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
         title={successData?.title || ''}
         message={successData?.message || ''}
         transactionSignature={successData?.signature}
+        network={network}
       />
     </div>
   )

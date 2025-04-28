@@ -2,49 +2,26 @@
 
 import { useEffect, useState, use } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useVerxioProgram } from '@/lib/methods/initializeProgram'
-import { getProgramDetails } from '@verxioprotocol/core'
-import { publicKey } from '@metaplex-foundation/umi'
 import ProgramCard from '@/components/loyalty/ProgramCard'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletButton } from '@/components/layout/buttonConfig'
 import { getImageFromMetadata } from '@/lib/getImageFromMetadata'
-import { mintLoyaltyPass } from '@/components/program/mintLoyaltyPass'
 import { SuccessModal } from '@/components/ui/success-modal'
 import { toast } from 'sonner'
-
-interface ProgramTier {
-  name: string
-  xpRequired: number
-  rewards: string[]
-}
-
-interface ProgramDetails {
-  name: string
-  uri: string
-  collectionAddress: string
-  updateAuthority: string
-  numMinted: number
-  creator: string
-  tiers: ProgramTier[]
-  pointsPerAction: Record<string, number>
-  metadata: {
-    organizationName: string
-    brandColor?: string
-    [key: string]: any
-  }
-}
+import { useNetwork } from '@/lib/network-context'
+import { getProgramDetails, ProgramDetails } from '@/app/actions/program'
+import { issuePasses } from '@/app/actions/manage-program'
 
 export default function PublicProgramPage({ params }: { params: Promise<{ programId: string }> }) {
+  const resolvedParams = use(params)
   const [program, setProgram] = useState<ProgramDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [bannerImage, setBannerImage] = useState<string | null>(null)
-  const context = useVerxioProgram()
   const { connected, publicKey: address } = useWallet()
-  const resolvedParams = use(params)
+  const { network } = useNetwork()
   const qrCodeUrl = program ? `${window.location.origin}/program/${program.collectionAddress}` : ''
   const [isMinting, setIsMinting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -54,15 +31,15 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
     let isMounted = true
 
     async function fetchProgram() {
-      if (!context) {
+      if (!network) {
         setIsLoading(false)
         return
       }
 
       try {
         setError(null)
-        context.collectionAddress = publicKey(resolvedParams.programId)
-        const details = await getProgramDetails(context)
+        const details = await getProgramDetails(resolvedParams.programId)
+
         if (isMounted) {
           setProgram(details)
           // Fetch the image URL from metadata
@@ -88,7 +65,7 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
     return () => {
       isMounted = false
     }
-  }, [context, resolvedParams.programId])
+  }, [resolvedParams.programId, network])
 
   const handleMintPass = async () => {
     if (!address) {
@@ -101,30 +78,36 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
       return
     }
 
-    if (!context) {
-      toast.error('Please connect your wallet first')
+    if (!network) {
+      toast.error('Network not selected')
+      return
+    }
+
+    if (program.network !== network) {
+      toast.error(`Please switch to ${program.network} network to mint this pass`)
       return
     }
 
     setIsMinting(true)
     try {
-      const result = await mintLoyaltyPass(
-        context,
-        program.collectionAddress,
-        program.name,
-        program.uri,
-        address.toString(),
-      )
+      const results = await issuePasses([
+        {
+          collectionAddress: program.collectionAddress,
+          recipient: address.toString(),
+          passName: program.name,
+          passMetadataUri: program.uri,
+          network,
+        },
+      ])
 
-      if (result) {
+      if (results) {
+        toast.success('Loyalty pass minted successfully!')
         setSuccessData({
-          title: 'Passes Issued Successfully',
-          message: `Your loyalty pass has been issued successfully`,
-          signature: result.signature,
+          title: 'Pass Issued Successfully',
+          message: 'Your loyalty pass has been issued successfully',
         })
+        setShowSuccessModal(true)
       }
-      setShowSuccessModal(true)
-      toast.success('Loyalty pass minted successfully!')
     } catch (error) {
       console.error('Error minting pass:', error)
       toast.error('Failed to mint loyalty pass')
@@ -192,19 +175,19 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
                   <div>
                     <p className="text-xs sm:text-sm text-white/50">Creator</p>
                     <p className="text-sm sm:text-base text-white font-mono">
-                      {program.creator.slice(0, 6)}...{program.creator.slice(-4)}
+                      {program.creator.slice(0, 8)}...{program.creator.slice(-6)}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs sm:text-sm text-white/50">Authority</p>
                     <p className="text-sm sm:text-base text-white font-mono">
-                      {program.updateAuthority.slice(0, 6)}...{program.updateAuthority.slice(-4)}
+                      {program.updateAuthority.slice(0, 8)}...{program.updateAuthority.slice(-6)}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs sm:text-sm text-white/50">Collection</p>
                     <p className="text-sm sm:text-base text-white font-mono">
-                      {program.collectionAddress.slice(0, 6)}...{program.collectionAddress.slice(-4)}
+                      {program.collectionAddress.slice(0, 8)}...{program.collectionAddress.slice(-6)}
                     </p>
                   </div>
                   <div>
@@ -228,7 +211,7 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
                         <span className="text-xs sm:text-sm text-white/70">{tier.xpRequired} XP</span>
                       </div>
                       <ul className="list-disc list-inside text-sm sm:text-base text-white/70">
-                        {tier.rewards.map((reward, i) => (
+                        {tier.rewards.map((reward: string, i: number) => (
                           <li key={i}>{reward}</li>
                         ))}
                       </ul>

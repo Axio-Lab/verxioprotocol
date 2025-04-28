@@ -13,6 +13,7 @@ On-chain loyalty protocol powered by Metaplex CORE for creating and managing loy
 - Update loyalty program tiers and points per action
 - Gift points to users with custom actions
 - Comprehensive asset data and customer behaviour tracking
+- Flexible authority management for loyalty programs and loyalty pass updates
 
 ## Installation
 
@@ -53,6 +54,7 @@ const result = await createLoyaltyProgram(context, {
   loyaltyProgramName: "Brew's summer discount",
   metadataUri: 'https://arweave.net/...',
   programAuthority: context.programAuthority,
+  updateAuthority: generateSigner(context.umi), // Optional: Provide custom update authority
   metadata: {
     organizationName: 'Coffee Brew', // Required: Name of the host/organization
     brandColor: '#FF5733', // Optional: Brand color for UI customization
@@ -78,7 +80,8 @@ const result = await createLoyaltyProgram(context, {
 console.log(result)
 // {
 //   collection: KeypairSigner,  // Collection signer
-//   signature: string          // Transaction signature
+//   signature: string,         // Transaction signature
+//   programAuthority: KeypairSigner // Update authority for the loyalty program
 // }
 ```
 
@@ -89,6 +92,7 @@ console.log(result)
 const result = await updateLoyaltyProgram(context, {
   collectionAddress: publicKey('COLLECTION_ADDRESS'),
   programAuthority: context.programAuthority,
+  updateAuthority: programAuthority, // Required: Program authority from Loyalty Program creation
   newPointsPerAction: {
     purchase: 150, // Update existing action
     referral: 200, // Add new action
@@ -99,6 +103,7 @@ const result = await updateLoyaltyProgram(context, {
 const result = await updateLoyaltyProgram(context, {
   collectionAddress: publicKey('COLLECTION_ADDRESS'),
   programAuthority: context.programAuthority,
+  updateAuthority: programAuthority, // Required: Program authority from Loyalty Program creation
   newTiers: [
     { name: 'Grind', xpRequired: 0, rewards: ['nothing for you!'] }, // Grind tier must exist
     { name: 'Bronze', xpRequired: 400, rewards: ['free item'] }, // Update existing tier
@@ -112,6 +117,7 @@ const result = await updateLoyaltyProgram(context, {
 const result = await updateLoyaltyProgram(context, {
   collectionAddress: publicKey('COLLECTION_ADDRESS'),
   programAuthority: context.programAuthority,
+  updateAuthority: programAuthority, // Required: Program authority from Loyalty Program creation
   newTiers: [
     { name: 'Grind', xpRequired: 0, rewards: ['nothing for you!'] },
     { name: 'Bronze', xpRequired: 400, rewards: ['free item'] },
@@ -139,6 +145,7 @@ const result = await issueLoyaltyPass(context, {
   passName: 'Coffee Rewards Pass',
   passMetadataUri: 'https://arweave.net/...',
   assetSigner: generateSigner(context.umi), // Optional: Provide a signer for the pass
+  updateAuthority: programAuthority, // Required: Program authority of the Loyalty Program
 })
 
 console.log(result)
@@ -154,7 +161,7 @@ console.log(result)
 const result = await awardLoyaltyPoints(context, {
   passAddress: publicKey('PASS_ADDRESS'),
   action: 'purchase',
-  signer: passSigner, // KeypairSigner from issueLoyaltyPass
+  signer: programAuthority, // Required: Program authority of the Loyalty Program
   multiplier: 1, // Optional: Point multiplier (default: 1)
 })
 
@@ -172,7 +179,7 @@ console.log(result)
 const result = await revokeLoyaltyPoints(context, {
   passAddress: publicKey('PASS_ADDRESS'),
   pointsToRevoke: 50,
-  signer: passSigner, // KeypairSigner from issueLoyaltyPass
+  signer: programAuthority, // Required: Program authority of the Loyalty Program
 })
 
 console.log(result)
@@ -189,7 +196,7 @@ console.log(result)
 const result = await giftLoyaltyPoints(context, {
   passAddress: publicKey('PASS_ADDRESS'),
   pointsToGift: 100,
-  signer: passSigner, // KeypairSigner from issueLoyaltyPass
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
   action: 'bonus', // Reason for gifting points
 })
 

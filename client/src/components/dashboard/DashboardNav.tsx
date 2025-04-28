@@ -66,7 +66,7 @@ export default function DashboardNav({ isOrganization }: DashboardNavProps) {
   }
 
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className={`flex flex-col h-full p-4 `}>
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-white orbitron mb-4">Dashboard</h2>
         <nav className="space-y-1">

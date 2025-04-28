@@ -3,7 +3,9 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
 
 interface DashboardContextType {
+  isSidebarOpen: boolean
   isOrganization: boolean
+  toggleSidebar: () => void
   setIsOrganization: (value: boolean) => void
 }
 
@@ -11,8 +13,17 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [isOrganization, setIsOrganization] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  return <DashboardContext.Provider value={{ isOrganization, setIsOrganization }}>{children}</DashboardContext.Provider>
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  return (
+    <DashboardContext.Provider value={{ isOrganization, setIsOrganization, toggleSidebar, isSidebarOpen }}>
+      {children}
+    </DashboardContext.Provider>
+  )
 }
 
 export function useDashboard() {

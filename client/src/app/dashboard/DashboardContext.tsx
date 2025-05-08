@@ -14,7 +14,7 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [isOrganization, setIsOrganization] = useState(true)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)

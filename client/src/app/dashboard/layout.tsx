@@ -6,11 +6,13 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { useEffect } from 'react'
 import DashboardNav from '@/components/dashboard/DashboardNav'
 import { DashboardProvider, useDashboard } from './DashboardContext'
+import useMediaQuery from '@/components/hooks/useMediaQuerry'
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { connected } = useWallet()
   const router = useRouter()
-  const { isOrganization, toggleSidebar, isSidebarOpen } = useDashboard()
+  const isAboveMobileDevices = useMediaQuery('(min-width: 768px)')
+  const { isOrganization, toggleSidebar, isSidebarOpen, setIsSidebarOpen } = useDashboard()
 
   useEffect(() => {
     if (!connected) {
@@ -21,6 +23,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   if (!connected) {
     return null
   }
+
+  useEffect(() => {
+    if (isAboveMobileDevices) {
+      setIsSidebarOpen(false)
+    }
+  }, [isAboveMobileDevices])
+
+  console.log('isSidebarOpen value:', isSidebarOpen)
 
   // <div
   //   className={`z-50 flex flex-col h-full p-4 border-4 border-red-500 transition-all duration-300 ease-in-out ${

@@ -6,6 +6,7 @@ interface DashboardContextType {
   isSidebarOpen: boolean
   isOrganization: boolean
   toggleSidebar: () => void
+  setIsSidebarOpen: (value: boolean) => void
   setIsOrganization: (value: boolean) => void
 }
 
@@ -20,7 +21,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <DashboardContext.Provider value={{ isOrganization, setIsOrganization, toggleSidebar, isSidebarOpen }}>
+    <DashboardContext.Provider
+      value={{ isOrganization, setIsOrganization, toggleSidebar, isSidebarOpen, setIsSidebarOpen }}
+    >
       {children}
     </DashboardContext.Provider>
   )

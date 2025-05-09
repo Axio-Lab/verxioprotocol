@@ -58,20 +58,20 @@ export default function DashboardPage() {
   if (isOrganization) {
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-5 md:items-center border border-red-500">
+          <div className="w-full md:w-1/2 ">
+            <h1 className="text-lg md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
               Organization Dashboard
             </h1>
+          </div>
+          <div className="w-full md:w-1/2 flex items-center justify-between gap-4">
             <button
               onClick={toggleDashboard}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
+              className="flex items-center gap-2 md:px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
             >
               <User className="h-4 w-4" />
               Switch to User View
             </button>
-          </div>
-          <div className="flex items-center gap-4">
             <Link href="/dashboard/programs/new">
               <button className="bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity orbitron">
                 Create Program

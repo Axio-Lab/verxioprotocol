@@ -3,16 +3,17 @@
 import { useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import DashboardNav from '@/components/dashboard/DashboardNav'
 import { DashboardProvider, useDashboard } from './DashboardContext'
 import useMediaQuery from '@/components/hooks/useMediaQuerry'
 import 'aos/dist/aos.css'
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
-  const { connected } = useWallet()
   const router = useRouter()
-  const isAboveMobileDevices = useMediaQuery('(min-width: 768px)')
+  const { connected } = useWallet()
+  const [hasMounted, setHasMounted] = useState(false)
+  const isSmallDevices = useMediaQuery('(max-width: 768px)')
   const { isOrganization, toggleSidebar, isSidebarOpen, setIsSidebarOpen } = useDashboard()
 
   useEffect(() => {
@@ -26,26 +27,28 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (isAboveMobileDevices) {
-      setIsSidebarOpen(false)
-    }
-  }, [isAboveMobileDevices])
+    setHasMounted(true)
+    setIsSidebarOpen(isSmallDevices)
+  }, [isSmallDevices])
 
-  console.log('isSidebarOpen value:', isSidebarOpen)
-
+  if (!hasMounted) return null
   return (
     <div className="relative flex min-h-screen">
       <div
-        className={`z-90 w-64 flex-col gap-4 border-r border-verxio-purple/20 bg-black/20 p-4 fixed h-full 
-          ${!isSidebarOpen ? 'translate-x-0 flex bg-black' : 'hidden -translate-x-full'} transition-all duration-300 ease-in-out`}
+        className={`z-90 w-64 flex-col gap-4 border-r border-verxio-purple/20 bg-black p-4 fixed h-full 
+          ${!isSidebarOpen ? 'translate-x-0 flex' : 'hidden -translate-x-full'} transition-all duration-300 ease-in-out`}
       >
-        <DashboardNav isOrganization={isOrganization} />
+        <DashboardNav
+          isOrganization={isOrganization}
+          isSmallDevices={isSmallDevices}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
       </div>
       <main className="flex-1 p-4 md:p-8 md:ml-64 overflow-y-auto">{children}</main>
 
       <span
         onClick={toggleSidebar}
-        className="bg-black/20 shadow-sm p-2 rounded md:hidden fixed top-10 right-10 cursor-pointer transition-all duration-300 z-50"
+        className="bg-verxio-purple/20 shadow-sm p-2 rounded md:hidden fixed top-8 right-10 cursor-pointer transition-all duration-300 z-99"
       >
         {isSidebarOpen ? <Menu size={24} /> : <X size={24} />}
       </span>

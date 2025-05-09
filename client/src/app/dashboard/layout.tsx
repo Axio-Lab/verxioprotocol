@@ -48,7 +48,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       <span
         onClick={toggleSidebar}
-        className="bg-verxio-purple/20 shadow-sm p-2 rounded md:hidden fixed top-8 right-10 cursor-pointer transition-all duration-300 z-99"
+        className="bg-verxio-purple/20 shadow-sm p-2 rounded md:hidden fixed top-4 right-10 cursor-pointer transition-all duration-300 z-99"
       >
         {isSidebarOpen ? <Menu size={24} /> : <X size={24} />}
       </span>

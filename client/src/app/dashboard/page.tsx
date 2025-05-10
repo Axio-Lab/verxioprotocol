@@ -18,7 +18,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false)
   const { network } = useNetwork()
   const mounted = useRef(true)
-  const isAboveMediumDevices = useMediaQuery('(max-width: 1150px)')
+  const isBelowSpecifiedWidth = useMediaQuery('(max-width: 1150px)')
 
   useEffect(() => {
     mounted.current = true
@@ -61,14 +61,14 @@ export default function DashboardPage() {
     return (
       <div className="space-y-8">
         <div
-          className={`flex gap-5 ${isAboveMediumDevices ? 'flex-col items-start' : 'flex-row items-center justify-between'}`}
+          className={`flex gap-5 ${isBelowSpecifiedWidth ? 'flex-col items-start' : 'flex-row items-center justify-between'}`}
         >
-          <div className={`${isAboveMediumDevices ? "w-full" : "w-1/2"}`}>
-            <h1 className="text-lg md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+          <div className={`${isBelowSpecifiedWidth ? 'w-full' : 'w-1/2'}`}>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
               Organization Dashboard
             </h1>
           </div>
-          <div className={`flex items-center justify-between gap-4 ${isAboveMediumDevices ? "w-full" : "w-1/2"}`}>
+          <div className={`flex items-center justify-between gap-4 ${isBelowSpecifiedWidth ? 'w-full' : 'w-1/2'}`}>
             <button
               onClick={toggleDashboard}
               className="flex items-center gap-2 md:px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"

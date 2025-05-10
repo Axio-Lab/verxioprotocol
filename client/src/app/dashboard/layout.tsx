@@ -36,7 +36,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="relative flex min-h-screen">
       <div
         className={`z-90 w-64 flex-col gap-4 border-r border-verxio-purple/20 bg-black p-4 fixed h-full 
-          ${!isSidebarOpen ? 'translate-x-0 flex' : 'hidden -translate-x-full'} transition-all duration-300 ease-in-out`}
+          ${!isSidebarOpen ? 'translate-x-0 flex slideInLeft' : 'hidden -translate-x-full slideOutLeft'} transition-all duration-300 ease-in-out`}
       >
         <DashboardNav
           isOrganization={isOrganization}

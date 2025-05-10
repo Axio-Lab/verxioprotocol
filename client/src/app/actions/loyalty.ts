@@ -62,7 +62,7 @@ export const getLoyaltyPasses = cache(async (recipient: string, network: string)
 
     // Then fetch asset data and images for each pass
     const passesWithDetails = await Promise.all(
-      dbPasses.map(async (pass) => {
+      dbPasses.map(async (pass: { recipient: string; publicKey: string }) => {
         try {
           // Create server context for this pass
           const context = createServerProgram(pass.recipient, pass.publicKey, network as Network)
@@ -78,7 +78,7 @@ export const getLoyaltyPasses = cache(async (recipient: string, network: string)
             bannerImage = await getImageFromMetadata(details.uri)
           }
 
-          return {
+          const passWithImage: PassWithImage = {
             details: {
               xp: details.xp,
               lastAction: details.lastAction,
@@ -95,6 +95,7 @@ export const getLoyaltyPasses = cache(async (recipient: string, network: string)
             },
             bannerImage,
           }
+          return passWithImage
         } catch (error) {
           console.error(`Error fetching details for pass ${pass.publicKey}:`, error)
           return null
@@ -103,7 +104,7 @@ export const getLoyaltyPasses = cache(async (recipient: string, network: string)
     )
 
     // Filter out null values and return valid passes
-    return passesWithDetails.filter((pass): pass is NonNullable<typeof pass> => pass !== null)
+    return passesWithDetails.filter((pass: PassWithImage | null): pass is PassWithImage => pass !== null)
   } catch (error) {
     console.error('Error fetching loyalty passes:', error)
     throw new Error('Failed to fetch loyalty passes')

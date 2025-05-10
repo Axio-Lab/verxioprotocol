@@ -18,3 +18,9 @@ export function convertSecretKeyToKeypair(secretKey: string) {
     throw new Error('Invalid secret key format')
   }
 }
+
+export function formatNumber(num: number): string {
+  return num.toLocaleString('en-US', {
+    maximumFractionDigits: 0,
+  })
+}

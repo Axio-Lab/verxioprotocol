@@ -15,7 +15,9 @@ export async function createImageLeaderboard(data: LeaderboardImageData): Promis
   // Load font
   Font.loadDefault()
 
-  const background = data.backgroundImage || 'src/assets/background-1.jpg'
+  const background =
+    data.backgroundImage ||
+    'https://images.unsplash.com/photo-1634330902537-64a3ccb601ff?q=80&w=2624&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
   const headerImage = data.headerImage || 'https://github.com/neplextech.png'
   let avatars: string[] = []
 

@@ -29,7 +29,7 @@ class CreateImageLoyaltyPass extends Builder {
     },
   ) {
     // Set a larger size for the loyalty card
-    super(500, 500)
+    super(512, 512)
 
     // Load default font if none loaded
     if (!FontFactory.size) Font.loadDefault()

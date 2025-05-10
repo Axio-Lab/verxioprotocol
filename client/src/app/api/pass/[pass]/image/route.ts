@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getVerxioPass } from '@/lib/methods/serverContext'
-import { Network } from '@/lib/network-context'
+import { Network } from '@/lib/methods/serverProgram'
 import { publicKey } from '@metaplex-foundation/umi'
 import { createImageLoyaltyPass } from '@/lib/methods/createImageLoyaltyPass'
 
@@ -16,11 +16,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ pass
 
     // Get pass data using read-only context
     const passData = await getVerxioPass(passAddress, network as Network, publicKey(passAddress))
-
+    console.log(passData)
     if (!passData) {
       return NextResponse.json({ error: 'Pass not found', code: 'PASS_NOT_FOUND' }, { status: 404 })
     }
 
+    console.log(passData)
     // Generate the image
     const image = await createImageLoyaltyPass(passData)
 

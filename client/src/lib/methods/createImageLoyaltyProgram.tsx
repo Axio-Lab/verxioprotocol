@@ -28,7 +28,7 @@ class CreateImageLoyaltyProgram extends Builder {
       data: LoyaltyProgramData
     },
   ) {
-    super(500, 500)
+    super(512, 512)
     if (!FontFactory.size) Font.loadDefault()
   }
 

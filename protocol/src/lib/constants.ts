@@ -10,6 +10,7 @@ export const DEFAULT_PASS_DATA = {
   xp: 0,
   lastAction: null,
   actionHistory: [],
+  messageHistory: [],
   currentTier: DEFAULT_TIER.name,
   tierUpdatedAt: Date.now(),
   rewards: DEFAULT_TIER.rewards,

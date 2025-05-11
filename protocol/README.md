@@ -14,6 +14,7 @@ On-chain loyalty protocol powered by Metaplex CORE for creating and managing loy
 - Gift points to users with custom actions
 - Comprehensive asset data and customer behaviour tracking
 - Flexible authority management for loyalty programs and loyalty pass updates
+- Direct messaging between program and pass holders with support for program-wide broadcasts
 
 ## Installation
 
@@ -311,6 +312,66 @@ await approveTransfer(context, {
   passAddress: publicKey('PASS_ADDRESS'),
   toAddress: publicKey('NEW_OWNER_ADDRESS'),
 })
+```
+
+### Send Message
+
+```typescript
+const result = await sendMessage(context, {
+  passAddress: publicKey('PASS_ADDRESS'),
+  message: 'Welcome to our loyalty program!',
+  sender: programAuthority.publicKey,
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+console.log(result)
+// {
+//   signature: string,  // Transaction signature
+//   message: {
+//     id: string,      // Unique message ID
+//     content: string, // Message content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Message timestamp
+//     read: boolean    // Message read status
+//   }
+// }
+```
+
+### Mark Message as Read
+
+```typescript
+const result = await markMessageRead(context, {
+  passAddress: publicKey('PASS_ADDRESS'),
+  messageId: 'MESSAGE_ID',
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+console.log(result)
+// {
+//   signature: string  // Transaction signature
+// }
+```
+
+### Get Asset Messages
+
+```typescript
+const messages = await getAssetMessages(context, publicKey('PASS_ADDRESS'))
+
+console.log(messages)
+// {
+//   stats: {
+//     total: number,   // Total number of messages
+//     unread: number,  // Number of unread messages
+//     read: number     // Number of read messages
+//   },
+//   messages: Array<{
+//     id: string,      // Message ID
+//     content: string, // Message content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Message timestamp
+//     read: boolean    // Message read status
+//   }>
+// }
 ```
 
 ## License

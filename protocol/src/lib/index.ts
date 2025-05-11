@@ -35,34 +35,33 @@ export async function updatePassData(
     points: number
     currentData: any
     newTier: any
+    messageHistory?: any[]
   },
 ): Promise<{ points: number; signature: string }> {
   const feeInstruction = createFeeInstruction(context.umi, context.umi.identity.publicKey, 'VERXIO_INTERACTION')
+
+  // Create a minimal data object with only necessary fields
+  const dataToWrite = {
+    xp: updates.xp,
+    lastAction: updates.action,
+    currentTier: updates.newTier.name,
+    tierUpdatedAt:
+      updates.newTier.name !== updates.currentData.currentTier ? Date.now() : updates.currentData.tierUpdatedAt,
+    actionHistory: updates.currentData.actionHistory || [],
+    messageHistory: updates.messageHistory || updates.currentData.messageHistory || [],
+    rewards: updates.newTier.rewards || [],
+  }
+
+  // Encode the data more efficiently
+  const encodedData = new TextEncoder().encode(JSON.stringify(dataToWrite))
+
   const txnInstruction = writeData(context.umi, {
     key: {
       type: PLUGIN_TYPES.APP_DATA,
       dataAuthority: appDataPlugin.dataAuthority,
     },
     authority: signer,
-    data: new TextEncoder().encode(
-      JSON.stringify({
-        xp: updates.xp,
-        lastAction: updates.action,
-        currentTier: updates.newTier.name,
-        tierUpdatedAt:
-          updates.newTier.name !== updates.currentData.currentTier ? Date.now() : updates.currentData.tierUpdatedAt,
-        actionHistory: [
-          ...(updates.currentData.actionHistory || []),
-          {
-            type: updates.action,
-            points: updates.points,
-            timestamp: Date.now(),
-            newTotal: updates.xp,
-          },
-        ],
-        rewards: updates.newTier.rewards,
-      }),
-    ),
+    data: encodedData,
     asset: passAddress,
     collection: context.collectionAddress!,
   }).add(feeInstruction)

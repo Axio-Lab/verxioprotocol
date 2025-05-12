@@ -374,6 +374,79 @@ console.log(messages)
 // }
 ```
 
+### Send Broadcast
+
+```typescript
+// Send broadcast to all holders
+const result = await sendBroadcast(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  message: 'Welcome to our loyalty program!',
+  sender: programAuthority.publicKey,
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+// Send broadcast to specific holders
+const specificResult = await sendBroadcast(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  message: 'VIP announcement',
+  sender: programAuthority.publicKey,
+  signer: updateAuthority,
+})
+
+console.log(result)
+// {
+//   signature: string,  // Transaction signature
+//   broadcast: {
+//     id: string,      // Unique broadcast ID
+//     content: string, // Broadcast content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Broadcast timestamp
+//     read: boolean,   // Broadcast read status
+//     recipients?: {   // Optional recipient information
+//       type: 'all' | 'tier' | 'specific',
+//       value?: string[] // For 'tier': tier names, For 'specific': holder addresses
+//     }
+//   }
+// }
+```
+
+### Mark Broadcast as Read
+
+```typescript
+const result = await markBroadcastRead(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  broadcastId: 'BROADCAST_ID',
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+console.log(result)
+// {
+//   signature: string  // Transaction signature
+// }
+```
+
+### Get Program Broadcasts
+
+```typescript
+const broadcasts = await getProgramDetails(context)
+
+console.log(broadcasts.broadcasts)
+// {
+//   broadcasts: Array<{
+//     id: string,      // Broadcast ID
+//     content: string, // Broadcast content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Broadcast timestamp
+//     read: boolean,   // Broadcast read status
+//     recipients?: {   // Optional recipient information
+//       type: 'all' | 'tier' | 'specific',
+//       value?: string[] // For 'tier': tier names, For 'specific': holder addresses
+//     }
+//   }>,
+//   totalBroadcasts: number // Total number of broadcasts
+// }
+```
+
 ## License
 
 MIT

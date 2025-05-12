@@ -1,5 +1,5 @@
 import { KeypairSigner, PublicKey as UmiPublicKey } from '@metaplex-foundation/umi'
-import { fetchCollection, writeData } from '@metaplex-foundation/mpl-core'
+import { fetchCollection, writeData, writeCollectionExternalPluginAdapterDataV1 } from '@metaplex-foundation/mpl-core'
 import { toBase58 } from '@utils/to-base58'
 import { ATTRIBUTE_KEYS, DEFAULT_TIER, PLUGIN_TYPES } from './constants'
 import { validateCollectionState } from '@utils/validate-collection-state'
@@ -70,6 +70,51 @@ export async function updatePassData(
 
   return {
     points: updates.xp,
+    signature: toBase58(tx.signature),
+  }
+}
+
+export async function updateProgramData(
+  context: VerxioContext,
+  collectionAddress: UmiPublicKey,
+  signer: KeypairSigner,
+  appDataPlugin: any,
+  updates: {
+    broadcasts: any[]
+    totalBroadcasts: number
+  },
+): Promise<{ signature: string }> {
+  const feeInstruction = createFeeInstruction(context.umi, context.umi.identity.publicKey, 'VERXIO_INTERACTION')
+
+  // Create a minimal data object with only necessary fields
+  const dataToWrite = {
+    broadcasts: updates.broadcasts,
+    totalBroadcasts: updates.totalBroadcasts,
+  }
+
+  // Encode the data more efficiently
+  const encodedData = new TextEncoder().encode(JSON.stringify(dataToWrite))
+
+  const txnInstruction = writeCollectionExternalPluginAdapterDataV1(context.umi, {
+    collection: collectionAddress,
+    authority: signer,
+    key: {
+      __kind: PLUGIN_TYPES.APP_DATA,
+      fields: [
+        {
+          __kind: 'Address',
+          address: appDataPlugin.dataAuthority.address,
+        },
+      ],
+    },
+    data: encodedData,
+  }).add(feeInstruction)
+
+  const tx = await txnInstruction.sendAndConfirm(context.umi, {
+    confirm: { commitment: 'confirmed' },
+  })
+
+  return {
     signature: toBase58(tx.signature),
   }
 }

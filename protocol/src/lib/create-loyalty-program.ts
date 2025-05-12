@@ -1,6 +1,13 @@
 import { generateSigner, KeypairSigner, PublicKey } from '@metaplex-foundation/umi'
-import { createCollection, CreateCollectionArgsPlugin, PluginAuthority } from '@metaplex-foundation/mpl-core'
-import { ATTRIBUTE_KEYS, PLUGIN_TYPES } from '@lib/constants'
+import {
+  createCollection,
+  CreateCollectionArgsPlugin,
+  PluginAuthority,
+  writeData,
+  ExternalPluginAdapterSchema,
+  writeCollectionExternalPluginAdapterDataV1,
+} from '@metaplex-foundation/mpl-core'
+import { ATTRIBUTE_KEYS, DEFAULT_BROADCAST_DATA, PLUGIN_TYPES } from '@lib/constants'
 import { VerxioContext } from '@schemas/verxio-context'
 import { toBase58 } from '@utils/to-base58'
 import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
@@ -33,15 +40,38 @@ export async function createLoyaltyProgram(
 
   try {
     const feeInstruction = createFeeInstruction(context.umi, context.umi.identity.publicKey, 'CREATE_LOYALTY_PROGRAM')
+
+    // Create collection with plugins
     const txnInstruction = createCollection(context.umi, {
       collection,
       name: config.loyaltyProgramName,
       plugins: createLoyaltyProgramPlugins(config, updateAuthority.publicKey),
       uri: config.metadataUri,
       updateAuthority: updateAuthority.publicKey,
-    }).add(feeInstruction)
+    })
+      .add(feeInstruction)
 
-    const txn = await txnInstruction.sendAndConfirm(context.umi, { confirm: { commitment: 'confirmed' } })
+      .add(
+        writeCollectionExternalPluginAdapterDataV1(context.umi, {
+          collection: collection.publicKey,
+          authority: updateAuthority,
+          key: {
+            __kind: PLUGIN_TYPES.APP_DATA,
+            fields: [
+              {
+                __kind: 'Address',
+                address: updateAuthority.publicKey,
+              },
+            ],
+          },
+          data: new TextEncoder().encode(JSON.stringify(DEFAULT_BROADCAST_DATA)),
+        }),
+      )
+
+    const txn = await txnInstruction.sendAndConfirm(context.umi, {
+      confirm: { commitment: 'confirmed' },
+    })
+
     return { collection, signature: toBase58(txn.signature), updateAuthority }
   } catch (error) {
     throw new Error(`Failed to create loyalty program: ${error}`)
@@ -77,6 +107,14 @@ export function createLoyaltyProgramPlugins(
         type: 'Address',
       } as PluginAuthority,
       additionalDelegates: [],
+    },
+    {
+      type: PLUGIN_TYPES.APP_DATA,
+      dataAuthority: {
+        type: 'Address',
+        address: updateAuthority,
+      },
+      schema: ExternalPluginAdapterSchema.Json,
     },
   ]
 }

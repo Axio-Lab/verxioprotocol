@@ -6,6 +6,11 @@ export const DEFAULT_TIER: LoyaltyProgramTier = {
   xpRequired: 0,
 }
 
+export const DEFAULT_BROADCAST_DATA = {
+  totalBroadcasts: 0,
+  broadcasts: [],
+}
+
 export const DEFAULT_PASS_DATA = {
   xp: 0,
   lastAction: null,

@@ -24,7 +24,7 @@ describe('get-program-details', () => {
 
   describe('expected usage', () => {
     it('should return program details', async () => {
-      expect.assertions(11)
+      expect.assertions(12)
       if (!collection) throw new Error('Test setup failed')
 
       // ACT
@@ -42,6 +42,7 @@ describe('get-program-details', () => {
       expect(details.tiers).toBeDefined()
       expect(details.pointsPerAction).toBeDefined()
       expect(details.metadata).toBeDefined()
+      expect(details.broadcasts).toBeDefined()
     })
 
     it('should return valid tiers data', async () => {
@@ -79,6 +80,19 @@ describe('get-program-details', () => {
       // ASSERT
       expect(typeof details.metadata).toBe('object')
       expect(details.metadata).toHaveProperty('organizationName')
+    })
+
+    it('should return valid broadcast data', async () => {
+      expect.assertions(3)
+      if (!collection) throw new Error('Test setup failed')
+
+      // ACT
+      const details = await getProgramDetails(context)
+
+      // ASSERT
+      expect(details.broadcasts).toBeDefined()
+      expect(Array.isArray(details.broadcasts.broadcasts)).toBe(true)
+      expect(details.broadcasts.totalBroadcasts).toBeDefined()
     })
   })
 

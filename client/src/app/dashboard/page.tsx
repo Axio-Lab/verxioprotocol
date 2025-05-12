@@ -9,6 +9,7 @@ import MyLoyaltyPasses from '@/components/dashboard/MyLoyaltyPass'
 import { useEffect, useState, useRef } from 'react'
 import { useNetwork } from '@/lib/network-context'
 import { getProgramStats, ProgramStats } from '@/app/actions/program'
+import useMediaQuery from '@/components/hooks/useMediaQuerry'
 
 export default function DashboardPage() {
   const { connected, publicKey: walletPublicKey } = useWallet()
@@ -17,6 +18,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false)
   const { network } = useNetwork()
   const mounted = useRef(true)
+  const isBelowSpecifiedWidth = useMediaQuery('(max-width: 1150px)')
 
   useEffect(() => {
     mounted.current = true
@@ -58,20 +60,22 @@ export default function DashboardPage() {
   if (isOrganization) {
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+        <div
+          className={`flex gap-5 ${isBelowSpecifiedWidth ? 'flex-col items-start' : 'flex-row items-center justify-between'}`}
+        >
+          <div className={`${isBelowSpecifiedWidth ? 'w-full' : 'w-1/2'}`}>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
               Organization Dashboard
             </h1>
+          </div>
+          <div className={`flex items-center justify-between gap-4 ${isBelowSpecifiedWidth ? 'w-full' : 'w-1/2'}`}>
             <button
               onClick={toggleDashboard}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
+              className="flex items-center gap-2 md:px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
             >
               <User className="h-4 w-4" />
               Switch to User View
             </button>
-          </div>
-          <div className="flex items-center gap-4">
             <Link href="/dashboard/programs/new">
               <button className="bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity orbitron">
                 Create Program

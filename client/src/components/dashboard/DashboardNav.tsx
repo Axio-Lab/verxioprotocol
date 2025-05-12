@@ -10,9 +10,11 @@ import { NetworkToggle } from '@/components/network/NetworkToggle'
 
 interface DashboardNavProps {
   isOrganization: boolean
+  isSmallDevices: boolean
+  setIsSidebarOpen: (value: boolean) => void
 }
 
-export default function DashboardNav({ isOrganization }: DashboardNavProps) {
+export default function DashboardNav({ isOrganization, isSmallDevices, setIsSidebarOpen }: DashboardNavProps) {
   const pathname = usePathname()
   const { connected, publicKey, disconnect } = useWallet()
 
@@ -90,7 +92,7 @@ export default function DashboardNav({ isOrganization }: DashboardNavProps) {
   }
 
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className={`flex flex-col h-full p-4 `}>
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-white orbitron mb-4">Dashboard</h2>
         <nav className="space-y-1">
@@ -100,10 +102,18 @@ export default function DashboardNav({ isOrganization }: DashboardNavProps) {
               ? pathname === item.href
               : pathname.startsWith(item.href) &&
                 (item.href === '/dashboard' || pathname.startsWith(`${item.href}/`) || pathname === item.href)
+
+            const handleLinkClick = () => {
+              if (isSmallDevices) {
+                setIsSidebarOpen(true)
+              }
+            }
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={handleLinkClick}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-white transition-all ${
                   isActive
                     ? 'bg-gradient-to-r from-verxio-purple/20 to-verxio-purple/10 text-verxio-purple border border-verxio-purple/20'

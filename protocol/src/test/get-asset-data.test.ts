@@ -54,6 +54,7 @@ describe('get-asset-data', () => {
 
       // ACT
       const data = await getAssetData(context, loyaltyPass.publicKey)
+      console.log('data', data)
 
       // ASSERT
       expect(data).toBeTruthy()

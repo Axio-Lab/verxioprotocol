@@ -2,6 +2,7 @@ import { VerxioContext } from '@schemas/verxio-context'
 import { validateCollectionState } from '@utils/validate-collection-state'
 import { fetchCollection } from '@metaplex-foundation/mpl-core'
 import { ATTRIBUTE_KEYS } from './constants'
+import { Broadcast } from '@lib/send-broadcast'
 
 export interface ProgramTier {
   name: string
@@ -13,14 +14,6 @@ export interface ProgramMetadata {
   organizationName: string
   brandColor?: string
   [key: string]: any
-}
-
-export interface Broadcast {
-  id: string
-  content: string
-  sender: string
-  timestamp: number
-  read: boolean
 }
 
 export interface ProgramBroadcasts {

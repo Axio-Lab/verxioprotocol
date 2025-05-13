@@ -289,7 +289,7 @@ export default function LoyaltyCardCustomizer({ onRotationComplete }: LoyaltyCar
   }
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-8 max-w-[1400px] mx-auto">
+    <div className="w-full flex flex-col lg:flex-row gap-8 max-w-[1400px] mx-auto overflow-x-hidden">
       <div className="lg:w-1/2 space-y-6">
         <Card className="bg-verxio-dark border-verxio-purple/20">
           <CardContent className="pt-6">

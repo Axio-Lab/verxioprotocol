@@ -25,25 +25,25 @@ importers:
         version: 1.2.0(@metaplex-foundation/umi@1.1.1)(@noble/hashes@1.7.1)
       '@metaplex-foundation/mpl-token-metadata':
         specifier: ^3.4.0
-        version: 3.4.0(@metaplex-foundation/umi@1.1.1)
+        version: 3.4.0(@metaplex-foundation/umi@1.0.0)
       '@metaplex-foundation/umi':
-        specifier: ^1.1.1
+        specifier: ^1.0.0
         version: 1.1.1
       '@metaplex-foundation/umi-bundle-defaults':
-        specifier: ^1.1.1
-        version: 1.1.1(@metaplex-foundation/umi@1.1.1)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: ^1.0.0
+        version: 1.0.0(@metaplex-foundation/umi@1.0.0)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@metaplex-foundation/umi-downloader-http':
-        specifier: ^1.2.0
-        version: 1.2.0(@metaplex-foundation/umi@1.1.1)
+        specifier: ^1.0.0
+        version: 1.0.0(@metaplex-foundation/umi@1.0.0)
       '@metaplex-foundation/umi-rpc-web3js':
-        specifier: ^1.2.0
-        version: 1.2.0(@metaplex-foundation/umi@1.1.1)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: ^1.0.0
+        version: 1.0.0(@metaplex-foundation/umi@1.0.0)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@metaplex-foundation/umi-signer-wallet-adapters':
-        specifier: ^1.1.1
-        version: 1.1.1(@metaplex-foundation/umi@1.1.1)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: ^1.0.0
+        version: 1.0.0(@metaplex-foundation/umi@1.0.0)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@metaplex-foundation/umi-web3js-adapters':
-        specifier: ^1.1.1
-        version: 1.1.1(@metaplex-foundation/umi@1.1.1)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: ^1.0.0
+        version: 1.0.0(@metaplex-foundation/umi@1.0.0)(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@prisma/client':
         specifier: ^6.6.0
         version: 6.6.0(prisma@6.6.0(typescript@5.8.2))(typescript@5.8.2)

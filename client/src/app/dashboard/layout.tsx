@@ -35,7 +35,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative flex min-h-screen">
       <div
-        className={`z-90 w-64 flex-col gap-4 border-r border-verxio-purple/20 bg-black p-4 fixed h-full 
+        className={`z-[999] w-64 flex-col gap-4 border-r border-verxio-purple/20 bg-black p-4 fixed h-full 
           ${!isSidebarOpen ? 'translate-x-0 flex slideInLeft' : 'hidden -translate-x-full slideOutLeft'} transition-all duration-300 ease-in-out`}
       >
         <DashboardNav
@@ -48,7 +48,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       <span
         onClick={toggleSidebar}
-        className="bg-verxio-purple/20 shadow-sm p-2 rounded md:hidden fixed top-4 right-10 cursor-pointer transition-all duration-300 z-99"
+        className="bg-verxio-purple/20 shadow-sm p-2 rounded md:hidden fixed top-4 right-4 cursor-pointer transition-all duration-300 z-99"
       >
         {isSidebarOpen ? <Menu size={24} /> : <X size={24} />}
       </span>

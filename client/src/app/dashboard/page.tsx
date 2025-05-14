@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const { network } = useNetwork()
   const mounted = useRef(true)
   const isBelowSpecifiedWidth = useMediaQuery('(max-width: 1150px)')
+  const responsiveNavMenu = useMediaQuery('(max-width: 896px)')
 
   useEffect(() => {
     mounted.current = true
@@ -64,7 +65,7 @@ export default function DashboardPage() {
           className={`flex gap-5 ${isBelowSpecifiedWidth ? 'flex-col items-start' : 'flex-row items-center justify-between'}`}
         >
           <div className={`${isBelowSpecifiedWidth ? 'w-full' : 'w-1/2'}`}>
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+            <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
               Organization Dashboard
             </h1>
           </div>
@@ -174,21 +175,22 @@ export default function DashboardPage() {
   }
 
   // User view
+  // className="flex flex-col md:flex-row items-start gap-5 justify-between md:items-center w-full"
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
-            My Loyalty Cards
-          </h1>
-          <button
-            onClick={toggleDashboard}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
-          >
-            <Building2 className="h-4 w-4" />
-            Switch to Organization View
-          </button>
-        </div>
+      <div
+        className={`w-ful flex gap-5 ${responsiveNavMenu ? 'flex-col items-start' : 'flex-row items-center justify-between'}`}
+      >
+        <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+          My Loyalty Cards
+        </h1>
+        <button
+          onClick={toggleDashboard}
+          className="self-end md:self-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 border border-verxio-purple/20 text-white hover:bg-black/30 transition-colors"
+        >
+          <Building2 className="h-4 w-4" />
+          Switch to Organization View
+        </button>
       </div>
 
       <MyLoyaltyPasses />

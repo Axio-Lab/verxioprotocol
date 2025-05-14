@@ -1,12 +1,14 @@
 import { createServerProgram, Network } from './serverProgram'
-import { createSignerFromKeypair, keypairIdentity, PublicKey } from '@metaplex-foundation/umi'
-import { convertSecretKeyToKeypair } from '@/lib/utils'
+import { keypairIdentity, PublicKey } from '@metaplex-foundation/umi'
+// import { convertSecretKeyToKeypair } from '@/lib/utils'
 import { getAssetData, getProgramDetails } from '@verxioprotocol/core'
+import { fromWeb3JsKeypair } from '@metaplex-foundation/umi-web3js-adapters'
+import { Keypair as Web3JsKeypair } from '@solana/web3.js'
 
 export function createServerContextWithFeePayer(collectionAddress: string, network: Network, feePayer: string) {
   const serverContext = createServerProgram(collectionAddress, collectionAddress, network)
-  const keypairSigner = createSignerFromKeypair(serverContext.umi, convertSecretKeyToKeypair(feePayer))
-  serverContext.umi.use(keypairIdentity(keypairSigner))
+  const signer = fromWeb3JsKeypair(Web3JsKeypair.fromSecretKey(Uint8Array.from(feePayer)))
+  serverContext.umi.use(keypairIdentity(signer))
 
   return serverContext
 }

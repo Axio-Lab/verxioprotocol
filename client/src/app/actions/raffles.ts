@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { CreateRaffleData, RaffleFilter } from '@/types/raffle'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export const getRaffles = cache(async (filter: RaffleFilter) => {
   try {

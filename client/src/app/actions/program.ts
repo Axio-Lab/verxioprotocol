@@ -5,7 +5,7 @@ import { createServerProgram, Network } from '@/lib/methods/serverProgram'
 import { getAssetData, getProgramDetails as getProgramDetailsCore } from '@verxioprotocol/core'
 import { publicKey } from '@metaplex-foundation/umi'
 import { getProgramNetwork } from '@/lib/methods/getProgramNetwork'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export interface ProgramStats {
   totalPrograms: string

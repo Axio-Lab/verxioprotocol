@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, Users, Trophy, Settings, Copy, LogOut, Gift, Award } from 'lucide-react'
+import { LayoutDashboard, Building2, Users, Trophy, Copy, LogOut, Gift, Award } from 'lucide-react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'

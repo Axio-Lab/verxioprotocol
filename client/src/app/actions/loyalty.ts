@@ -6,7 +6,7 @@ import { getAssetData } from '@verxioprotocol/core'
 import { publicKey } from '@metaplex-foundation/umi'
 import { getProgramNetwork } from '@/lib/methods/getProgramNetwork'
 import { getImageFromMetadata } from '@/lib/getImageFromMetadata'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export interface PassWithImage {
   details: {

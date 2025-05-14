@@ -22,16 +22,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [connected, router])
 
-  if (!connected) {
-    return null
-  }
-
   useEffect(() => {
     setHasMounted(true)
     setIsSidebarOpen(isSmallDevices)
-  }, [isSmallDevices])
+  }, [isSmallDevices, setIsSidebarOpen])
 
-  if (!hasMounted) return null
+  if (!connected || !hasMounted) {
+    return null
+  }
+
   return (
     <div className="relative flex min-h-screen">
       <div

@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export const getAssetSigner = cache(async (publicKey: string) => {
   try {

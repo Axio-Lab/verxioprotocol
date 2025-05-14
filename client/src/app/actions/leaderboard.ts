@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 import { createServerProgram, Network } from '@/lib/methods/serverProgram'
 import { getAssetData } from '@verxioprotocol/core'
 import { publicKey } from '@metaplex-foundation/umi'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export interface LeaderboardMember {
   address: string

@@ -5,7 +5,7 @@ import { createServerProgram, Network } from '@/lib/methods/serverProgram'
 import { getAssetData, getProgramDetails as getProgramDetailsCore } from '@verxioprotocol/core'
 import { publicKey } from '@metaplex-foundation/umi'
 import { getProgramNetwork } from '@/lib/methods/getProgramNetwork'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export interface ProgramStats {
   totalPrograms: string
@@ -85,7 +85,7 @@ export const getProgramStats = cache(async (creator: string, network: string): P
     const passes = await prisma.loyaltyPass.findMany({
       where: {
         collection: {
-          in: programs.map((program) => program.publicKey),
+          in: programs.map((program: { publicKey: string }) => program.publicKey),
         },
         network: network,
       },
@@ -98,12 +98,12 @@ export const getProgramStats = cache(async (creator: string, network: string): P
     // Calculate basic statistics
     const totalPrograms = programs.length
     const activePasses = passes.length
-    const uniqueHolders = new Set(passes.map((pass) => pass.recipient)).size
+    const uniqueHolders = new Set(passes.map((pass: { recipient: string }) => pass.recipient)).size
 
     // Calculate total XP from all passes
     let totalPoints = 0
     const passesWithXP = await Promise.all(
-      passes.map(async (pass) => {
+      passes.map(async (pass: { publicKey: string }) => {
         try {
           const context = createServerProgram(creator, pass.publicKey, network as Network)
           const details = await getAssetData(context, publicKey(pass.publicKey))
@@ -114,7 +114,7 @@ export const getProgramStats = cache(async (creator: string, network: string): P
         }
       }),
     )
-    totalPoints = passesWithXP.reduce((sum, xp) => sum + xp, 0)
+    totalPoints = passesWithXP.reduce((sum: number, xp: number) => sum + xp, 0)
 
     // Format total points
     const formatStat = (points: number): string => {
@@ -213,7 +213,7 @@ export const getPrograms = cache(async (creator: string, network: string): Promi
 
     // Then fetch program details for each program
     const programsWithDetails = await Promise.all(
-      dbPrograms.map(async (program) => {
+      dbPrograms.map(async (program: { creator: string; publicKey: string; programAuthorityPublic: string }) => {
         try {
           const context = createServerProgram(program.creator, program.publicKey, network as Network)
           const details = await getProgramDetailsCore(context)
@@ -280,7 +280,7 @@ export const getProgramMembers = cache(async (creator: string, network: string):
     const passes = await prisma.loyaltyPass.findMany({
       where: {
         collection: {
-          in: programs.map((program) => program.publicKey),
+          in: programs.map((program: { publicKey: string }) => program.publicKey),
         },
         network: network,
       },
@@ -292,33 +292,40 @@ export const getProgramMembers = cache(async (creator: string, network: string):
 
     // Group passes by recipient
     const passesByRecipient = passes.reduce(
-      (acc, pass) => {
+      (
+        acc: Record<string, { publicKey: string; recipient: string }[]>,
+        pass: { publicKey: string; recipient: string },
+      ) => {
         if (!acc[pass.recipient]) {
           acc[pass.recipient] = []
         }
         acc[pass.recipient].push(pass)
         return acc
       },
-      {} as Record<string, typeof passes>,
+      {} as Record<string, { publicKey: string; recipient: string }[]>,
     )
 
     // Get detailed pass information for each member
     const members: Member[] = await Promise.all(
       Object.entries(passesByRecipient).map(async ([address, memberPasses]) => {
         const passesWithDetails = await Promise.all(
-          memberPasses.map(async (pass) => {
+          (memberPasses as typeof passes).map(async (pass: { publicKey: string }) => {
             try {
               const context = createServerProgram(creator, pass.publicKey, network as Network)
               const details = await getAssetData(context, publicKey(pass.publicKey))
               if (!details) return null
 
-              return {
+              const memberPass: MemberPass = {
                 publicKey: pass.publicKey,
                 name: details.name,
                 xp: details.xp,
+                lastAction: details.lastAction,
                 actionHistory: details.actionHistory,
                 currentTier: details.currentTier,
+                tierUpdatedAt: details.tierUpdatedAt,
+                rewards: details.rewards,
               }
+              return memberPass
             } catch (error) {
               console.error(`Error fetching details for pass ${pass.publicKey}:`, error)
               return null
@@ -326,8 +333,8 @@ export const getProgramMembers = cache(async (creator: string, network: string):
           }),
         )
 
-        const validPasses = passesWithDetails.filter((pass): pass is MemberPass => pass !== null)
-        const totalXp = validPasses.reduce((sum, pass) => sum + pass.xp, 0)
+        const validPasses = passesWithDetails.filter((pass: MemberPass | null): pass is MemberPass => pass !== null)
+        const totalXp = validPasses.reduce((sum: number, pass: MemberPass) => sum + pass.xp, 0)
 
         return {
           address,

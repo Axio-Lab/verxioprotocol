@@ -83,6 +83,8 @@ export default {
         'glow-pulse': 'glow-pulse 2s infinite ease-in-out',
         float: 'float 6s ease-in-out infinite',
         gradient: 'gradient 3s linear infinite',
+        slideInLeft: 'slideInLeft 0.5s ease-out forwards',
+        slideOutLeft: 'slideOutLeft 0.5s ease-in forwards',
       },
       keyframes: {
         'glow-pulse': {
@@ -100,6 +102,14 @@ export default {
           '50%': {
             'background-position': '100% 50%',
           },
+        },
+        slideInLeft: {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideOutLeft: {
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(-100%)', opacity: '0' },
         },
       },
       borderRadius: {

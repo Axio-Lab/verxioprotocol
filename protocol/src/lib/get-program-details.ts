@@ -2,6 +2,7 @@ import { VerxioContext } from '@schemas/verxio-context'
 import { validateCollectionState } from '@utils/validate-collection-state'
 import { fetchCollection } from '@metaplex-foundation/mpl-core'
 import { ATTRIBUTE_KEYS } from './constants'
+import { Broadcast } from '@lib/send-broadcast'
 
 export interface ProgramTier {
   name: string
@@ -15,6 +16,11 @@ export interface ProgramMetadata {
   [key: string]: any
 }
 
+export interface ProgramBroadcasts {
+  broadcasts: Broadcast[]
+  totalBroadcasts: number
+}
+
 export async function getProgramDetails(context: VerxioContext): Promise<{
   name: string
   uri: string
@@ -26,11 +32,13 @@ export async function getProgramDetails(context: VerxioContext): Promise<{
   tiers: ProgramTier[]
   pointsPerAction: Record<string, number>
   metadata: ProgramMetadata
+  broadcasts: ProgramBroadcasts
 }> {
   validateCollectionState(context)
 
   try {
     const collection = await fetchCollection(context.umi, context.collectionAddress!)
+    console.log('collection', collection)
 
     // Get attributes from the collection
     const attributes = collection.attributes?.attributeList || []
@@ -45,6 +53,10 @@ export async function getProgramDetails(context: VerxioContext): Promise<{
     const pointsPerAction = pointsAttr ? JSON.parse(pointsAttr.value) : {}
     const metadata = metadataAttr ? JSON.parse(metadataAttr.value) : {}
 
+    // Get broadcast data from app data plugin
+    const appDataPlugin = collection.appDatas?.[0]
+    const broadcastData = appDataPlugin?.data
+
     return {
       name: collection.name,
       uri: collection.uri,
@@ -56,6 +68,7 @@ export async function getProgramDetails(context: VerxioContext): Promise<{
       tiers,
       pointsPerAction,
       metadata,
+      broadcasts: broadcastData,
     }
   } catch (error) {
     throw new Error(`Failed to fetch program details: ${error}`)

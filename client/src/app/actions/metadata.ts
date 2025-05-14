@@ -1,7 +1,7 @@
 'use server'
 
 import { pinata } from '@/lib/config'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export const getMetadata = cache(async (uri: string) => {
   try {

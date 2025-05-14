@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { CreateRaffleData, RaffleFilter } from '@/types/raffle'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export const getRaffles = cache(async (filter: RaffleFilter) => {
   try {
@@ -24,18 +24,34 @@ export const getRaffles = cache(async (filter: RaffleFilter) => {
 
     // Get eligible participants count for each raffle
     const rafflesWithParticipants = await Promise.all(
-      raffles.map(async (raffle) => {
-        const passes = await prisma.loyaltyPass.findMany({
-          where: {
-            collection: raffle.programAddress,
-            ...(raffle.minTier ? { tier: { gte: raffle.minTier } } : {}),
-          },
-        })
-        return {
-          ...raffle,
-          eligibleParticipants: passes.length,
-        }
-      }),
+      raffles.map(
+        async (raffle: {
+          programAddress: string
+          minTier: string | null
+          status: string
+          id: string
+          creator: string
+          winners: Array<{
+            id: string
+            raffleId: string
+            passPublicKey: string
+            position: number
+            claimed: boolean
+            claimedAt: Date | null
+          }>
+        }) => {
+          const passes = await prisma.loyaltyPass.findMany({
+            where: {
+              collection: raffle.programAddress,
+              ...(raffle.minTier ? { tier: { gte: Number(raffle.minTier) } } : {}),
+            },
+          })
+          return {
+            ...raffle,
+            eligibleParticipants: passes.length,
+          }
+        },
+      ),
     )
 
     return rafflesWithParticipants

@@ -14,6 +14,7 @@ On-chain loyalty protocol powered by Metaplex's CORE for creating and managing l
 - Gift points to users with custom actions
 - Comprehensive asset data and customer behaviour tracking
 - Flexible authority management for loyalty programs and loyalty pass updates
+- Direct messaging between program and pass holders with support for program-wide broadcasts
 
 ## Installation
 
@@ -311,6 +312,139 @@ await approveTransfer(context, {
   passAddress: publicKey('PASS_ADDRESS'),
   toAddress: publicKey('NEW_OWNER_ADDRESS'),
 })
+```
+
+### Send Message
+
+```typescript
+const result = await sendMessage(context, {
+  passAddress: publicKey('PASS_ADDRESS'),
+  message: 'Welcome to our loyalty program!',
+  sender: programAuthority.publicKey,
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+console.log(result)
+// {
+//   signature: string,  // Transaction signature
+//   message: {
+//     id: string,      // Unique message ID
+//     content: string, // Message content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Message timestamp
+//     read: boolean    // Message read status
+//   }
+// }
+```
+
+### Mark Message as Read
+
+```typescript
+const result = await markMessageRead(context, {
+  passAddress: publicKey('PASS_ADDRESS'),
+  messageId: 'MESSAGE_ID',
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+console.log(result)
+// {
+//   signature: string  // Transaction signature
+// }
+```
+
+### Get Asset Messages
+
+```typescript
+const messages = await getAssetMessages(context, publicKey('PASS_ADDRESS'))
+
+console.log(messages)
+// {
+//   stats: {
+//     total: number,   // Total number of messages
+//     unread: number,  // Number of unread messages
+//     read: number     // Number of read messages
+//   },
+//   messages: Array<{
+//     id: string,      // Message ID
+//     content: string, // Message content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Message timestamp
+//     read: boolean    // Message read status
+//   }>
+// }
+```
+
+### Send Broadcast
+
+```typescript
+// Send broadcast to all holders
+const result = await sendBroadcast(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  message: 'Welcome to our loyalty program!',
+  sender: programAuthority.publicKey,
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+// Send broadcast to specific holders
+const specificResult = await sendBroadcast(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  message: 'VIP announcement',
+  sender: programAuthority.publicKey,
+  signer: updateAuthority,
+})
+
+console.log(result)
+// {
+//   signature: string,  // Transaction signature
+//   broadcast: {
+//     id: string,      // Unique broadcast ID
+//     content: string, // Broadcast content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Broadcast timestamp
+//     read: boolean,   // Broadcast read status
+//     recipients?: {   // Optional recipient information
+//       type: 'all' | 'tier' | 'specific',
+//       value?: string[] // For 'tier': tier names, For 'specific': holder addresses
+//     }
+//   }
+// }
+```
+
+### Mark Broadcast as Read
+
+```typescript
+const result = await markBroadcastRead(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  broadcastId: 'BROADCAST_ID',
+  signer: updateAuthority, // Required: Program authority of the Loyalty Program
+})
+
+console.log(result)
+// {
+//   signature: string  // Transaction signature
+// }
+```
+
+### Get Program Broadcasts
+
+```typescript
+const broadcasts = await getProgramDetails(context)
+
+console.log(broadcasts.broadcasts)
+// {
+//   broadcasts: Array<{
+//     id: string,      // Broadcast ID
+//     content: string, // Broadcast content
+//     sender: string,  // Sender's public key
+//     timestamp: number, // Broadcast timestamp
+//     read: boolean,   // Broadcast read status
+//     recipients?: {   // Optional recipient information
+//       type: 'all' | 'tier' | 'specific',
+//       value?: string[] // For 'tier': tier names, For 'specific': holder addresses
+//     }
+//   }>,
+//   totalBroadcasts: number // Total number of broadcasts
+// }
 ```
 
 ## License

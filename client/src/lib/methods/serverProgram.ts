@@ -1,6 +1,4 @@
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
-import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
-import { httpDownloader } from '@metaplex-foundation/umi-downloader-http'
 import { publicKey } from '@metaplex-foundation/umi'
 import { VerxioContext } from '@verxioprotocol/core'
 
@@ -17,7 +15,7 @@ export function createServerProgram(
   network: Network = 'devnet',
 ): VerxioContext {
   const rpcEndpoint = RPC_ENDPOINTS[network]
-  const umi = createUmi(rpcEndpoint).use(mplTokenMetadata()).use(httpDownloader())
+  const umi = createUmi(rpcEndpoint)
 
   return {
     umi,

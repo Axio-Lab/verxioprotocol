@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 import { createServerProgram, Network } from '@/lib/methods/serverProgram'
 import { getAssetData } from '@verxioprotocol/core'
 import { publicKey } from '@metaplex-foundation/umi'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 
 export interface LeaderboardMember {
   address: string
@@ -38,7 +38,7 @@ export const getLeaderboard = cache(async (creator: string, network: string): Pr
     const passes = await prisma.loyaltyPass.findMany({
       where: {
         collection: {
-          in: programs.map((program) => program.publicKey),
+          in: programs.map((program: { publicKey: string }) => program.publicKey),
         },
         network: network,
       },
@@ -52,7 +52,7 @@ export const getLeaderboard = cache(async (creator: string, network: string): Pr
     const members: LeaderboardMember[] = await Promise.all(
       Object.entries(
         passes.reduce(
-          (acc, pass) => {
+          (acc: Record<string, typeof passes>, pass: { recipient: string; publicKey: string }) => {
             if (!acc[pass.recipient]) {
               acc[pass.recipient] = []
             }
@@ -61,7 +61,7 @@ export const getLeaderboard = cache(async (creator: string, network: string): Pr
           },
           {} as Record<string, typeof passes>,
         ),
-      ).map(async ([address, memberPasses]) => {
+      ).map(async ([address, memberPasses]: [string, typeof passes]) => {
         let totalXp = 0
         let lastAction: string | null = null
 

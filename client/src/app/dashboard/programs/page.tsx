@@ -65,13 +65,13 @@ export default function ProgramsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
+    <div className="space-y-6 ">
+      <div className="flex flex-col md:flex-row items-start gap-5 justify-between md:items-center w-full">
+        <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-transparent bg-clip-text orbitron">
           Loyalty Programs
         </h1>
-        <Link href="/dashboard/programs/new">
-          <Button className="bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white hover:opacity-90 orbitron">
+        <Link className="self-end md:self-auto" href="/dashboard/programs/new">
+          <Button className=" bg-gradient-to-r from-[#00FFE0] via-[#0085FF] to-[#7000FF] text-white hover:opacity-90 orbitron">
             <Plus className="mr-2 h-4 w-4" />
             Create Program
           </Button>
@@ -80,7 +80,7 @@ export default function ProgramsPage() {
 
       {programs.length === 0 ? (
         <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20">
-          <CardContent className="flex flex-col items-center justify-center py-12">
+          <CardContent className="flex flex-col items-center text-center justify-center py-12">
             <Gift className="h-12 w-12 text-[#00FFE0] mb-4" />
             <h3 className="text-lg font-semibold text-white mb-2">No Programs Yet</h3>
             <p className="text-white/70 mb-6">Create your first loyalty program to start rewarding your customers</p>

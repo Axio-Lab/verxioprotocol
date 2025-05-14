@@ -2,6 +2,7 @@ import { PublicKey as UmiPublicKey } from '@metaplex-foundation/umi'
 import { fetchAsset, fetchCollection } from '@metaplex-foundation/mpl-core'
 import { VerxioContext } from '@schemas/verxio-context'
 import { PLUGIN_TYPES, ATTRIBUTE_KEYS } from '@lib/constants'
+import { Broadcast } from '@lib/send-broadcast'
 
 export interface AssetData {
   xp: number
@@ -29,6 +30,11 @@ export interface AssetData {
     xpRequired: number
     rewards: string[]
   }>
+  broadcasts: {
+    broadcasts: Broadcast[]
+    totalBroadcasts: number
+    unreadBroadcasts: number
+  }
 }
 
 export async function getAssetData(context: VerxioContext, passAddress: UmiPublicKey): Promise<AssetData | null> {
@@ -51,6 +57,7 @@ export async function getAssetData(context: VerxioContext, passAddress: UmiPubli
 
     const tierAttr = collection.attributes?.attributeList.find((attr) => attr.key === ATTRIBUTE_KEYS.TIERS)
     const rewardTiers = tierAttr ? JSON.parse(tierAttr.value) : {}
+    const broadcasts = collection.appDatas?.[0].data
 
     return {
       ...appDataPlugin.data,
@@ -60,6 +67,7 @@ export async function getAssetData(context: VerxioContext, passAddress: UmiPubli
       pass: asset.publicKey.toString(),
       metadata,
       rewardTiers,
+      broadcasts,
     }
   } catch (error) {
     // Return null if the asset is not found

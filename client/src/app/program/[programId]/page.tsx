@@ -35,7 +35,9 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
         setIsLoading(false)
         return
       }
-
+      if (program) {
+        return
+      }
       try {
         setError(null)
         const details = await getProgramDetails(resolvedParams.programId)

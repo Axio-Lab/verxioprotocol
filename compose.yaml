@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: verxio
+      POSTGRES_PASSWORD: verxio
+      POSTGRES_DB: verxio
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  validator:
+    image: ghcr.io/samui-build/samui-test-validator:latest
+    ports:
+      - '8899:8899'
+      - '8900:8900'
+
+volumes:
+  postgres_data:

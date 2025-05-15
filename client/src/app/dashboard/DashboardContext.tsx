@@ -1,28 +1,41 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 interface DashboardContextType {
-  isSidebarOpen: boolean
   isOrganization: boolean
-  toggleSidebar: () => void
-  setIsSidebarOpen: (value: boolean) => void
   setIsOrganization: (value: boolean) => void
+  isSidebarOpen: boolean
+  setIsSidebarOpen: (value: boolean) => void
+  toggleSidebar: () => void
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined)
 
-export function DashboardProvider({ children }: { children: ReactNode }) {
+export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [isOrganization, setIsOrganization] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const pathname = usePathname()
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
+  useEffect(() => {
+    // Set the view based on the current route
+    setIsOrganization(!pathname.includes('/dashboard/user'))
+  }, [pathname])
+
   return (
     <DashboardContext.Provider
-      value={{ isOrganization, setIsOrganization, toggleSidebar, isSidebarOpen, setIsSidebarOpen }}
+      value={{
+        isOrganization,
+        setIsOrganization,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        toggleSidebar,
+      }}
     >
       {children}
     </DashboardContext.Provider>

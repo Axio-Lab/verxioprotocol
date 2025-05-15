@@ -59,7 +59,6 @@ export const getLoyaltyPasses = cache(async (recipient: string, network: string)
         createdAt: 'desc',
       },
     })
-
     // Then fetch asset data and images for each pass
     const passesWithDetails = await Promise.all(
       dbPasses.map(async (pass: { recipient: string; publicKey: string }) => {

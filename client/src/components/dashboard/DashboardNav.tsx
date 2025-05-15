@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, Users, Trophy, Copy, LogOut, Gift, Award } from 'lucide-react'
+import { LayoutDashboard, Building2, Users, Trophy, Copy, LogOut, Gift, Award, Bell } from 'lucide-react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -14,32 +14,34 @@ interface DashboardNavProps {
   setIsSidebarOpen: (value: boolean) => void
 }
 
+interface NavItem {
+  title: string
+  href: string
+  icon: any
+  exact: boolean
+  badge?: string
+}
+
 export default function DashboardNav({ isOrganization, isSmallDevices, setIsSidebarOpen }: DashboardNavProps) {
   const pathname = usePathname()
   const { connected, publicKey, disconnect } = useWallet()
 
-  const userNavItems = [
+  const userNavItems: NavItem[] = [
     {
       title: 'Overview',
-      href: '/dashboard',
+      href: '/dashboard/user',
       icon: LayoutDashboard,
       exact: true,
     },
     {
-      title: 'Contests',
-      href: '/dashboard/contest',
-      icon: Award,
-      exact: false,
-    },
-    {
-      title: 'Raffles',
-      href: '/dashboard/raffle',
-      icon: Gift,
+      title: 'Notifications',
+      href: '/dashboard/user/notifications',
+      icon: Bell,
       exact: false,
     },
   ]
 
-  const organizationNavItems = [
+  const organizationNavItems: NavItem[] = [
     {
       title: 'Overview',
       href: '/dashboard',
@@ -53,15 +55,9 @@ export default function DashboardNav({ isOrganization, isSmallDevices, setIsSide
       exact: false,
     },
     {
-      title: 'Contests',
-      href: '/dashboard/contest',
-      icon: Award,
-      exact: false,
-    },
-    {
-      title: 'Raffles',
-      href: '/dashboard/raffle',
-      icon: Gift,
+      title: 'Notifications',
+      href: '/dashboard/notifications',
+      icon: Bell,
       exact: false,
     },
     {
@@ -122,6 +118,11 @@ export default function DashboardNav({ isOrganization, isSmallDevices, setIsSide
               >
                 <Icon className={`h-4 w-4 ${isActive ? 'text-verxio-purple' : ''}`} />
                 <span className="text-sm font-medium">{item.title}</span>
+                {item.badge && (
+                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-verxio-purple/20 text-verxio-purple">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             )
           })}

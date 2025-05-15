@@ -6,12 +6,10 @@ import { awardPoints, revokePoints, giftPoints } from '@/lib/methods/manageLoyal
 import { convertSecretKeyToKeypair } from '@/lib/utils'
 import { getPassCollection, storeLoyaltyPass } from './loyalty'
 import { getProgramAuthorityAccount } from './program'
-import { unstable_cache as cache } from 'next/cache'
+import { cache } from 'react'
 import bs58 from 'bs58'
 import { Network } from '@/lib/methods/serverProgram'
 import { createServerContextWithFeePayer } from '@/lib/methods/serverContext'
-import { fromWeb3JsKeypair } from '@metaplex-foundation/umi-web3js-adapters'
-import { Keypair as Web3JsKeypair } from '@solana/web3.js'
 
 interface IssuePassInput {
   collectionAddress: string
@@ -54,8 +52,11 @@ export const issuePasses = cache(async (inputs: IssuePassInput[]) => {
           programAuthorityAccount,
         )
 
-        const programSigner = fromWeb3JsKeypair(Web3JsKeypair.fromSecretKey(Uint8Array.from(programAuthorityAccount)))
-        const assetSigner = Web3JsKeypair.generate()
+        const programSigner = createSignerFromKeypair(
+          serverContext.umi,
+          convertSecretKeyToKeypair(programAuthorityAccount),
+        )
+        const assetSigner = generateSigner(serverContext.umi)
         const result = await issueNewLoyaltyPass(serverContext, {
           collectionAddress: input.collectionAddress,
           recipient: input.recipient,
@@ -108,7 +109,10 @@ export const awardPointsToPasses = cache(async (inputs: AwardPointsInput[]) => {
           input.network as Network,
           programAuthorityAccount,
         )
-        const programSigner = fromWeb3JsKeypair(Web3JsKeypair.fromSecretKey(Uint8Array.from(programAuthorityAccount)))
+        const programSigner = createSignerFromKeypair(
+          serverContext.umi,
+          convertSecretKeyToKeypair(programAuthorityAccount),
+        )
         return await awardPoints(serverContext, {
           passAddress: input.passAddress,
           action: input.action,
@@ -138,7 +142,11 @@ export const giftPointsToPasses = cache(async (inputs: GiftPointsInput[]) => {
           input.network as Network,
           programAuthorityAccount,
         )
-        const programSigner = fromWeb3JsKeypair(Web3JsKeypair.fromSecretKey(Uint8Array.from(programAuthorityAccount)))
+        const programSigner = createSignerFromKeypair(
+          serverContext.umi,
+          convertSecretKeyToKeypair(programAuthorityAccount),
+        )
+
         return await giftPoints(serverContext, {
           passAddress: input.passAddress,
           pointsToGift: input.pointsToGift,
@@ -169,8 +177,11 @@ export const revokePointsFromPasses = cache(async (inputs: RevokePointsInput[]) 
           input.network as Network,
           programAuthorityAccount,
         )
+        const programSigner = createSignerFromKeypair(
+          serverContext.umi,
+          convertSecretKeyToKeypair(programAuthorityAccount),
+        )
 
-        const programSigner = fromWeb3JsKeypair(Web3JsKeypair.fromSecretKey(Uint8Array.from(programAuthorityAccount)))
         return await revokePoints(serverContext, {
           passAddress: input.passAddress,
           pointsToRevoke: input.pointsToRevoke,

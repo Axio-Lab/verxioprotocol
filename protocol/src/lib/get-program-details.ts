@@ -38,7 +38,6 @@ export async function getProgramDetails(context: VerxioContext): Promise<{
 
   try {
     const collection = await fetchCollection(context.umi, context.collectionAddress!)
-    console.log('collection', collection)
 
     // Get attributes from the collection
     const attributes = collection.attributes?.attributeList || []

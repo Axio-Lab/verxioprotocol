@@ -60,7 +60,7 @@ export interface ProgramWithDetails {
   details: ProgramDetails
 }
 
-export const getProgramStats = cache(async (creator: string, network: string): Promise<ProgramStats> => {
+export const getProgramStats = async (creator: string, network: string): Promise<ProgramStats> => {
   try {
     if (!creator) {
       throw new Error('Creator address is required')
@@ -137,256 +137,264 @@ export const getProgramStats = cache(async (creator: string, network: string): P
     console.error('Error fetching program stats:', error)
     throw new Error('Failed to fetch program stats')
   }
-})
+}
 
-export const getProgramDetails = cache(async (programId: string): Promise<ProgramDetails> => {
-  try {
-    if (!programId) {
-      throw new Error('Program ID is required')
-    }
-
-    // Get the program's network from the database
-    const network = await getProgramNetwork(programId)
-    if (!network) {
-      throw new Error('Program not found')
-    }
-
-    // Create server context for this program
-    const context = createServerProgram(programId, programId, network as Network)
-
-    // Get program details using the context
-    const details = await getProgramDetailsCore(context)
-    if (!details) {
-      throw new Error('Failed to fetch program details')
-    }
-
-    // Get fee payer from database
-    const program = await prisma.loyaltyProgram.findFirst({
-      where: {
-        publicKey: programId,
-      },
-      select: {
-        programAuthorityPublic: true,
-      },
-    })
-
-    return {
-      ...details,
-      network: network,
-      feeAddress: program?.programAuthorityPublic || '',
-      metadata: {
-        ...details.metadata,
-        brandColor: details.metadata?.brandColor || '#000000',
-      },
-    }
-  } catch (error) {
-    console.error('Error fetching program details:', error)
-    throw new Error('Failed to fetch program details')
-  }
-})
-
-export const getPrograms = cache(async (creator: string, network: string): Promise<ProgramWithDetails[]> => {
-  try {
-    if (!creator) {
-      throw new Error('Creator address is required')
-    }
-
-    if (!network) {
-      throw new Error('Network is required')
-    }
-
-    // First, get programs from database
-    const dbPrograms = await prisma.loyaltyProgram.findMany({
-      where: {
-        creator: creator,
-        network: network,
-      },
-      select: {
-        publicKey: true,
-        programAuthorityPublic: true,
-        creator: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-    console.log(dbPrograms)
-    // Then fetch program details for each program
-    const programsWithDetails = await Promise.all(
-      dbPrograms.map(async (program: { creator: string; publicKey: string; programAuthorityPublic: string }) => {
-        try {
-          const context = createServerProgram(program.creator, program.publicKey, network as Network)
-          const details = await getProgramDetailsCore(context)
-
-          if (!details) {
-            throw new Error('Failed to fetch program details')
-          }
-
-          const programDetails: ProgramDetails = {
-            name: details.name || '',
-            uri: details.uri || '',
-            collectionAddress: program.publicKey,
-            updateAuthority: details.updateAuthority || program.creator,
-            numMinted: details.numMinted || 0,
-            transferAuthority: details.transferAuthority || program.creator,
-            creator: program.creator,
-            tiers: details.tiers || [],
-            pointsPerAction: details.pointsPerAction || {},
-            metadata: {
-              organizationName: details.metadata?.organizationName || '',
-              brandColor: details.metadata?.brandColor || '#000000',
-            },
-            network: network,
-            feeAddress: program.programAuthorityPublic || '',
-          }
-
-          return { details: programDetails }
-        } catch (error) {
-          console.error(`Error fetching details for program ${program.publicKey}:`, error)
-          throw new Error('Failed to fetch program details')
-        }
-      }),
-    )
-
-    return programsWithDetails
-  } catch (error) {
-    console.error('Error fetching programs:', error)
-    throw new Error('Failed to fetch programs')
-  }
-})
-
-export const getProgramMembers = cache(async (creator: string, network: string): Promise<Member[]> => {
-  try {
-    if (!creator) {
-      throw new Error('Creator address is required')
-    }
-
-    if (!network) {
-      throw new Error('Valid network is required')
-    }
-
-    // Get all programs created by the user
-    const programs = await prisma.loyaltyProgram.findMany({
-      where: {
-        creator: creator,
-        network: network,
-      },
-      select: {
-        publicKey: true,
-      },
-    })
-
-    // Get all passes associated with these programs
-    const passes = await prisma.loyaltyPass.findMany({
-      where: {
-        collection: {
-          in: programs.map((program: { publicKey: string }) => program.publicKey),
-        },
-        network: network,
-      },
-      select: {
-        recipient: true,
-        publicKey: true,
-      },
-    })
-
-    // Group passes by recipient
-    const passesByRecipient = passes.reduce(
-      (
-        acc: Record<string, { publicKey: string; recipient: string }[]>,
-        pass: { publicKey: string; recipient: string },
-      ) => {
-        if (!acc[pass.recipient]) {
-          acc[pass.recipient] = []
-        }
-        acc[pass.recipient].push(pass)
-        return acc
-      },
-      {} as Record<string, { publicKey: string; recipient: string }[]>,
-    )
-
-    // Get detailed pass information for each member
-    const members: Member[] = await Promise.all(
-      Object.entries(passesByRecipient).map(async ([address, memberPasses]) => {
-        const passesWithDetails = await Promise.all(
-          (memberPasses as typeof passes).map(async (pass: { publicKey: string }) => {
-            try {
-              const context = createServerProgram(creator, pass.publicKey, network as Network)
-              const details = await getAssetData(context, publicKey(pass.publicKey))
-              if (!details) return null
-
-              const memberPass: MemberPass = {
-                publicKey: pass.publicKey,
-                name: details.name,
-                xp: details.xp,
-                lastAction: details.lastAction,
-                actionHistory: details.actionHistory,
-                currentTier: details.currentTier,
-                tierUpdatedAt: details.tierUpdatedAt,
-                rewards: details.rewards,
-              }
-              return memberPass
-            } catch (error) {
-              console.error(`Error fetching details for pass ${pass.publicKey}:`, error)
-              return null
-            }
-          }),
-        )
-
-        const validPasses = passesWithDetails.filter((pass: MemberPass | null): pass is MemberPass => pass !== null)
-        const totalXp = validPasses.reduce((sum: number, pass: MemberPass) => sum + pass.xp, 0)
-
-        return {
-          address,
-          passes: validPasses,
-          totalXp,
-        }
-      }),
-    )
-
-    // Sort members by total XP
-    return members.sort((a, b) => b.totalXp - a.totalXp)
-  } catch (error) {
-    console.error('Error fetching program members:', error)
-    throw new Error('Failed to fetch program members')
-  }
-})
-
-export const storeLoyaltyProgram = cache(
-  async (data: {
-    creator: string
-    publicKey: string
-    privateKey: string
-    signature: string
-    network: string
-    programAuthorityPrivate: string
-    programAuthorityPublic: string
-  }) => {
+export const getProgramDetails = cache(
+  async (programId: string): Promise<ProgramDetails> => {
     try {
-      const { creator, publicKey, privateKey, signature, network, programAuthorityPrivate, programAuthorityPublic } =
-        data
+      if (!programId) {
+        throw new Error('Program ID is required')
+      }
 
-      const program = await prisma.loyaltyProgram.create({
-        data: {
-          creator,
-          publicKey,
-          privateKey,
-          signature,
-          network,
-          programAuthorityPrivate,
-          programAuthorityPublic,
+      // Get the program's network from the database
+      const network = await getProgramNetwork(programId)
+      if (!network) {
+        throw new Error('Program not found')
+      }
+
+      // Create server context for this program
+      const context = createServerProgram(programId, programId, network as Network)
+
+      // Get program details using the context
+      const details = await getProgramDetailsCore(context)
+      if (!details) {
+        throw new Error('Failed to fetch program details')
+      }
+
+      // Get fee payer from database
+      const program = await prisma.loyaltyProgram.findFirst({
+        where: {
+          publicKey: programId,
+        },
+        select: {
+          programAuthorityPublic: true,
         },
       })
 
-      return program
+      return {
+        ...details,
+        network: network,
+        feeAddress: program?.programAuthorityPublic || '',
+        metadata: {
+          ...details.metadata,
+          brandColor: details.metadata?.brandColor || '#000000',
+        },
+      }
     } catch (error) {
-      console.error('Error storing loyalty program:', error)
-      throw new Error('Failed to store loyalty program')
+      console.error('Error fetching program details:', error)
+      throw new Error('Failed to fetch program details')
     }
   },
+  ['program-details'],
+  { revalidate: 30 },
 )
 
-export const getProgramAuthorityAccount = cache(async (programAddress: string): Promise<string> => {
+export const getPrograms = cache(
+  async (creator: string, network: string): Promise<ProgramWithDetails[]> => {
+    try {
+      if (!creator) {
+        throw new Error('Creator address is required')
+      }
+
+      if (!network) {
+        throw new Error('Network is required')
+      }
+
+      // First, get programs from database
+      const dbPrograms = await prisma.loyaltyProgram.findMany({
+        where: {
+          creator: creator,
+          network: network,
+        },
+        select: {
+          publicKey: true,
+          programAuthorityPublic: true,
+          creator: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+      // Then fetch program details for each program
+      const programsWithDetails = await Promise.all(
+        dbPrograms.map(async (program: { creator: string; publicKey: string; programAuthorityPublic: string }) => {
+          try {
+            const context = createServerProgram(program.creator, program.publicKey, network as Network)
+            const details = await getProgramDetailsCore(context)
+
+            if (!details) {
+              throw new Error('Failed to fetch program details')
+            }
+
+            const programDetails: ProgramDetails = {
+              name: details.name || '',
+              uri: details.uri || '',
+              collectionAddress: program.publicKey,
+              updateAuthority: details.updateAuthority || program.creator,
+              numMinted: details.numMinted || 0,
+              transferAuthority: details.transferAuthority || program.creator,
+              creator: program.creator,
+              tiers: details.tiers || [],
+              pointsPerAction: details.pointsPerAction || {},
+              metadata: {
+                organizationName: details.metadata?.organizationName || '',
+                brandColor: details.metadata?.brandColor || '#000000',
+              },
+              network: network,
+              feeAddress: program.programAuthorityPublic || '',
+            }
+
+            return { details: programDetails }
+          } catch (error) {
+            console.error(`Error fetching details for program ${program.publicKey}:`, error)
+            throw new Error('Failed to fetch program details')
+          }
+        }),
+      )
+
+      return programsWithDetails
+    } catch (error) {
+      console.error('Error fetching programs:', error)
+      throw new Error('Failed to fetch programs')
+    }
+  },
+  ['programs'],
+  { revalidate: 30 },
+)
+
+export const getProgramMembers = cache(
+  async (creator: string, network: string): Promise<Member[]> => {
+    try {
+      if (!creator) {
+        throw new Error('Creator address is required')
+      }
+
+      if (!network) {
+        throw new Error('Valid network is required')
+      }
+
+      // Get all programs created by the user
+      const programs = await prisma.loyaltyProgram.findMany({
+        where: {
+          creator: creator,
+          network: network,
+        },
+        select: {
+          publicKey: true,
+        },
+      })
+
+      // Get all passes associated with these programs
+      const passes = await prisma.loyaltyPass.findMany({
+        where: {
+          collection: {
+            in: programs.map((program: { publicKey: string }) => program.publicKey),
+          },
+          network: network,
+        },
+        select: {
+          recipient: true,
+          publicKey: true,
+        },
+      })
+
+      // Group passes by recipient
+      const passesByRecipient = passes.reduce(
+        (
+          acc: Record<string, { publicKey: string; recipient: string }[]>,
+          pass: { publicKey: string; recipient: string },
+        ) => {
+          if (!acc[pass.recipient]) {
+            acc[pass.recipient] = []
+          }
+          acc[pass.recipient].push(pass)
+          return acc
+        },
+        {} as Record<string, { publicKey: string; recipient: string }[]>,
+      )
+
+      // Get detailed pass information for each member
+      const members: Member[] = await Promise.all(
+        Object.entries(passesByRecipient).map(async ([address, memberPasses]) => {
+          const passesWithDetails = await Promise.all(
+            (memberPasses as typeof passes).map(async (pass: { publicKey: string }) => {
+              try {
+                const context = createServerProgram(creator, pass.publicKey, network as Network)
+                const details = await getAssetData(context, publicKey(pass.publicKey))
+                if (!details) return null
+
+                const memberPass: MemberPass = {
+                  publicKey: pass.publicKey,
+                  name: details.name,
+                  xp: details.xp,
+                  lastAction: details.lastAction,
+                  actionHistory: details.actionHistory,
+                  currentTier: details.currentTier,
+                  tierUpdatedAt: details.tierUpdatedAt,
+                  rewards: details.rewards,
+                }
+                return memberPass
+              } catch (error) {
+                console.error(`Error fetching details for pass ${pass.publicKey}:`, error)
+                return null
+              }
+            }),
+          )
+
+          const validPasses = passesWithDetails.filter((pass: MemberPass | null): pass is MemberPass => pass !== null)
+          const totalXp = validPasses.reduce((sum: number, pass: MemberPass) => sum + pass.xp, 0)
+
+          return {
+            address,
+            passes: validPasses,
+            totalXp,
+          }
+        }),
+      )
+
+      // Sort members by total XP
+      return members.sort((a, b) => b.totalXp - a.totalXp)
+    } catch (error) {
+      console.error('Error fetching program members:', error)
+      throw new Error('Failed to fetch program members')
+    }
+  },
+  ['program-members'],
+  { revalidate: 30 },
+)
+
+export const storeLoyaltyProgram = async (data: {
+  creator: string
+  publicKey: string
+  privateKey: string
+  signature: string
+  network: string
+  programAuthorityPrivate: string
+  programAuthorityPublic: string
+}) => {
+  try {
+    const { creator, publicKey, privateKey, signature, network, programAuthorityPrivate, programAuthorityPublic } = data
+
+    const program = await prisma.loyaltyProgram.create({
+      data: {
+        creator,
+        publicKey,
+        privateKey,
+        signature,
+        network,
+        programAuthorityPrivate,
+        programAuthorityPublic,
+      },
+    })
+
+    return program
+  } catch (error) {
+    console.error('Error storing loyalty program:', error)
+    throw new Error('Failed to store loyalty program')
+  }
+}
+
+export const getProgramAuthorityAccount = async (programAddress: string): Promise<string> => {
   try {
     if (!programAddress) {
       throw new Error('Program address is required')
@@ -410,4 +418,4 @@ export const getProgramAuthorityAccount = cache(async (programAddress: string): 
     console.error('Error getting fee payer account:', error)
     throw new Error('Failed to get fee payer account')
   }
-})
+}

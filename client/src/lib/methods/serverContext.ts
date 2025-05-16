@@ -6,10 +6,8 @@ import { getAssetData, getProgramDetails } from '@verxioprotocol/core'
 export function createServerContextWithFeePayer(collectionAddress: string, network: Network, feePayer: string) {
   const serverContext = createServerProgram(collectionAddress, collectionAddress, network)
   const keypair = createSignerFromKeypair(serverContext.umi, convertSecretKeyToKeypair(feePayer))
-  console.log('keypair signer...', keypair)
   serverContext.umi.use(signerIdentity(keypair))
   serverContext.umi.use(keypairIdentity(keypair))
-  console.log('serverContext', serverContext)
   return serverContext
 }
 

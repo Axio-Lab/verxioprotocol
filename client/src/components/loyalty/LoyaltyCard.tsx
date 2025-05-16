@@ -183,14 +183,14 @@ export default function LoyaltyCard({
                 </Badge>
               </div>
             )}
-            <div className="space-y-1">
+            {/* <div className="space-y-1">
               <p className="text-[10.5px] text-white/50 font-mono truncate" title={owner}>
                 Owner: {owner}
               </p>
               <p className="text-[10.5px] text-white/50 font-mono truncate" title={loyaltyPassAddress}>
                 Pass: {loyaltyPassAddress}
               </p>
-            </div>
+            </div> */}
             <div className="pt-4 border-t border-white/10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-white/50 text-sm">

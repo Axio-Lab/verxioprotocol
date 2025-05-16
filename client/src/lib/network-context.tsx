@@ -12,9 +12,14 @@ interface NetworkContextType {
 
 const NetworkContext = createContext<NetworkContextType | undefined>(undefined)
 
+// export const RPC_ENDPOINTS = {
+//   devnet: `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
+//   'mainnet-beta': `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
+// }
+
 export const RPC_ENDPOINTS = {
-  devnet: `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
-  'mainnet-beta': `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
+  devnet: `https://api.devnet.solana.com`,
+  'mainnet-beta': `https://api.mainnet-beta.solana.com`,
 }
 
 export function NetworkProvider({ children }: { children: ReactNode }) {

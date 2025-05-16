@@ -210,7 +210,7 @@ export const getPrograms = cache(async (creator: string, network: string): Promi
         createdAt: 'desc',
       },
     })
-
+    console.log(dbPrograms)
     // Then fetch program details for each program
     const programsWithDetails = await Promise.all(
       dbPrograms.map(async (program: { creator: string; publicKey: string; programAuthorityPublic: string }) => {

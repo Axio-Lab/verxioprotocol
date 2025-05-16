@@ -168,7 +168,7 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1fr_450px]">
           {/* Left Column - Program Details */}
           <div className="space-y-4 sm:space-y-6">
-            <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20">
+            {/* <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Program Details</CardTitle>
               </CardHeader>
@@ -198,9 +198,9 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20">
+            {/* <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Reward Tiers</CardTitle>
               </CardHeader>
@@ -221,7 +221,7 @@ export default function PublicProgramPage({ params }: { params: Promise<{ progra
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card className="bg-black/20 backdrop-blur-sm border-slate-800/20">
               <CardHeader className="p-4 sm:p-6">

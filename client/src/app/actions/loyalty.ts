@@ -39,7 +39,7 @@ export interface PassWithImage {
   bannerImage?: string
 }
 
-export const getLoyaltyPasses = cache(async (recipient: string, network: string): Promise<PassWithImage[]> => {
+export const getLoyaltyPasses = async (recipient: string, network: string): Promise<PassWithImage[]> => {
   try {
     if (!recipient) {
       throw new Error('Recipient address is required')
@@ -108,115 +108,121 @@ export const getLoyaltyPasses = cache(async (recipient: string, network: string)
     console.error('Error fetching loyalty passes:', error)
     throw new Error('Failed to fetch loyalty passes')
   }
-})
+}
 
-export const getPassDetails = cache(async (passId: string) => {
-  try {
-    if (!passId) {
-      throw new Error('Pass ID is required')
-    }
-
-    // Get the pass details from our database
-    const pass = await prisma.loyaltyPass.findFirst({
-      where: {
-        publicKey: passId,
-      },
-    })
-
-    if (!pass) {
-      throw new Error('Pass not found')
-    }
-
-    // Get the program's network from the database
-    const network = await getProgramNetwork(pass.collection)
-    if (!network) {
-      throw new Error('Program not found')
-    }
-
-    // Create server context for this program
-    const context = createServerProgram(
-      pass.collection, // Using collection as both authority and collection address
-      pass.collection,
-      network as Network,
-    )
-
-    // Get pass details using the context
-    const details = await getAssetData(context, publicKey(passId))
-
-    if (!details) {
-      throw new Error('Failed to fetch pass details')
-    }
-
-    // Fetch image if URI exists
-    let bannerImage: string | undefined
-    if (details.uri) {
-      bannerImage = await getImageFromMetadata(details.uri)
-    }
-
-    return {
-      ...details,
-      network,
-      bannerImage,
-    }
-  } catch (error) {
-    console.error('Error fetching pass details:', error)
-    throw new Error('Failed to fetch pass details')
-  }
-})
-
-export const storeLoyaltyPass = cache(
-  async (data: {
-    collection: string
-    recipient: string
-    publicKey: string
-    privateKey: string
-    signature: string
-    network: string
-  }) => {
+export const getPassDetails = cache(
+  async (passId: string) => {
     try {
-      const { collection, recipient, publicKey, privateKey, signature, network } = data
+      if (!passId) {
+        throw new Error('Pass ID is required')
+      }
 
-      const pass = await prisma.loyaltyPass.create({
-        data: {
-          collection,
-          recipient,
-          publicKey,
-          privateKey,
-          signature,
-          network,
+      // Get the pass details from our database
+      const pass = await prisma.loyaltyPass.findFirst({
+        where: {
+          publicKey: passId,
         },
       })
 
-      return pass
+      if (!pass) {
+        throw new Error('Pass not found')
+      }
+
+      // Get the program's network from the database
+      const network = await getProgramNetwork(pass.collection)
+      if (!network) {
+        throw new Error('Program not found')
+      }
+
+      // Create server context for this program
+      const context = createServerProgram(
+        pass.collection, // Using collection as both authority and collection address
+        pass.collection,
+        network as Network,
+      )
+
+      // Get pass details using the context
+      const details = await getAssetData(context, publicKey(passId))
+
+      if (!details) {
+        throw new Error('Failed to fetch pass details')
+      }
+
+      // Fetch image if URI exists
+      let bannerImage: string | undefined
+      if (details.uri) {
+        bannerImage = await getImageFromMetadata(details.uri)
+      }
+
+      return {
+        ...details,
+        network,
+        bannerImage,
+      }
     } catch (error) {
-      console.error('Error storing loyalty pass:', error)
-      throw new Error('Failed to store loyalty pass')
+      console.error('Error fetching pass details:', error)
+      throw new Error('Failed to fetch pass details')
     }
   },
+  ['pass-details'],
+  { revalidate: 30 },
 )
 
-export const getPassCollection = cache(async (passAddress: string) => {
+export const storeLoyaltyPass = async (data: {
+  collection: string
+  recipient: string
+  publicKey: string
+  privateKey: string
+  signature: string
+  network: string
+}) => {
   try {
-    if (!passAddress) {
-      throw new Error('Pass address is required')
-    }
+    const { collection, recipient, publicKey, privateKey, signature, network } = data
 
-    const pass = await prisma.loyaltyPass.findFirst({
-      where: {
-        publicKey: passAddress,
-      },
-      select: {
-        collection: true,
+    const pass = await prisma.loyaltyPass.create({
+      data: {
+        collection,
+        recipient,
+        publicKey,
+        privateKey,
+        signature,
+        network,
       },
     })
 
-    if (!pass) {
-      throw new Error('Pass not found')
-    }
-
-    return pass.collection
+    return pass
   } catch (error) {
-    console.error('Error getting pass collection:', error)
-    throw new Error('Failed to get pass collection')
+    console.error('Error storing loyalty pass:', error)
+    throw new Error('Failed to store loyalty pass')
   }
-})
+}
+
+export const getPassCollection = cache(
+  async (passAddress: string) => {
+    try {
+      if (!passAddress) {
+        throw new Error('Pass address is required')
+      }
+
+      const pass = await prisma.loyaltyPass.findFirst({
+        where: {
+          publicKey: passAddress,
+        },
+        select: {
+          collection: true,
+        },
+      })
+
+      if (!pass) {
+        throw new Error('Pass not found')
+      }
+
+      return pass.collection
+    } catch (error) {
+      console.error('Error getting pass collection:', error)
+      throw new Error('Failed to get pass collection')
+    }
+  },
+  ['pass-collection'],
+  { revalidate: 30 },
+)

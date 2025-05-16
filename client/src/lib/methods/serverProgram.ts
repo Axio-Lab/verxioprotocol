@@ -5,9 +5,14 @@ import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
 import { httpDownloader } from '@metaplex-foundation/umi-downloader-http'
 import { web3JsEddsa } from '@metaplex-foundation/umi-eddsa-web3js'
 
-const RPC_ENDPOINTS = {
-  devnet: `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
-  'mainnet-beta': `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
+// const RPC_ENDPOINTS = {
+//   devnet: `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
+//   'mainnet-beta': `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
+// }
+
+export const RPC_ENDPOINTS = {
+  devnet: `https://api.devnet.solana.com`,
+  'mainnet-beta': `https://api.mainnet-beta.solana.com`,
 }
 
 export type Network = 'devnet' | 'mainnet-beta'

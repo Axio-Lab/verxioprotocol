@@ -34,6 +34,12 @@ export default function DashboardNav({ isOrganization, isSmallDevices, setIsSide
       exact: true,
     },
     {
+      title: 'Campaigns',
+      href: '/dashboard/user/campaigns',
+      icon: Gift,
+      exact: false,
+    },
+    {
       title: 'Notifications',
       href: '/dashboard/user/notifications',
       icon: Bell,
@@ -52,6 +58,12 @@ export default function DashboardNav({ isOrganization, isSmallDevices, setIsSide
       title: 'Programs',
       href: '/dashboard/programs',
       icon: Building2,
+      exact: false,
+    },
+    {
+      title: 'Campaigns',
+      href: '/dashboard/campaigns',
+      icon: Gift,
       exact: false,
     },
     {

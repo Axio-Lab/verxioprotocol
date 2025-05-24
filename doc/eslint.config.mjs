@@ -20,9 +20,11 @@ const eslintConfig = [
       // Allow any types in documentation examples
       '@typescript-eslint/no-explicit-any': 'warn',
       // Allow empty functions in demo code
-      '@typescript-eslint/no-empty-function': 'off'
-    }
-  }
+      '@typescript-eslint/no-empty-function': 'off',
+    },
+  },
 ]
 
 export default eslintConfig
+
+

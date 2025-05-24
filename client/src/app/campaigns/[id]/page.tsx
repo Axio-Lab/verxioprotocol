@@ -9,11 +9,7 @@ import { Label } from '@/components/ui/label'
 import { CountdownTimer } from '@/components/campaign/CountdownTimer'
 import { toast } from 'sonner'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 // Mock data for now
 const mockCampaign = {
@@ -66,13 +62,11 @@ export default function CampaignPage() {
     setIsSubmitting(true)
     try {
       // TODO: Implement task submission with Verxio SDK
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API call
 
-      const newTasks = tasks.map(task =>
-        task.id === taskId ? { ...task, completed: true } : task
-      )
+      const newTasks = tasks.map((task) => (task.id === taskId ? { ...task, completed: true } : task))
       setTasks(newTasks)
-      setCurrentTaskIndex(prev => prev + 1)
+      setCurrentTaskIndex((prev) => prev + 1)
       setSubmissionUrl('')
       toast.success('Task completed successfully!')
     } catch (error) {
@@ -84,7 +78,7 @@ export default function CampaignPage() {
 
   const currentTask = tasks[currentTaskIndex]
   const isLastTask = currentTaskIndex === tasks.length - 1
-  const allTasksCompleted = tasks.every(task => task.completed)
+  const allTasksCompleted = tasks.every((task) => task.completed)
 
   return (
     <div className="container mx-auto py-8">
@@ -92,11 +86,7 @@ export default function CampaignPage() {
         {/* Left Column */}
         <div className="space-y-6">
           <div className="relative aspect-video rounded-lg overflow-hidden">
-            <img
-              src={mockCampaign.bannerImage}
-              alt={mockCampaign.title}
-              className="object-cover w-full h-full"
-            />
+            <img src={mockCampaign.bannerImage} alt={mockCampaign.title} className="object-cover w-full h-full" />
           </div>
 
           <CountdownTimer startDate={mockCampaign.startDate} endDate={mockCampaign.endDate} />
@@ -114,8 +104,8 @@ export default function CampaignPage() {
                       index === currentTaskIndex
                         ? 'bg-primary/10 border border-primary'
                         : task.completed
-                        ? 'bg-muted'
-                        : 'bg-background border'
+                          ? 'bg-muted'
+                          : 'bg-background border'
                     }`}
                   >
                     <div className="flex-1">
@@ -196,4 +186,4 @@ export default function CampaignPage() {
       </div>
     </div>
   )
-} 
+}

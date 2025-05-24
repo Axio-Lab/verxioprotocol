@@ -97,4 +97,4 @@ export function CountdownTimer({ startDate, endDate }: CountdownTimerProps) {
       </CardContent>
     </Card>
   )
-} 
+}

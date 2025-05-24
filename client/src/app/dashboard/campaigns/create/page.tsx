@@ -6,7 +6,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Plus, Trash2, ArrowRight, ArrowLeft as ArrowLeftIcon, Palette, PencilIcon, CheckIcon, XIcon } from 'lucide-react'
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  ArrowRight,
+  ArrowLeft as ArrowLeftIcon,
+  Palette,
+  PencilIcon,
+  CheckIcon,
+  XIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -70,14 +80,17 @@ export default function CreateCampaignPage() {
   }
 
   const addRewardTier = () => {
-    const newId = Math.max(...rewardTiers.map(tier => tier.id)) + 1
-    setRewardTiers([...rewardTiers, { 
-      id: newId, 
-      name: 'New Tier', 
-      xp: 0, 
-      description: '', 
-      color: '#CD7F32' 
-    }])
+    const newId = Math.max(...rewardTiers.map((tier) => tier.id)) + 1
+    setRewardTiers([
+      ...rewardTiers,
+      {
+        id: newId,
+        name: 'New Tier',
+        xp: 0,
+        description: '',
+        color: '#CD7F32',
+      },
+    ])
   }
 
   const resetToDefaultTiers = () => {
@@ -85,13 +98,11 @@ export default function CreateCampaignPage() {
   }
 
   const removeRewardTier = (id: number) => {
-    setRewardTiers(rewardTiers.filter(tier => tier.id !== id))
+    setRewardTiers(rewardTiers.filter((tier) => tier.id !== id))
   }
 
   const updateTier = (id: number, updates: Partial<RewardTier>) => {
-    setRewardTiers(rewardTiers.map(tier => 
-      tier.id === id ? { ...tier, ...updates } : tier
-    ))
+    setRewardTiers(rewardTiers.map((tier) => (tier.id === id ? { ...tier, ...updates } : tier)))
   }
 
   const startEditTier = (tier: RewardTier) => {
@@ -102,9 +113,9 @@ export default function CreateCampaignPage() {
 
   const saveTierEdit = () => {
     if (editingTierId !== null) {
-      updateTier(editingTierId, { 
-        name: editName.trim() || 'Tier', 
-        xp: editXp || 0 
+      updateTier(editingTierId, {
+        name: editName.trim() || 'Tier',
+        xp: editXp || 0,
       })
       setEditingTierId(null)
     }
@@ -123,11 +134,11 @@ export default function CreateCampaignPage() {
   }
 
   const nextStep = () => {
-    setCurrentStep(prev => prev + 1)
+    setCurrentStep((prev) => prev + 1)
   }
 
   const prevStep = () => {
-    setCurrentStep(prev => prev - 1)
+    setCurrentStep((prev) => prev - 1)
   }
 
   return (
@@ -148,34 +159,34 @@ export default function CreateCampaignPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="organization">Organization Name</Label>
-                <Input 
-                  id="organization" 
-                  placeholder="Enter organization name" 
+                <Input
+                  id="organization"
+                  placeholder="Enter organization name"
                   value={organization}
                   onChange={(e) => setOrganization(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="title">Campaign Title</Label>
-                <Input 
-                  id="title" 
-                  placeholder="Enter campaign title" 
+                <Input
+                  id="title"
+                  placeholder="Enter campaign title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Textarea 
-                  id="description" 
-                  placeholder="Enter campaign description" 
+                <Textarea
+                  id="description"
+                  placeholder="Enter campaign description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
@@ -186,7 +197,10 @@ export default function CreateCampaignPage() {
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        className={cn('w-full justify-start text-left font-normal', !startDate && 'text-muted-foreground')}
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !startDate && 'text-muted-foreground',
+                        )}
                       >
                         {startDate ? format(startDate, 'PPP') : 'Pick a date'}
                       </Button>
@@ -203,7 +217,10 @@ export default function CreateCampaignPage() {
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        className={cn('w-full justify-start text-left font-normal', !endDate && 'text-muted-foreground')}
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !endDate && 'text-muted-foreground',
+                        )}
                       >
                         {endDate ? format(endDate, 'PPP') : 'Pick a date'}
                       </Button>
@@ -235,12 +252,7 @@ export default function CreateCampaignPage() {
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-medium">Reward Tiers</h3>
                   <div className="flex items-center gap-2">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={resetToDefaultTiers} 
-                      size="sm"
-                    >
+                    <Button type="button" variant="outline" onClick={resetToDefaultTiers} size="sm">
                       Reset to Default
                     </Button>
                     <Button type="button" variant="outline" onClick={addRewardTier} size="sm">
@@ -289,11 +301,7 @@ export default function CreateCampaignPage() {
                             </Button>
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-muted-foreground"
-                                >
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
                                   <Palette className="h-3.5 w-3.5" />
                                 </Button>
                               </PopoverTrigger>
@@ -301,21 +309,21 @@ export default function CreateCampaignPage() {
                                 <Label className="text-xs mb-2 block">Choose a color</Label>
                                 <div className="grid grid-cols-5 gap-2 mb-2">
                                   {[
-                                    "#CD7F32", // Bronze
-                                    "#C0C0C0", // Silver
-                                    "#FFD700", // Gold
-                                    "#E5E4E2", // Platinum
-                                    "#B9F2FF", // Diamond
-                                    "#FF5733", // Coral
-                                    "#33FF57", // Lime
-                                    "#3357FF", // Blue
-                                    "#F033FF", // Magenta
-                                    "#FFFF33", // Yellow
-                                    "#33FFFF", // Cyan
-                                    "#FF33A8", // Pink
-                                    "#A833FF", // Purple
-                                    "#FF8333", // Orange
-                                    "#33FF83", // Mint
+                                    '#CD7F32', // Bronze
+                                    '#C0C0C0', // Silver
+                                    '#FFD700', // Gold
+                                    '#E5E4E2', // Platinum
+                                    '#B9F2FF', // Diamond
+                                    '#FF5733', // Coral
+                                    '#33FF57', // Lime
+                                    '#3357FF', // Blue
+                                    '#F033FF', // Magenta
+                                    '#FFFF33', // Yellow
+                                    '#33FFFF', // Cyan
+                                    '#FF33A8', // Pink
+                                    '#A833FF', // Purple
+                                    '#FF8333', // Orange
+                                    '#33FF83', // Mint
                                   ].map((color, index) => (
                                     <button
                                       key={index}
@@ -356,29 +364,27 @@ export default function CreateCampaignPage() {
                           }}
                           onClick={() => startEditTier(tier)}
                         >
-                          <div 
+                          <div
                             className="absolute bottom-0 left-0 right-0 h-1 transition-all"
-                            style={{ 
+                            style={{
                               backgroundColor: tier.color,
-                              opacity: 0.3
+                              opacity: 0.3,
                             }}
                           />
-                          
-                          <div 
+
+                          <div
                             className="w-5 h-5 rounded-full mb-1 mx-auto border transition-all border-muted-foreground/20"
-                            style={{ 
+                            style={{
                               backgroundColor: tier.color,
-                              opacity: 0.5
+                              opacity: 0.5,
                             }}
                           />
-                          
+
                           <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">
                             {tier.name}
                           </span>
-                          
-                          <span className="text-[10px] text-muted-foreground">
-                            {tier.xp} XP
-                          </span>
+
+                          <span className="text-[10px] text-muted-foreground">{tier.xp} XP</span>
                         </Button>
                       )}
                     </div>
@@ -480,12 +486,7 @@ export default function CreateCampaignPage() {
         )}
 
         <div className="mt-6 flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={prevStep}
-            disabled={currentStep === 1}
-          >
+          <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1}>
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Previous
           </Button>

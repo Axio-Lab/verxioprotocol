@@ -44,7 +44,9 @@ export function CampaignPreview({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <Badge variant="outline" className="mb-2">{organization}</Badge>
+              <Badge variant="outline" className="mb-2">
+                {organization}
+              </Badge>
               <CardTitle>{title}</CardTitle>
             </div>
             <div className="text-sm text-muted-foreground">
@@ -54,7 +56,7 @@ export function CampaignPreview({
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-muted-foreground">{description}</p>
-          
+
           <div className="border rounded-lg p-4" style={{ borderColor: `${campaignColor}40` }}>
             <CountdownTimer startDate={startDate} endDate={endDate} />
           </div>
@@ -63,11 +65,7 @@ export function CampaignPreview({
             <h3 className="font-medium">Reward Tiers</h3>
             <div className="grid gap-4">
               {rewardTiers.map((tier, index) => (
-                <div
-                  key={index}
-                  className="p-4 rounded-lg border"
-                  style={{ borderColor: `${campaignColor}40` }}
-                >
+                <div key={index} className="p-4 rounded-lg border" style={{ borderColor: `${campaignColor}40` }}>
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">{tier.name}</h4>
                     <Badge variant="outline">{tier.xp} XP</Badge>
@@ -82,11 +80,7 @@ export function CampaignPreview({
             <h3 className="font-medium">Tasks</h3>
             <div className="grid gap-4">
               {tasks.map((task, index) => (
-                <div
-                  key={index}
-                  className="p-4 rounded-lg border"
-                  style={{ borderColor: `${campaignColor}40` }}
-                >
+                <div key={index} className="p-4 rounded-lg border" style={{ borderColor: `${campaignColor}40` }}>
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">{task.title}</h4>
                     <Badge variant="outline">{task.points} points</Badge>
@@ -100,4 +94,4 @@ export function CampaignPreview({
       </Card>
     </div>
   )
-} 
+}

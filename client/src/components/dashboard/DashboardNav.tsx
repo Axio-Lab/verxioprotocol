@@ -33,18 +33,18 @@ export default function DashboardNav({ isOrganization, isSmallDevices, setIsSide
       icon: LayoutDashboard,
       exact: true,
     },
-    {
-      title: 'Campaigns',
-      href: '/dashboard/user/campaigns',
-      icon: Gift,
-      exact: false,
-    },
-    {
-      title: 'Notifications',
-      href: '/dashboard/user/notifications',
-      icon: Bell,
-      exact: false,
-    },
+    // {
+    //   title: 'Campaigns',
+    //   href: '/dashboard/user/campaigns',
+    //   icon: Gift,
+    //   exact: false,
+    // },
+    // {
+    //   title: 'Notifications',
+    //   href: '/dashboard/user/notifications',
+    //   icon: Bell,
+    //   exact: false,
+    // },
   ]
 
   const organizationNavItems: NavItem[] = [
@@ -60,18 +60,18 @@ export default function DashboardNav({ isOrganization, isSmallDevices, setIsSide
       icon: Building2,
       exact: false,
     },
-    {
-      title: 'Campaigns',
-      href: '/dashboard/campaigns',
-      icon: Gift,
-      exact: false,
-    },
-    {
-      title: 'Notifications',
-      href: '/dashboard/notifications',
-      icon: Bell,
-      exact: false,
-    },
+    // {
+    //   title: 'Campaigns',
+    //   href: '/dashboard/campaigns',
+    //   icon: Gift,
+    //   exact: false,
+    // },
+    // {
+    //   title: 'Notifications',
+    //   href: '/dashboard/notifications',
+    //   icon: Bell,
+    //   exact: false,
+    // },
     {
       title: 'Members',
       href: '/dashboard/members',

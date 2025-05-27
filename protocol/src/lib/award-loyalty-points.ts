@@ -19,6 +19,7 @@ export async function awardLoyaltyPoints(
     let asset
     try {
       asset = await fetchAsset(context.umi, config.passAddress)
+      console.log('asset', asset)
     } catch (error) {
       throw new Error('Failed to award points: Pass not found')
     }

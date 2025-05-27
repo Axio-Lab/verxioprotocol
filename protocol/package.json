@@ -1,6 +1,6 @@
 {
   "name": "@verxioprotocol/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Opensource infrastructure powering on-chain loyalty across Solana with Metaplex Core",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

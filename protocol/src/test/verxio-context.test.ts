@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getTestContext } from './helpers/get-test-context'
-import { VerxioContext } from '../types/verxio-context'
+import { VerxioContext } from '../schemas/verxio-context'
 import { assertValidContext } from '../utils/assert-valid-context'
 
 const { context } = getTestContext()

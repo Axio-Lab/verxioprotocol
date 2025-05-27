@@ -15,6 +15,7 @@ On-chain loyalty protocol powered by Metaplex CORE for creating and managing loy
 - Comprehensive asset data and customer behaviour tracking
 - Flexible authority management for loyalty programs and loyalty pass updates
 - Direct messaging between program and pass holders with support for program-wide broadcasts
+- **Advanced transaction composition with instruction-based functions**
 
 ## Installation
 
@@ -26,7 +27,21 @@ yarn add @verxioprotocol/core
 pnpm add @verxioprotocol/core
 ```
 
-## Usage
+## Two Approaches to Using Verxio Protocol
+
+Verxio Protocol provides two complementary approaches for different use cases:
+
+### 1. Direct Functions (Immediate Execution)
+
+Traditional functions that execute transactions immediately - perfect for simple, single-operation use cases.
+
+### 2. Instruction Functions (Advanced Composition)
+
+Instruction-based functions that return `TransactionBuilder` objects for advanced transaction composition, batching, and custom fee handling.
+
+---
+
+## Direct Functions Usage
 
 ### Initialize Protocol
 
@@ -446,6 +461,160 @@ console.log(broadcasts.broadcasts)
 //   totalBroadcasts: number // Total number of broadcasts
 // }
 ```
+
+---
+
+## Instruction Functions Usage (Advanced)
+
+Instruction-based functions provide advanced transaction composition capabilities, allowing you to batch multiple operations, optimize fees, and integrate with existing transaction flows.
+
+### Key Benefits
+
+- **Composability**: Combine multiple Verxio operations in a single transaction
+- **Flexibility**: Add custom instructions before/after Verxio operations
+- **Gas Optimization**: Batch operations to save on transaction fees
+- **Integration**: Easier integration with existing transaction flows
+
+### Protocol Fees
+
+Verxio Protocol includes built-in static fees for protocol operations:
+
+- **CREATE_LOYALTY_PROGRAM**: 0.002 SOL - Creating new loyalty programs
+- **LOYALTY_OPERATIONS**: 0.001 SOL - Pass issuance and program updates
+- **VERXIO_INTERACTION**: 0.0004 SOL - Points management and messaging
+
+All instruction functions include these fees by default.
+
+### Basic Instruction Usage
+
+```typescript
+import { createLoyaltyProgramInstruction } from '@verxioprotocol/core'
+
+// Create instruction (doesn't execute)
+const { instruction, collection, updateAuthority } = createLoyaltyProgramInstruction(context, config)
+
+// Execute when ready
+const result = await instruction.sendAndConfirm(context.umi)
+```
+
+### Composing Multiple Operations
+
+```typescript
+import {
+  createLoyaltyProgramInstruction,
+  issueLoyaltyPassInstruction,
+  awardLoyaltyPointsInstruction,
+} from '@verxioprotocol/core'
+
+// Create individual instructions
+const { instruction: createProgram, collection } = createLoyaltyProgramInstruction(context, programConfig)
+const { instruction: issuePass } = issueLoyaltyPassInstruction(context, passConfig)
+const { instruction: awardPoints } = await awardLoyaltyPointsInstruction(context, pointsConfig)
+
+// Combine into single transaction
+const combinedTx = createProgram.add(issuePass).add(awardPoints).add(customInstruction) // Your own instruction
+
+// Execute with custom settings
+const result = await combinedTx.sendAndConfirm(context.umi, {
+  confirm: { commitment: 'finalized' },
+  send: { skipPreflight: true },
+})
+```
+
+### Available Instruction Functions
+
+#### Core Loyalty Program Operations
+
+- `createLoyaltyProgramInstruction` - Create a new loyalty program
+- `updateLoyaltyProgramInstruction` - Update existing loyalty program
+- `issueLoyaltyPassInstruction` - Issue loyalty passes to users
+
+#### Points Management
+
+- `awardLoyaltyPointsInstruction` - Award points for actions
+- `revokeLoyaltyPointsInstruction` - Revoke points from users
+- `giftLoyaltyPointsInstruction` - Gift points to users
+
+#### Messaging & Communication
+
+- `sendBroadcastInstruction` - Send broadcasts to all pass holders
+- `sendAssetMessageInstruction` - Send messages to specific pass holders
+- `markBroadcastReadInstruction` - Mark broadcasts as read
+- `markMessageReadInstruction` - Mark messages as read
+
+#### Asset Management
+
+- `approveTransferInstruction` - Approve asset transfers
+
+### Migration from Direct Functions
+
+#### Before (Direct Functions)
+
+```typescript
+import { createLoyaltyProgram } from '@verxioprotocol/core'
+
+// Executes immediately
+const result = await createLoyaltyProgram(context, config)
+console.log('Transaction signature:', result.signature)
+```
+
+#### After (Instruction Functions)
+
+```typescript
+import { createLoyaltyProgramInstruction } from '@verxioprotocol/core'
+
+// Returns instruction builder
+const { instruction, collection } = createLoyaltyProgramInstruction(context, config)
+
+// Execute when ready
+const tx = await instruction.sendAndConfirm(context.umi)
+console.log('Transaction signature:', toBase58(tx.signature))
+```
+
+### Error Handling
+
+All instruction functions perform the same validation as their direct counterparts but throw errors during instruction creation rather than execution:
+
+```typescript
+try {
+  const { instruction } = await awardLoyaltyPointsInstruction(context, config)
+  const result = await instruction.sendAndConfirm(context.umi)
+} catch (error) {
+  if (error.message.includes('Pass not found')) {
+    // Handle pass not found during instruction creation
+  } else {
+    // Handle transaction execution errors
+  }
+}
+```
+
+### Best Practices
+
+1. **Batch Related Operations**: Combine related operations in single transactions
+2. **Validate Early**: Instruction functions validate inputs immediately
+3. **Error Handling**: Separate instruction creation errors from execution errors
+4. **Gas Optimization**: Use `sendAndConfirm` options for priority fees and commitment levels
+
+### Fee Structure Details
+
+| Operation Type         | Fee Amount | When Applied                   |
+| ---------------------- | ---------- | ------------------------------ |
+| CREATE_LOYALTY_PROGRAM | 0.002 SOL  | Creating new loyalty programs  |
+| LOYALTY_OPERATIONS     | 0.001 SOL  | Pass issuance, program updates |
+| VERXIO_INTERACTION     | 0.0004 SOL | Points management, messaging   |
+
+### Read-Only Functions
+
+The following functions are available for querying data (no instruction versions needed):
+
+- `getCollectionAttribute`
+- `calculateNewTier`
+- `getProgramDetails`
+- `getAssetData`
+- `getAssetMessages`
+- `getProgramTiers`
+- `getWalletLoyaltyPasses`
+- `getPointsPerAction`
 
 ## License
 

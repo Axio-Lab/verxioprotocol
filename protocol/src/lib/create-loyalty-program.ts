@@ -3,7 +3,6 @@ import {
   createCollection,
   CreateCollectionArgsPlugin,
   PluginAuthority,
-  writeData,
   ExternalPluginAdapterSchema,
   writeCollectionExternalPluginAdapterDataV1,
 } from '@metaplex-foundation/mpl-core'

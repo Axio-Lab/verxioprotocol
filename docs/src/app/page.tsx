@@ -48,7 +48,7 @@ const result = await createLoyaltyProgram(context, {
               Create customizable loyalty programs with multiple tiers, rewards, and automatic progression based on user
               activity.
             </p>
-            <Link href="/docs/create-program" className="text-blue-600 text-sm font-medium">
+            <Link href="/create-program" className="text-blue-600 text-sm font-medium">
               Learn more →
             </Link>
           </div>
@@ -59,7 +59,7 @@ const result = await createLoyaltyProgram(context, {
               Issue loyalty passes as NFTs that users can hold in their wallets, with transferability controls and
               metadata.
             </p>
-            <Link href="/docs/issue-pass" className="text-blue-600 text-sm font-medium">
+            <Link href="/issue-pass" className="text-blue-600 text-sm font-medium">
               Learn more →
             </Link>
           </div>
@@ -70,7 +70,7 @@ const result = await createLoyaltyProgram(context, {
               Award, revoke, and gift points based on user actions. Automatic tier progression with customizable
               thresholds.
             </p>
-            <Link href="/docs/award-points" className="text-blue-600 text-sm font-medium">
+            <Link href="/award-points" className="text-blue-600 text-sm font-medium">
               Learn more →
             </Link>
           </div>
@@ -80,7 +80,7 @@ const result = await createLoyaltyProgram(context, {
             <p className="text-muted mb-4">
               Send direct messages to pass holders or broadcast announcements to your entire program community.
             </p>
-            <Link href="/docs/messaging" className="text-blue-600 text-sm font-medium">
+            <Link href="/messaging" className="text-blue-600 text-sm font-medium">
               Learn more →
             </Link>
           </div>
@@ -98,19 +98,19 @@ const result = await createLoyaltyProgram(context, {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <code className="inline-code">createLoyaltyProgram</code>
-                <Link href="/docs/create-program" className="text-blue-600 text-sm">
+                <Link href="/create-program" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
               <div className="flex items-center justify-between">
                 <code className="inline-code">updateLoyaltyProgram</code>
-                <Link href="/docs/update-program" className="text-blue-600 text-sm">
+                <Link href="/update-program" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
               <div className="flex items-center justify-between">
                 <code className="inline-code">issueLoyaltyPass</code>
-                <Link href="/docs/issue-pass" className="text-blue-600 text-sm">
+                <Link href="/issue-pass" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
@@ -122,19 +122,19 @@ const result = await createLoyaltyProgram(context, {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <code className="inline-code">awardLoyaltyPoints</code>
-                <Link href="/docs/award-points" className="text-blue-600 text-sm">
+                <Link href="/award-points" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
               <div className="flex items-center justify-between">
                 <code className="inline-code">revokeLoyaltyPoints</code>
-                <Link href="/docs/revoke-points" className="text-blue-600 text-sm">
+                <Link href="/revoke-points" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
               <div className="flex items-center justify-between">
                 <code className="inline-code">giftLoyaltyPoints</code>
-                <Link href="/docs/gift-points" className="text-blue-600 text-sm">
+                <Link href="/gift-points" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
@@ -146,19 +146,19 @@ const result = await createLoyaltyProgram(context, {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <code className="inline-code">getAssetData</code>
-                <Link href="/docs/get-asset-data" className="text-blue-600 text-sm">
+                <Link href="/get-asset-data" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
               <div className="flex items-center justify-between">
                 <code className="inline-code">getProgramDetails</code>
-                <Link href="/docs/get-program-details" className="text-blue-600 text-sm">
+                <Link href="/get-program-details" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
               <div className="flex items-center justify-between">
                 <code className="inline-code">getWalletLoyaltyPasses</code>
-                <Link href="/docs/get-wallet-passes" className="text-blue-600 text-sm">
+                <Link href="/get-wallet-passes" className="text-blue-600 text-sm">
                   View docs
                 </Link>
               </div>
@@ -177,7 +177,7 @@ const result = await createLoyaltyProgram(context, {
             functions.
           </p>
           <div className="flex gap-3">
-            <Link href="/docs/create-program" className="btn btn-primary">
+            <Link href="/create-program" className="btn btn-primary">
               Create Loyalty Program
             </Link>
           </div>

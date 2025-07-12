@@ -3,5 +3,5 @@ packages:
   - docs
   - protocol
   - sandbox
-  - starter-app
+  - starter-template
   - ui-component

@@ -1,0 +1,74 @@
+{
+  "name": "@verxioprotocol/components",
+  "version": "0.0.1",
+  "description": "A component library for Verxio Protocol's functionalities",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "tsup",
+    "next:build": "next build",
+    "next:start": "next start",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@verxioprotocol/core": "0.1.1"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@metaplex-foundation/umi": "^1.2.0",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.2.0",
+    "@metaplex-foundation/umi-signer-wallet-adapters": "^1.2.0",
+    "@metaplex-foundation/umi-web3js-adapters": "^1.2.0",
+    "@radix-ui/react-alert-dialog": "^1.0.0",
+    "@radix-ui/react-dialog": "^1.0.0",
+    "@radix-ui/react-label": "^2.0.0",
+    "@radix-ui/react-slot": "^1.0.0",
+    "@solana/wallet-adapter-base": "^0.9.26",
+    "@solana/wallet-adapter-react": "^0.15.38",
+    "@solana/wallet-adapter-react-ui": "^0.9.38",
+    "@solana/wallet-adapter-wallets": "^0.19.36",
+    "@solana/web3.js": "^1.98.2",
+    "bs58": "^6.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
+    "react-hook-form": "^7.0.0",
+    "tailwind-merge": "^2.0.0",
+    "zod": "^3.25.42"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "autoprefixer": "^10.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.0.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
+    "pino-pretty": "^13.0.0",
+    "postcss": "^8.0.0",
+    "prettier": "^3.0.0",
+    "tailwindcss": "^3.0.0",
+    "tailwindcss-animate": "^1.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "verxio",
+    "ui",
+    "react"
+  ],
+  "author": "Verxio Protocol",
+  "license": "MIT"
+}

@@ -15,7 +15,8 @@ import { useState } from 'react'
 const formSchema = z.object({
   collectionAddress: z.string().min(1, 'Collection address is required'),
   passAddress: z.string().min(1, 'Pass address is required'),
-  message: z.string()
+  message: z
+    .string()
     .min(1, 'Message content is required')
     .max(500, 'Message content must be less than 500 characters'),
 })
@@ -33,12 +34,7 @@ interface MessagingFormProps {
   onError?: (error: Error) => void
 }
 
-export default function MessagingForm({ 
-  context,
-  signer,
-  onSuccess,
-  onError 
-}: MessagingFormProps) {
+export default function MessagingForm({ context, signer, onSuccess, onError }: MessagingFormProps) {
   const [messageResult, setMessageResult] = useState<MessageResult | null>(null)
 
   const form = useForm<FormData>({
@@ -56,8 +52,8 @@ export default function MessagingForm({
       const validationResult = formSchema.safeParse(data)
       if (!validationResult.success) {
         console.error('Validation errors:', validationResult.error.format())
-        form.setError('root', { 
-          message: 'Please check all required fields are filled correctly' 
+        form.setError('root', {
+          message: 'Please check all required fields are filled correctly',
         })
         return
       }
@@ -73,7 +69,7 @@ export default function MessagingForm({
       const result = await sendMessage(context, messageData)
       setMessageResult(result)
       onSuccess?.(result)
-      
+
       // Reset form after successful sending
       form.reset({
         collectionAddress: '',
@@ -91,10 +87,7 @@ export default function MessagingForm({
   return (
     <div className="space-y-8">
       <VerxioForm form={form} onSubmit={onSubmit} className="space-y-8">
-        <VerxioFormSection
-          title="Program Information"
-          description="Specify the program and pass for the message"
-        >
+        <VerxioFormSection title="Program Information" description="Specify the program and pass for the message">
           <div className="space-y-6">
             <VerxioFormField
               form={form}
@@ -102,7 +95,7 @@ export default function MessagingForm({
               label="Collection Address"
               description="The address of the loyalty program collection"
             >
-              <Input 
+              <Input
                 placeholder="Enter the collection address"
                 onChange={(e) => form.setValue('collectionAddress', e.target.value)}
               />
@@ -114,7 +107,7 @@ export default function MessagingForm({
               label="Pass Address"
               description="The address of the loyalty pass"
             >
-              <Input 
+              <Input
                 placeholder="Enter the loyalty pass address"
                 onChange={(e) => form.setValue('passAddress', e.target.value)}
               />
@@ -122,10 +115,7 @@ export default function MessagingForm({
           </div>
         </VerxioFormSection>
 
-        <VerxioFormSection
-          title="Message Details"
-          description="Compose your message to the pass holder"
-        >
+        <VerxioFormSection title="Message Details" description="Compose your message to the pass holder">
           <div className="space-y-6">
             <VerxioFormField
               form={form}
@@ -146,23 +136,37 @@ export default function MessagingForm({
         </VerxioFormSection>
 
         <div className="flex justify-center pt-8">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={form.formState.isSubmitting}
             className="px-12 py-4 text-lg font-bold bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600"
           >
             {form.formState.isSubmitting ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Sending Message...
               </>
             ) : (
               <>
                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
                 </svg>
                 Send Message
               </>
@@ -176,14 +180,16 @@ export default function MessagingForm({
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  {form.formState.errors.root.message}
-                </div>
+                <div className="mt-2 text-sm text-red-700">{form.formState.errors.root.message}</div>
               </div>
             </div>
           </div>
@@ -199,10 +205,12 @@ export default function MessagingForm({
               Transaction Confirmed
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
-              <p><span className="font-medium">Transaction Signature:</span></p>
+              <p>
+                <span className="font-medium">Transaction Signature:</span>
+              </p>
               <p className="font-mono text-sm break-all">{messageResult.signature}</p>
             </div>
           </div>

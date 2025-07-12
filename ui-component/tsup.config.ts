@@ -11,4 +11,4 @@ export default defineConfig({
   minify: true,
   outDir: 'dist',
   tsconfig: 'tsconfig.json',
-}) 
+})

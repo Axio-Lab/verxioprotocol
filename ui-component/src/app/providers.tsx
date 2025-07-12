@@ -38,7 +38,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new AvanaWalletAdapter(),
       new AlphaWalletAdapter(),
     ],
-    []
+    [],
   )
 
   return (
@@ -48,4 +48,4 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </WalletProvider>
     </ConnectionProvider>
   )
-} 
+}

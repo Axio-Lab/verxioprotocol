@@ -24,19 +24,25 @@ const FORMS = {
   'create-loyalty-program': CreateLoyaltyProgramForm,
   'approve-transfer': ApproveTransferForm,
   'update-loyalty-program': UpdateLoyaltyProgramForm,
-  'messaging': MessagingForm,
+  messaging: MessagingForm,
   'revoke-points': RevokeLoyaltyPointsForm,
   'gift-points': GiftLoyaltyPointsForm,
   'issue-pass': IssueLoyaltyPassForm,
   'get-asset': GetAssetDataForm,
   'get-program': GetProgramDetailsForm,
   'award-points': AwardLoyaltyPointsForm,
-  'broadcasts': BroadcastsForm,
+  broadcasts: BroadcastsForm,
 } as const
 
 type FormType = keyof typeof FORMS
 
-function FormNavigation({ activeForm, onFormSelect }: { activeForm: FormType; onFormSelect: (form: FormType) => void }) {
+function FormNavigation({
+  activeForm,
+  onFormSelect,
+}: {
+  activeForm: FormType
+  onFormSelect: (form: FormType) => void
+}) {
   return (
     <div className="w-full md:w-64 bg-white rounded-lg shadow p-4">
       <h2 className="text-lg font-semibold mb-4 text-gray-900">Verxio Forms</h2>
@@ -51,14 +57,16 @@ function FormNavigation({ activeForm, onFormSelect }: { activeForm: FormType; on
               onFormSelect(formKey as FormType)
             }}
             className={`w-full text-left px-4 py-2.5 rounded-md transition-colors duration-200 ease-in-out relative z-20
-              ${activeForm === formKey
-                ? 'bg-blue-50 text-blue-700 font-medium'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              ${
+                activeForm === formKey
+                  ? 'bg-blue-50 text-blue-700 font-medium'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
           >
-            {formKey.split('-').map(word =>
-              word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ')}
+            {formKey
+              .split('-')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ')}
           </button>
         ))}
       </nav>
@@ -72,9 +80,10 @@ function FormDisplay({ activeForm, context, signer }: { activeForm: FormType; co
   return (
     <div className="flex-1 bg-white rounded-lg shadow p-6">
       <h1 className="text-2xl font-bold mb-6 text-gray-900">
-        {activeForm.split('-').map(word =>
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ')}
+        {activeForm
+          .split('-')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ')}
       </h1>
       <div className="bg-white rounded-lg">
         <ActiveFormComponent key={activeForm} context={context} signer={signer} />
@@ -122,7 +131,6 @@ export default function TestFormPage() {
     )
   }
 
-
   const signer = convertSecretKeyToKeypair(process.env.NEXT_PUBLIC_SECRET_KEY as string)
   const umi = createUmi('https://api.devnet.solana.com')
 
@@ -149,4 +157,4 @@ export default function TestFormPage() {
       </div>
     </div>
   )
-} 
+}

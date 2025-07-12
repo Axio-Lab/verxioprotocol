@@ -40,7 +40,7 @@ export default function PointsPage() {
         // Set up wallet signer
         const walletSigner = createSignerFromWalletAdapter(wallet.adapter)
         umi.use(signerIdentity(walletSigner))
-        
+
         const newContext = initializeVerxio(umi, newSigner.publicKey)
         setContext(newContext)
         setSigner(newSigner)
@@ -187,4 +187,4 @@ export default function PointsPage() {
       </Tabs>
     </div>
   )
-} 
+}

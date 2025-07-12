@@ -16,18 +16,22 @@ This is a starter template for building Solana dApps with Next.js, Tailwind CSS,
 ## Getting Started
 
 1. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 2. Set up environment variables:
    Create a `.env.local` file in the root directory and add your Solana secret key:
+
    ```bash
    SECRET_KEY=your_solana_secret_key_here
    ```
+
    Note: Never commit your secret key to version control. The `.env.local` file is automatically ignored by git.
 
 3. Run the development server:
+
    ```bash
    pnpm dev
    ```
@@ -68,4 +72,4 @@ To learn more about the technologies used in this template:
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [Solana Web3.js Documentation](https://solana-labs.github.io/solana-web3.js/)
-- [Verxio Documentation](https://verxio.com/docs) 
+- [Verxio Documentation](https://verxio.com/docs)

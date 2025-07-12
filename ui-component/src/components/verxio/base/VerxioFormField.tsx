@@ -1,12 +1,5 @@
 import { ReactNode } from 'react'
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { UseFormReturn, Path } from 'react-hook-form'
 
 interface VerxioFormFieldProps<T extends Record<string, any>> {
@@ -40,4 +33,4 @@ export function VerxioFormField<T extends Record<string, any>>({
       )}
     />
   )
-} 
+}

@@ -54,4 +54,4 @@ After creating your project, you'll need to set up your environment variables:
 
 ## License
 
-MIT 
+MIT

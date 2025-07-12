@@ -26,12 +26,10 @@ export function VerxioFormField<T extends Record<string, unknown>>({
         <FormItem>
           <FormLabel>{label}</FormLabel>
           {description && <FormDescription>{description}</FormDescription>}
-          <FormControl>
-            {children}
-          </FormControl>
+          <FormControl>{children}</FormControl>
           <FormMessage />
         </FormItem>
       )}
     />
   )
-} 
+}

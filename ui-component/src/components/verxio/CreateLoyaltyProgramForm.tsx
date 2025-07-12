@@ -47,11 +47,11 @@ interface CreateLoyaltyProgramFormProps {
   onError?: (error: Error) => void
 }
 
-export default function CreateLoyaltyProgramForm({ 
+export default function CreateLoyaltyProgramForm({
   context,
   signer: providedSigner,
   onSuccess,
-  onError 
+  onError,
 }: CreateLoyaltyProgramFormProps) {
   const [createdProgram, setCreatedProgram] = useState<CreateLoyaltyProgramResult | null>(null)
   const signer = providedSigner || generateSigner(context.umi)
@@ -63,14 +63,12 @@ export default function CreateLoyaltyProgramForm({
       metadataUri: '',
       organizationName: '',
       brandColor: '#00adef',
-      pointsPerAction: [
-        { name: '', points: 0 },
-      ],
+      pointsPerAction: [{ name: '', points: 0 }],
       tiers: [
-        { 
-          name: '', 
-          points: 0, 
-          rewards: ['']
+        {
+          name: '',
+          points: 0,
+          rewards: [''],
         },
       ],
     },
@@ -82,8 +80,8 @@ export default function CreateLoyaltyProgramForm({
       const validationResult = formSchema.safeParse(data)
       if (!validationResult.success) {
         console.error('Validation errors:', validationResult.error.format())
-        form.setError('root', { 
-          message: 'Please check all required fields are filled correctly' 
+        form.setError('root', {
+          message: 'Please check all required fields are filled correctly',
         })
         return
       }
@@ -98,26 +96,25 @@ export default function CreateLoyaltyProgramForm({
           organizationName: data.organizationName,
           brandColor: data.brandColor,
         },
-        tiers: data.tiers.map(tier => ({
+        tiers: data.tiers.map((tier) => ({
           name: tier.name,
           xpRequired: tier.points,
           rewards: tier.rewards,
         })),
-        pointsPerAction: Object.fromEntries(
-          data.pointsPerAction.map(action => [action.name, action.points])
-        ),
+        pointsPerAction: Object.fromEntries(data.pointsPerAction.map((action) => [action.name, action.points])),
       }
-      
+
       console.log('programData', programData)
       const result = await createLoyaltyProgram(context, programData)
       setCreatedProgram(result)
       onSuccess?.(result)
-      
+
       // Reset form after successful creation
       form.reset()
     } catch (error) {
       console.error(error)
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred while creating the loyalty program'
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred while creating the loyalty program'
       form.setError('root', { message: errorMessage })
       onError?.(error instanceof Error ? error : new Error(errorMessage))
     }
@@ -131,7 +128,10 @@ export default function CreateLoyaltyProgramForm({
   const handleRemoveAction = (index: number) => {
     const actions = form.getValues('pointsPerAction')
     if (actions.length > 1) {
-      form.setValue('pointsPerAction', actions.filter((_, i) => i !== index))
+      form.setValue(
+        'pointsPerAction',
+        actions.filter((_, i) => i !== index),
+      )
     }
   }
 
@@ -139,10 +139,10 @@ export default function CreateLoyaltyProgramForm({
     const tiers = form.getValues('tiers')
     form.setValue('tiers', [
       ...tiers,
-      { 
-        name: '', 
-        points: 0, 
-        rewards: [''] 
+      {
+        name: '',
+        points: 0,
+        rewards: [''],
       },
     ])
   }
@@ -150,7 +150,10 @@ export default function CreateLoyaltyProgramForm({
   const handleRemoveTier = (index: number) => {
     const tiers = form.getValues('tiers')
     if (tiers.length > 1) {
-      form.setValue('tiers', tiers.filter((_, i) => i !== index))
+      form.setValue(
+        'tiers',
+        tiers.filter((_, i) => i !== index),
+      )
     }
   }
 
@@ -159,7 +162,7 @@ export default function CreateLoyaltyProgramForm({
     const newTiers = [...tiers]
     newTiers[tierIndex] = {
       ...newTiers[tierIndex],
-      rewards: [...newTiers[tierIndex].rewards, '']
+      rewards: [...newTiers[tierIndex].rewards, ''],
     }
     form.setValue('tiers', newTiers)
   }
@@ -170,7 +173,7 @@ export default function CreateLoyaltyProgramForm({
     if (newTiers[tierIndex].rewards.length > 1) {
       newTiers[tierIndex] = {
         ...newTiers[tierIndex],
-        rewards: newTiers[tierIndex].rewards.filter((_, i) => i !== rewardIndex)
+        rewards: newTiers[tierIndex].rewards.filter((_, i) => i !== rewardIndex),
       }
       form.setValue('tiers', newTiers)
     }
@@ -179,10 +182,7 @@ export default function CreateLoyaltyProgramForm({
   return (
     <div className="space-y-8">
       <VerxioForm form={form} onSubmit={onSubmit} className="space-y-8">
-        <VerxioFormSection
-          title="Basic Information"
-          description="Enter the basic details of your loyalty program"
-        >
+        <VerxioFormSection title="Basic Information" description="Enter the basic details of your loyalty program">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <VerxioFormField
               form={form}
@@ -190,8 +190,8 @@ export default function CreateLoyaltyProgramForm({
               label="Program Name"
               description="The name of your loyalty program"
             >
-              <Input 
-                placeholder="e.g., Coffee Rewards Program" 
+              <Input
+                placeholder="e.g., Coffee Rewards Program"
                 onChange={(e) => form.setValue('programName', e.target.value)}
               />
             </VerxioFormField>
@@ -202,8 +202,8 @@ export default function CreateLoyaltyProgramForm({
               label="Organization Name"
               description="Your organization's name"
             >
-              <Input 
-                placeholder="e.g., Coffee Brew Co." 
+              <Input
+                placeholder="e.g., Coffee Brew Co."
                 onChange={(e) => form.setValue('organizationName', e.target.value)}
               />
             </VerxioFormField>
@@ -217,27 +217,22 @@ export default function CreateLoyaltyProgramForm({
                 label="Metadata URI"
                 description="The URI where your program metadata is stored"
               >
-                <Input 
-                  placeholder="https://arweave.net/..." 
+                <Input
+                  placeholder="https://arweave.net/..."
                   onChange={(e) => form.setValue('metadataUri', e.target.value)}
                 />
               </VerxioFormField>
             </div>
 
-            <VerxioFormField
-              form={form}
-              name="brandColor"
-              label="Brand Color"
-              description="Your brand's primary color"
-            >
+            <VerxioFormField form={form} name="brandColor" label="Brand Color" description="Your brand's primary color">
               <div className="flex items-center gap-3">
-                <Input 
-                  type="color" 
+                <Input
+                  type="color"
                   className="w-14 h-14 p-1"
                   value={form.watch('brandColor')}
                   onChange={(e) => form.setValue('brandColor', e.target.value)}
                 />
-                <Input 
+                <Input
                   type="text"
                   value={form.watch('brandColor')}
                   onChange={(e) => form.setValue('brandColor', e.target.value)}
@@ -261,7 +256,7 @@ export default function CreateLoyaltyProgramForm({
                     label="Action Name"
                     description="Name of the action that earns points"
                   >
-                    <Input 
+                    <Input
                       placeholder="e.g., purchase, review, referral"
                       onChange={(e) => {
                         const actions = form.getValues('pointsPerAction')
@@ -278,8 +273,8 @@ export default function CreateLoyaltyProgramForm({
                     label="Points"
                     description="Points awarded for this action"
                   >
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       min={0}
                       onChange={(e) => {
                         const actions = form.getValues('pointsPerAction')
@@ -290,11 +285,7 @@ export default function CreateLoyaltyProgramForm({
                   </VerxioFormField>
                 </div>
                 {form.watch('pointsPerAction').length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => handleRemoveAction(index)}
-                  >
+                  <Button type="button" variant="destructive" onClick={() => handleRemoveAction(index)}>
                     Remove
                   </Button>
                 )}
@@ -306,13 +297,13 @@ export default function CreateLoyaltyProgramForm({
           </div>
         </VerxioFormSection>
 
-        <VerxioFormSection
-          title="Reward Tiers"
-          description="Define the tiers and rewards for your loyalty program"
-        >
+        <VerxioFormSection title="Reward Tiers" description="Define the tiers and rewards for your loyalty program">
           <div className="space-y-6">
             {form.watch('tiers').map((tier, tierIndex) => (
-              <div key={tierIndex} className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl space-y-4">
+              <div
+                key={tierIndex}
+                className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl space-y-4"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -340,7 +331,7 @@ export default function CreateLoyaltyProgramForm({
                     label="Tier Name"
                     description="Name of the loyalty tier"
                   >
-                    <Input 
+                    <Input
                       placeholder="e.g., Bronze"
                       onChange={(e) => {
                         const tiers = form.getValues('tiers')
@@ -356,8 +347,8 @@ export default function CreateLoyaltyProgramForm({
                     label="Required Points"
                     description="Points needed to reach this tier"
                   >
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       min={0}
                       onChange={(e) => {
                         const tiers = form.getValues('tiers')
@@ -371,12 +362,7 @@ export default function CreateLoyaltyProgramForm({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h6 className="font-medium">Rewards</h6>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddReward(tierIndex)}
-                    >
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddReward(tierIndex)}>
                       Add Reward
                     </Button>
                   </div>
@@ -390,7 +376,7 @@ export default function CreateLoyaltyProgramForm({
                           label=""
                           description="Reward for this tier"
                         >
-                          <Input 
+                          <Input
                             placeholder="e.g., 10% cashback"
                             value={tier.rewards[rewardIndex]}
                             onChange={(e) => {
@@ -398,9 +384,9 @@ export default function CreateLoyaltyProgramForm({
                               const newTiers = [...tiers]
                               newTiers[tierIndex] = {
                                 ...newTiers[tierIndex],
-                                rewards: newTiers[tierIndex].rewards.map((reward, i) => 
-                                  i === rewardIndex ? e.target.value : reward
-                                )
+                                rewards: newTiers[tierIndex].rewards.map((reward, i) =>
+                                  i === rewardIndex ? e.target.value : reward,
+                                ),
                               }
                               form.setValue('tiers', newTiers)
                             }}
@@ -430,16 +416,25 @@ export default function CreateLoyaltyProgramForm({
         </VerxioFormSection>
 
         <div className="flex justify-center pt-8">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={form.formState.isSubmitting}
             className="px-12 py-4 text-lg font-bold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
           >
             {form.formState.isSubmitting ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Creating Program...
               </>
@@ -460,14 +455,16 @@ export default function CreateLoyaltyProgramForm({
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  {form.formState.errors.root.message}
-                </div>
+                <div className="mt-2 text-sm text-red-700">{form.formState.errors.root.message}</div>
               </div>
             </div>
           </div>
@@ -483,12 +480,14 @@ export default function CreateLoyaltyProgramForm({
               Transaction Confirmed
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Transaction Details */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <p><span className="font-medium">Transaction Signature:</span></p>
+                <p>
+                  <span className="font-medium">Transaction Signature:</span>
+                </p>
                 <p className="font-mono text-sm break-all">{createdProgram.signature}</p>
               </div>
             </div>
@@ -497,11 +496,15 @@ export default function CreateLoyaltyProgramForm({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Collection Details</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Collection Public Key:</span></p>
+                <p>
+                  <span className="font-medium">Collection Public Key:</span>
+                </p>
                 <p className="font-mono text-sm break-all">{createdProgram.collection.publicKey}</p>
                 {createdProgram.updateAuthority && (
                   <>
-                    <p><span className="font-medium">Update Authority Public Key:</span></p>
+                    <p>
+                      <span className="font-medium">Update Authority Public Key:</span>
+                    </p>
                     <p className="font-mono text-sm break-all">{createdProgram.updateAuthority.publicKey}</p>
                   </>
                 )}
@@ -512,9 +515,7 @@ export default function CreateLoyaltyProgramForm({
             <div className="md:col-span-2 space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Next Steps</h3>
               <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-blue-800">
-                  Your loyalty program has been created successfully! You can now:
-                </p>
+                <p className="text-blue-800">Your loyalty program has been created successfully! You can now:</p>
                 <ul className="mt-2 list-disc list-inside text-blue-700">
                   <li>Use the collection address to create loyalty passes</li>
                   <li>Update program details using the update authority</li>

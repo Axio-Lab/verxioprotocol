@@ -42,11 +42,11 @@ interface UpdateLoyaltyProgramFormProps {
   onError?: (error: Error) => void
 }
 
-export default function UpdateLoyaltyProgramForm({ 
+export default function UpdateLoyaltyProgramForm({
   context,
   signer,
   onSuccess,
-  onError 
+  onError,
 }: UpdateLoyaltyProgramFormProps) {
   const [updateResult, setUpdateResult] = useState<UpdateLoyaltyProgramResult | null>(null)
 
@@ -54,14 +54,12 @@ export default function UpdateLoyaltyProgramForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       collectionAddress: '',
-      pointsPerAction: [
-        { name: '', points: 0 },
-      ],
+      pointsPerAction: [{ name: '', points: 0 }],
       tiers: [
-        { 
-          name: '', 
-          points: 0, 
-          rewards: [''] 
+        {
+          name: '',
+          points: 0,
+          rewards: [''],
         },
       ],
     },
@@ -73,8 +71,8 @@ export default function UpdateLoyaltyProgramForm({
       const validationResult = formSchema.safeParse(data)
       if (!validationResult.success) {
         console.error('Validation errors:', validationResult.error.format())
-        form.setError('root', { 
-          message: 'Please check all required fields are filled correctly' 
+        form.setError('root', {
+          message: 'Please check all required fields are filled correctly',
         })
         return
       }
@@ -84,37 +82,34 @@ export default function UpdateLoyaltyProgramForm({
         collectionAddress: publicKey(data.collectionAddress),
         programAuthority: context.programAuthority,
         updateAuthority: signer,
-        newTiers: data.tiers.map(tier => ({
+        newTiers: data.tiers.map((tier) => ({
           name: tier.name,
           xpRequired: tier.points,
           rewards: tier.rewards,
         })),
-        newPointsPerAction: Object.fromEntries(
-          data.pointsPerAction.map(action => [action.name, action.points])
-        ),
+        newPointsPerAction: Object.fromEntries(data.pointsPerAction.map((action) => [action.name, action.points])),
       }
 
       const result = await updateLoyaltyProgram(context, updateData)
       setUpdateResult(result)
       onSuccess?.(result)
-      
+
       // Reset form after successful update
       form.reset({
         collectionAddress: '',
-        pointsPerAction: [
-          { name: '', points: 0 },
-        ],
+        pointsPerAction: [{ name: '', points: 0 }],
         tiers: [
-          { 
-            name: '', 
-            points: 0, 
-            rewards: [''] 
+          {
+            name: '',
+            points: 0,
+            rewards: [''],
           },
         ],
       })
     } catch (error) {
       console.error(error)
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred while updating the loyalty program'
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred while updating the loyalty program'
       form.setError('root', { message: errorMessage })
       onError?.(error instanceof Error ? error : new Error(errorMessage))
     }
@@ -128,7 +123,10 @@ export default function UpdateLoyaltyProgramForm({
   const handleRemoveAction = (index: number) => {
     const actions = form.getValues('pointsPerAction')
     if (actions.length > 1) {
-      form.setValue('pointsPerAction', actions.filter((_, i) => i !== index))
+      form.setValue(
+        'pointsPerAction',
+        actions.filter((_, i) => i !== index),
+      )
     }
   }
 
@@ -136,10 +134,10 @@ export default function UpdateLoyaltyProgramForm({
     const tiers = form.getValues('tiers')
     form.setValue('tiers', [
       ...tiers,
-      { 
-        name: '', 
-        points: 0, 
-        rewards: [''] 
+      {
+        name: '',
+        points: 0,
+        rewards: [''],
       },
     ])
   }
@@ -147,7 +145,10 @@ export default function UpdateLoyaltyProgramForm({
   const handleRemoveTier = (index: number) => {
     const tiers = form.getValues('tiers')
     if (tiers.length > 1) {
-      form.setValue('tiers', tiers.filter((_, i) => i !== index))
+      form.setValue(
+        'tiers',
+        tiers.filter((_, i) => i !== index),
+      )
     }
   }
 
@@ -168,27 +169,21 @@ export default function UpdateLoyaltyProgramForm({
   return (
     <div className="space-y-8">
       <VerxioForm form={form} onSubmit={onSubmit} className="space-y-8">
-        <VerxioFormSection
-          title="Program Information"
-          description="Specify the program to update"
-        >
+        <VerxioFormSection title="Program Information" description="Specify the program to update">
           <VerxioFormField
             form={form}
             name="collectionAddress"
             label="Collection Address"
             description="The unique address of your loyalty program collection"
           >
-            <Input 
+            <Input
               placeholder="Enter the collection address"
               onChange={(e) => form.setValue('collectionAddress', e.target.value)}
             />
           </VerxioFormField>
         </VerxioFormSection>
 
-        <VerxioFormSection
-          title="Points Configuration"
-          description="Update points awarded for different actions"
-        >
+        <VerxioFormSection title="Points Configuration" description="Update points awarded for different actions">
           <div className="space-y-6">
             {form.watch('pointsPerAction').map((_, index) => (
               <div key={index} className="flex items-end gap-4">
@@ -199,7 +194,7 @@ export default function UpdateLoyaltyProgramForm({
                     label="Action Name"
                     description="Name of the action that earns points"
                   >
-                    <Input 
+                    <Input
                       placeholder="e.g., purchase, review, referral"
                       onChange={(e) => {
                         const actions = form.getValues('pointsPerAction')
@@ -216,7 +211,7 @@ export default function UpdateLoyaltyProgramForm({
                     label="Points"
                     description="Points awarded for this action"
                   >
-                    <Input 
+                    <Input
                       type="number"
                       min={0}
                       placeholder="100"
@@ -229,11 +224,7 @@ export default function UpdateLoyaltyProgramForm({
                   </VerxioFormField>
                 </div>
                 {form.watch('pointsPerAction').length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => handleRemoveAction(index)}
-                  >
+                  <Button type="button" variant="destructive" onClick={() => handleRemoveAction(index)}>
                     Remove
                   </Button>
                 )}
@@ -245,10 +236,7 @@ export default function UpdateLoyaltyProgramForm({
           </div>
         </VerxioFormSection>
 
-        <VerxioFormSection
-          title="Tier Configuration"
-          description="Configure loyalty program tiers and rewards"
-        >
+        <VerxioFormSection title="Tier Configuration" description="Configure loyalty program tiers and rewards">
           <div className="space-y-6">
             {form.watch('tiers').map((tier, tierIndex) => (
               <div
@@ -282,7 +270,7 @@ export default function UpdateLoyaltyProgramForm({
                     label="Tier Name"
                     description="Name of the loyalty tier"
                   >
-                    <Input 
+                    <Input
                       placeholder="e.g., Bronze"
                       onChange={(e) => {
                         const tiers = form.getValues('tiers')
@@ -298,7 +286,7 @@ export default function UpdateLoyaltyProgramForm({
                     label="Required Points"
                     description="Points needed to reach this tier"
                   >
-                    <Input 
+                    <Input
                       type="number"
                       min={0}
                       placeholder="500"
@@ -314,12 +302,7 @@ export default function UpdateLoyaltyProgramForm({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h6 className="font-medium">Rewards</h6>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddReward(tierIndex)}
-                    >
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddReward(tierIndex)}>
                       Add Reward
                     </Button>
                   </div>
@@ -333,7 +316,7 @@ export default function UpdateLoyaltyProgramForm({
                           label=""
                           description="Reward for this tier"
                         >
-                          <Input 
+                          <Input
                             placeholder="e.g., 10% cashback"
                             onChange={(e) => {
                               const tiers = form.getValues('tiers')
@@ -366,23 +349,37 @@ export default function UpdateLoyaltyProgramForm({
         </VerxioFormSection>
 
         <div className="flex justify-center pt-8">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={form.formState.isSubmitting}
             className="px-12 py-4 text-lg font-bold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
           >
             {form.formState.isSubmitting ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Updating Program...
               </>
             ) : (
               <>
                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
                 </svg>
                 Update Program
               </>
@@ -396,14 +393,16 @@ export default function UpdateLoyaltyProgramForm({
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  {form.formState.errors.root.message}
-                </div>
+                <div className="mt-2 text-sm text-red-700">{form.formState.errors.root.message}</div>
               </div>
             </div>
           </div>
@@ -419,10 +418,12 @@ export default function UpdateLoyaltyProgramForm({
               Transaction Confirmed
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
-              <p><span className="font-medium">Transaction Signature:</span></p>
+              <p>
+                <span className="font-medium">Transaction Signature:</span>
+              </p>
               <p className="font-mono text-sm break-all">{updateResult.signature}</p>
             </div>
           </div>

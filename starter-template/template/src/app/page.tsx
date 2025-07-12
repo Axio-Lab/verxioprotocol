@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function Dashboard() {
-
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
@@ -47,9 +46,7 @@ export default function Dashboard() {
             <CardDescription>Points issued</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {0}
-            </p>
+            <p className="text-3xl font-bold">{0}</p>
           </CardContent>
         </Card>
       </div>

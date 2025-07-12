@@ -19,7 +19,7 @@ import { CreateLoyaltyProgramForm } from '@verxio/components'
 
 function App() {
   return (
-    <CreateLoyaltyProgramForm 
+    <CreateLoyaltyProgramForm
       context={context}
       signer={signer}
       onSuccess={(result) => {
@@ -59,20 +59,23 @@ The library also exports base components that can be used to create custom forms
 
 1. Clone the repository
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Start the development server:
+
 ```bash
 pnpm dev
 ```
 
 4. Build the library:
+
 ```bash
 pnpm build
 ```
 
 ## License
 
-MIT 
+MIT

@@ -41,7 +41,7 @@ export default function ProgramPage() {
         // Set up wallet signer
         const walletSigner = createSignerFromWalletAdapter(wallet.adapter)
         umi.use(signerIdentity(walletSigner))
-        
+
         const newContext = initializeVerxio(umi, newSigner.publicKey)
         setContext(newContext)
         setSigner(newSigner)
@@ -91,9 +91,7 @@ export default function ProgramPage() {
       <Card>
         <CardHeader>
           <CardTitle>Program Details</CardTitle>
-          <CardDescription>
-            Create a new loyalty program for your organization
-          </CardDescription>
+          <CardDescription>Create a new loyalty program for your organization</CardDescription>
         </CardHeader>
         <CardContent>
           <CreateLoyaltyProgramForm
@@ -106,4 +104,4 @@ export default function ProgramPage() {
       </Card>
     </div>
   )
-} 
+}

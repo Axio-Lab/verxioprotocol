@@ -1,13 +1,12 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-import bs58 from "bs58"
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+import bs58 from 'bs58'
 import { fromWeb3JsKeypair } from '@metaplex-foundation/umi-web3js-adapters'
 import { Keypair as Web3JsKeypair } from '@solana/web3.js'
 
- 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
-} 
+}
 
 export function convertSecretKeyToKeypair(secretKey: string) {
   try {

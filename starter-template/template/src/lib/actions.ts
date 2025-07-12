@@ -7,14 +7,14 @@ export async function getKeypair() {
     const keypair = convertSecretKeyToKeypair(process.env.SECRET_KEY as string)
     return {
       keypair,
-      success: true
+      success: true,
     }
   } catch (error) {
     console.error('Error creating keypair:', error)
     return {
       keypair: null,
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create keypair'
+      error: error instanceof Error ? error.message : 'Failed to create keypair',
     }
   }
-} 
+}

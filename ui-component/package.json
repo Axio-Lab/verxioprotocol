@@ -20,7 +20,7 @@
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "@verxioprotocol/core": "latest"
+    "@verxioprotocol/core": "0.1.1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

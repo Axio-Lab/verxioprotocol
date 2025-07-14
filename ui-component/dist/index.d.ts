@@ -20,7 +20,7 @@ interface CreateLoyaltyProgramFormProps {
     onSuccess?: (result: CreateLoyaltyProgramResult) => void;
     onError?: (error: Error) => void;
 }
-declare function CreateLoyaltyProgramForm({ context, signer: providedSigner, onSuccess, onError }: CreateLoyaltyProgramFormProps): React.JSX.Element;
+declare function CreateLoyaltyProgramForm({ context, signer: providedSigner, onSuccess, onError, }: CreateLoyaltyProgramFormProps): React.JSX.Element;
 
 interface UpdateLoyaltyProgramResult {
     signature: string;
@@ -31,7 +31,7 @@ interface UpdateLoyaltyProgramFormProps {
     onSuccess?: (result: UpdateLoyaltyProgramResult) => void;
     onError?: (error: Error) => void;
 }
-declare function UpdateLoyaltyProgramForm({ context, signer, onSuccess, onError }: UpdateLoyaltyProgramFormProps): React.JSX.Element;
+declare function UpdateLoyaltyProgramForm({ context, signer, onSuccess, onError, }: UpdateLoyaltyProgramFormProps): React.JSX.Element;
 
 interface IssueLoyaltyPassResult {
     asset: KeypairSigner;
@@ -213,7 +213,7 @@ interface VerxioFormProps<T extends Record<string, any>> {
     children: ReactNode;
     className?: string;
 }
-declare function VerxioForm<T extends Record<string, any>>({ form, onSubmit, children, className, }: VerxioFormProps<T>): React.JSX.Element;
+declare function VerxioForm<T extends Record<string, any>>({ form, onSubmit, children, className }: VerxioFormProps<T>): React.JSX.Element;
 
 interface VerxioFormSectionProps {
     title: string;
@@ -221,7 +221,7 @@ interface VerxioFormSectionProps {
     children: ReactNode;
     className?: string;
 }
-declare function VerxioFormSection({ title, description, children, className, }: VerxioFormSectionProps): React.JSX.Element;
+declare function VerxioFormSection({ title, description, children, className }: VerxioFormSectionProps): React.JSX.Element;
 
 interface VerxioFormFieldProps<T extends Record<string, any>> {
     form: UseFormReturn<T>;

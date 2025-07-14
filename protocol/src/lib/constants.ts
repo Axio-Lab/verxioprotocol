@@ -11,6 +11,13 @@ export const DEFAULT_BROADCAST_DATA = {
   broadcasts: [],
 }
 
+export const DEFAULT_VOUCHER_COLLECTION_DATA = {
+  totalVouchersIssued: 0,
+  totalVouchersRedeemed: 0,
+  totalValueRedeemed: 0,
+  voucherStats: [],
+}
+
 export const DEFAULT_PASS_DATA = {
   xp: 0,
   lastAction: null,
@@ -26,6 +33,7 @@ export const PLUGIN_TYPES = {
   APP_DATA: 'AppData',
   PERMANENT_TRANSFER_DELEGATE: 'PermanentTransferDelegate',
   UPDATE_DELEGATE: 'UpdateDelegate',
+  FREEZE_DELEGATE: 'FreezeDelegate',
 } as const
 
 export const ATTRIBUTE_KEYS = {
@@ -36,4 +44,7 @@ export const ATTRIBUTE_KEYS = {
   TYPE: 'type',
   XP: 'xp',
   METADATA: 'metadata',
+  // Voucher-specific keys
+  VOUCHER_TYPES: 'voucherTypes',
+  MERCHANT_ID: 'merchantId',
 } as const

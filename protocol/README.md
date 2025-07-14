@@ -16,6 +16,16 @@ On-chain loyalty protocol powered by Metaplex CORE for creating and managing loy
 - Flexible authority management for loyalty programs and loyalty pass updates
 - Direct messaging between program and pass holders with support for program-wide broadcasts
 - **Advanced transaction composition with instruction-based functions**
+- **Complete Voucher Management System** - Create, mint, validate, and redeem vouchers
+- **Voucher Collections** - Organize vouchers by merchant and type
+- **Voucher Analytics** - Track redemption rates, usage patterns, and performance metrics
+- **User Voucher Management** - Get user vouchers with filtering and sorting
+- **Merchant Voucher Operations** - Bulk operations and merchant-specific analytics
+- **Voucher Validation** - Comprehensive validation with expiry and usage tracking
+- **Voucher Redemption** - Multi-type voucher redemption with value calculation
+- **Voucher Expiry Management** - Extend or cancel vouchers with reason tracking
+- **Advanced Loyalty Rewards** - Streak bonuses, milestone rewards, and gamification
+- **Bulk Operations** - Manage multiple vouchers and loyalty passes efficiently
 
 ## Installation
 
@@ -464,6 +474,243 @@ console.log(broadcasts.broadcasts)
 
 ---
 
+## Voucher Management System
+
+Verxio Protocol includes a comprehensive voucher management system for creating, distributing, and redeeming digital vouchers.
+
+### Create Voucher Collection
+
+```typescript
+const result = await createVoucherCollection(context, {
+  collectionName: 'Summer Sale Vouchers',
+  collectionMetadataUri: 'https://arweave.net/...',
+  updateAuthority: generateSigner(context.umi),
+  metadata: {
+    merchantName: 'Coffee Brew',
+    description: 'Summer sale vouchers for loyal customers',
+    terms: 'Valid until August 31st, 2024',
+  },
+})
+
+console.log(result)
+// {
+//   collection: KeypairSigner,  // Collection signer
+//   signature: string,         // Transaction signature
+//   updateAuthority: KeypairSigner // Update authority for the collection
+// }
+```
+
+### Mint Voucher
+
+```typescript
+const result = await mintVoucher(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  voucherName: 'Summer Sale Voucher',
+  voucherMetadataUri: 'https://arweave.net/...',
+  voucherData: {
+    type: 'percentage_off',
+    value: 15, // 15% off
+    maxUses: 1,
+    expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
+    conditions: [{ type: 'minimum_purchase', value: 50, operator: 'greater_than' }],
+    description: '15% off your next purchase',
+    merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  },
+  recipient: publicKey('RECIPIENT_ADDRESS'),
+  updateAuthority: collectionAuthority,
+})
+
+console.log(result)
+// {
+//   asset: KeypairSigner,  // Voucher signer
+//   signature: string,    // Transaction signature
+//   voucherAddress: PublicKey // Voucher public key
+// }
+```
+
+### Validate Voucher
+
+```typescript
+const validation = await validateVoucher(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  purchaseAmount: 100, // Optional: for percentage-based vouchers
+})
+
+console.log(validation)
+// {
+//   isValid: boolean,
+//   errors: string[],
+//   warnings: string[],
+//   voucherData: {
+//     type: string,
+//     value: number,
+//     currentUses: number,
+//     maxUses: number,
+//     expiryDate: number,
+//     conditions: string[],
+//     description: string,
+//     merchantId: string
+//   },
+//   redemptionValue: number
+// }
+```
+
+### Redeem Voucher
+
+```typescript
+const result = await redeemVoucher(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  purchaseAmount: 100, // Optional: for percentage-based vouchers
+  updateAuthority: merchantSigner, // Authority that can update the voucher
+})
+
+console.log(result)
+// {
+//   success: boolean,
+//   signature: string,
+//   redemptionValue: number,
+//   updatedVoucher: VoucherData,
+//   errors: string[]
+// }
+```
+
+### Get User Vouchers
+
+```typescript
+const vouchers = await getUserVouchers(context, {
+  userAddress: publicKey('USER_ADDRESS'),
+  filters: {
+    status: 'active', // 'active' | 'expired' | 'fully_used'
+    type: 'percentage_off', // Optional: filter by voucher type
+    minValue: 10, // Optional: minimum value
+  },
+  sortBy: 'expiryDate', // 'expiryDate' | 'value' | 'createdAt'
+  sortOrder: 'asc', // 'asc' | 'desc'
+  limit: 10, // Optional: limit results
+})
+
+console.log(vouchers)
+// {
+//   vouchers: Array<{
+//     address: string,
+//     type: string,
+//     value: number,
+//     currentUses: number,
+//     maxUses: number,
+//     expiryDate: number,
+//     status: string,
+//     description: string,
+//     conditions: string[],
+//     collection: string
+//   }>,
+//   total: number,
+//   expiringSoon: Array<string>, // Voucher addresses expiring in 7 days
+//   redeemable: Array<string>    // Voucher addresses that can be redeemed
+// }
+```
+
+### Extend Voucher Expiry
+
+```typescript
+const result = await extendVoucherExpiry(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  newExpiryDate: Date.now() + 60 * 24 * 60 * 60 * 1000, // 60 days from now
+  reason: 'Customer request',
+  signer: collectionAuthority,
+})
+
+console.log(result)
+// {
+//   signature: string,
+//   newExpiryDate: number
+// }
+```
+
+### Cancel Voucher
+
+```typescript
+const result = await cancelVoucher(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  reason: 'Customer refund',
+  signer: collectionAuthority,
+})
+
+console.log(result)
+// {
+//   signature: string,
+//   status: 'cancelled'
+// }
+```
+
+### Merchant Identification
+
+In the voucher system, merchants are identified using a `merchantId` string rather than a blockchain address. This provides flexibility for:
+
+- **Off-chain Integration**: Merchants can use their existing business identifiers
+- **Multi-chain Support**: Same merchant can operate across different networks
+- **Privacy**: Merchant identity can be managed separately from blockchain addresses
+- **Scalability**: No need to manage multiple wallet addresses per merchant
+
+The `merchantId` is set when creating vouchers and validated during redemption to ensure vouchers are only used at the correct merchant.
+
+### Supported Voucher Types
+
+Verxio Protocol supports multiple voucher types for different use cases:
+
+#### Percentage Off Vouchers
+
+```typescript
+{
+  type: 'percentage_off',
+  value: 15, // 15% discount
+  conditions: ['Minimum purchase: $50']
+}
+```
+
+#### Fixed Credit Vouchers
+
+```typescript
+{
+  type: 'fixed_verxio_credits',
+  value: 100, // $100 in credits
+  conditions: ['Valid for any purchase']
+}
+```
+
+#### Free Item Vouchers
+
+```typescript
+{
+  type: 'free_item',
+  value: 25, // $25 item value
+  conditions: ['Valid for items up to $25']
+}
+```
+
+#### Buy One Get One Vouchers
+
+```typescript
+{
+  type: 'buy_one_get_one',
+  value: 30, // Free item worth $30
+  conditions: ['Buy any item, get one free up to $30']
+}
+```
+
+#### Custom Reward Vouchers
+
+```typescript
+{
+  type: 'custom_reward',
+  value: 50, // Custom value
+  conditions: ['Special promotion', 'Valid with other offers']
+}
+```
+
+---
+
 ## Instruction Functions Usage (Advanced)
 
 Instruction-based functions provide advanced transaction composition capabilities, allowing you to batch multiple operations, optimize fees, and integrate with existing transaction flows.
@@ -482,6 +729,8 @@ Verxio Protocol includes built-in static fees for protocol operations:
 - **CREATE_LOYALTY_PROGRAM**: 0.002 SOL - Creating new loyalty programs
 - **LOYALTY_OPERATIONS**: 0.001 SOL - Pass issuance and program updates
 - **VERXIO_INTERACTION**: 0.0004 SOL - Points management and messaging
+- **VOUCHER_OPERATIONS**: 0.0008 SOL - Voucher creation, minting, and redemption
+- **VOUCHER_MANAGEMENT**: 0.0006 SOL - Voucher validation and analytics
 
 All instruction functions include these fees by default.
 
@@ -546,6 +795,15 @@ const result = await combinedTx.sendAndConfirm(context.umi, {
 
 - `approveTransferInstruction` - Approve asset transfers
 
+#### Voucher Management
+
+- `createVoucherCollectionInstruction` - Create voucher collections
+- `mintVoucherInstruction` - Mint new vouchers
+- `validateVoucherInstruction` - Validate voucher for redemption
+- `redeemVoucherInstruction` - Redeem vouchers
+- `extendVoucherExpiryInstruction` - Extend voucher expiry dates
+- `cancelVoucherInstruction` - Cancel vouchers
+
 ### Migration from Direct Functions
 
 #### Before (Direct Functions)
@@ -597,11 +855,13 @@ try {
 
 ### Fee Structure Details
 
-| Operation Type         | Fee Amount | When Applied                   |
-| ---------------------- | ---------- | ------------------------------ |
-| CREATE_LOYALTY_PROGRAM | 0.002 SOL  | Creating new loyalty programs  |
-| LOYALTY_OPERATIONS     | 0.001 SOL  | Pass issuance, program updates |
-| VERXIO_INTERACTION     | 0.0004 SOL | Points management, messaging   |
+| Operation Type         | Fee Amount | When Applied                              |
+| ---------------------- | ---------- | ----------------------------------------- |
+| CREATE_LOYALTY_PROGRAM | 0.002 SOL  | Creating new loyalty programs             |
+| LOYALTY_OPERATIONS     | 0.001 SOL  | Pass issuance, program updates            |
+| VERXIO_INTERACTION     | 0.0004 SOL | Points management, messaging              |
+| VOUCHER_OPERATIONS     | 0.0008 SOL | Voucher creation, minting, and redemption |
+| VOUCHER_MANAGEMENT     | 0.0006 SOL | Voucher validation and analytics          |
 
 ### Read-Only Functions
 
@@ -615,6 +875,9 @@ The following functions are available for querying data (no instruction versions
 - `getProgramTiers`
 - `getWalletLoyaltyPasses`
 - `getPointsPerAction`
+- `getUserVouchers` - Get user vouchers with filtering and sorting
+- `getVoucherAnalytics` - Get comprehensive voucher analytics
+- `validateVoucher` - Validate voucher without redeeming
 
 ## License
 

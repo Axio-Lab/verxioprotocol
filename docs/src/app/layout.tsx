@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import WalletProviderWrapper from './components/WalletProviderWrapper'
 import DocLayout from './components/DocLayout'
 
 export const metadata: Metadata = {
@@ -9,8 +8,6 @@ export const metadata: Metadata = {
     'Complete documentation for the Verxio Protocol SDK - On-chain loyalty protocol powered by Metaplex CORE',
   keywords: ['Verxio', 'Protocol', 'SDK', 'Solana', 'Loyalty', 'Metaplex', 'CORE', 'Blockchain'],
   authors: [{ name: 'Verxio Protocol Team' }],
-  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
-  themeColor: '#00adef',
   robots: 'index, follow',
   openGraph: {
     title: 'Verxio Protocol - Documentation',
@@ -27,18 +24,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
-        <WalletProviderWrapper>
-          <DocLayout>{children}</DocLayout>
-        </WalletProviderWrapper>
-      </body>
-    </html>
-  )
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
+
+export const themeColor = '#00adef'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return <DocLayout>{children}</DocLayout>
 }

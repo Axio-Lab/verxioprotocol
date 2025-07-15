@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
 const navigation = [
   {
@@ -15,11 +14,23 @@ const navigation = [
     ],
   },
   {
-    title: 'Core Functions',
+    title: 'Loyalty Management',
     items: [
       { name: 'Create Loyalty Program', href: '/create-program' },
       { name: 'Update Loyalty Program', href: '/update-program' },
       { name: 'Issue Loyalty Pass', href: '/issue-pass' },
+    ],
+  },
+  {
+    title: 'Voucher Management',
+    items: [
+      { name: 'Create Voucher Collection', href: '/create-voucher-collection' },
+      { name: 'Mint Voucher', href: '/mint-voucher' },
+      { name: 'Cancel Voucher', href: '/cancel-voucher' },
+      { name: 'Validate Voucher', href: '/validate-voucher' },
+      { name: 'Redeem Voucher', href: '/redeem-voucher' },
+      { name: 'Extend Voucher Expiry', href: '/extend-voucher-expiry' },
+      { name: 'Get User Vouchers', href: '/get-user-vouchers' },
     ],
   },
   {
@@ -100,11 +111,6 @@ export default function DocLayout({ children }: { children: React.ReactNode }) {
           <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
             {/* Mobile menu content */}
             <div className="p-6">
-              {/* Wallet Connection */}
-              <div className="mb-6">
-                <WalletMultiButton className="!bg-gradient-to-r !from-blue-500 !to-cyan-500 hover:!from-blue-600 hover:!to-cyan-600 !text-white !font-semibold !rounded-xl !border-0 !shadow-lg hover:!shadow-xl !transition-all !duration-300 w-full !justify-center" />
-              </div>
-
               {/* Navigation */}
               <div className="space-y-6">
                 {navigation.map((section, index) => (
@@ -163,14 +169,6 @@ export default function DocLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* Wallet */}
-          <div className="mb-8">
-            <div className="relative group">
-              <WalletMultiButton className="!bg-gradient-to-r !from-blue-500 !to-cyan-500 hover:!from-blue-600 hover:!to-cyan-600 !text-white !font-semibold !rounded-xl !border-0 !shadow-lg hover:!shadow-xl !transition-all !duration-300 !transform hover:!scale-105 w-full" />
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
-            </div>
-          </div>
-
           {/* Navigation */}
           <div className="space-y-6">
             {navigation.map((section, index) => (
@@ -192,18 +190,6 @@ export default function DocLayout({ children }: { children: React.ReactNode }) {
               </div>
             ))}
           </div>
-
-          {/* Footer badge */}
-          {/* <div className="absolute bottom-6 left-6 right-6">
-            <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-400/10 dark:to-cyan-400/10 rounded-xl p-4 backdrop-blur-sm border border-blue-200/20 dark:border-blue-400/20">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                  Devnet Connected
-                </span>
-              </div>
-            </div>
-          </div> */}
         </div>
       </nav>
 

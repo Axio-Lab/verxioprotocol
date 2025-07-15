@@ -1,7 +1,5 @@
 'use client'
 
-import UpdateLoyaltyProgramForm from '../components/UpdateLoyaltyProgramForm'
-
 export default function UpdateProgramPage() {
   return (
     <div className="max-w-4xl">
@@ -272,19 +270,6 @@ const result = await updateLoyaltyProgram(context, {
     { name: 'Legend', xpRequired: 3000, rewards: ['15% off'] }
   ]
 })`}</pre>
-        </div>
-      </div>
-
-      {/* Interactive Testing */}
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <p>
-          Test the update functionality with the form below. You'll need an existing loyalty program collection address.
-        </p>
-
-        <div className="interactive-section">
-          <h3>Update Loyalty Program</h3>
-          <UpdateLoyaltyProgramForm />
         </div>
       </div>
 

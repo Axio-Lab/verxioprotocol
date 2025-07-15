@@ -1,7 +1,5 @@
 'use client'
 
-import RevokeLoyaltyPointsForm from '../components/RevokeLoyaltyPointsForm'
-
 export default function RevokePointsPage() {
   return (
     <div className="max-w-4xl">
@@ -75,14 +73,6 @@ const result = await revokeLoyaltyPoints(context, {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Revoke Loyalty Points</h3>
-          <RevokeLoyaltyPointsForm />
-        </div>
       </div>
 
       <div className="doc-section">

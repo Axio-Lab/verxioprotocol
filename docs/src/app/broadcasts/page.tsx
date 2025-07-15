@@ -1,7 +1,5 @@
 'use client'
 
-import BroadcastsForm from '../components/BroadcastsForm'
-
 export default function BroadcastsPage() {
   return (
     <div className="max-w-4xl">
@@ -95,14 +93,6 @@ const tierResult = await sendBroadcast(context, {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Send Broadcast</h3>
-          <BroadcastsForm />
-        </div>
       </div>
 
       <div className="doc-section">

@@ -1,7 +1,5 @@
 'use client'
 
-import GetAssetDataForm from '../components/GetAssetDataForm'
-
 export default function GetAssetDataPage() {
   return (
     <div className="max-w-4xl">
@@ -62,14 +60,6 @@ console.log('Owner:', assetData.owner)`}</pre>
     rewards: string[]
   }>
 }`}</pre>
-        </div>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Get Asset Data</h3>
-          <GetAssetDataForm />
         </div>
       </div>
 

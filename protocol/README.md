@@ -1,21 +1,63 @@
 # Verxio Protocol
 
-On-chain loyalty protocol powered by Metaplex CORE for creating and managing loyalty programs
+On-chain loyalty infrastructure for creating and managing loyalty programs on solana and SVM.
 
 ## Features
 
-- Create loyalty programs with custom tiers and rewards
-- Issue loyalty passes as NFTs
-- Track user XP and tier progression
-- Support for transferable loyalty passes (with organization approval)
-- Built-in support for multiple networks (Solana, Sonic)
-- Automatic tier progression based on XP
-- Update loyalty program tiers and points per action
-- Gift points to users with custom actions
-- Comprehensive asset data and customer behaviour tracking
-- Flexible authority management for loyalty programs and loyalty pass updates
-- Direct messaging between program and pass holders with support for program-wide broadcasts
-- **Advanced transaction composition with instruction-based functions**
+### Core Loyalty System
+
+- **Create loyalty programs** with custom tiers and rewards
+- **Issue loyalty passes as NFTs** with automatic metadata generation or custom metadata
+- **Track user XP and tier progression** with automatic tier updates
+- **Support for transferable loyalty passes** (with organization approval)
+- **Built-in support for multiple networks** (Solana, Sonic)
+- **Automatic tier progression** based on XP accumulation
+- **Update loyalty program tiers and points per action** dynamically
+- **Gift points to users** with custom actions and reasons
+- **Comprehensive asset data and customer behavior tracking**
+- **Flexible authority management** for loyalty programs and loyalty pass updates
+
+### Communication & Messaging
+
+- **Direct messaging** between program and pass holders
+- **Program-wide broadcasts** with targeted delivery options
+- **Message read status tracking** and analytics
+- **Rich message metadata** with timestamps and sender information
+
+### Advanced Transaction Composition
+
+- **Instruction-based functions** for advanced transaction batching
+- **Custom fee handling** and gas optimization
+- **Transaction composition** with multiple operations
+- **Built-in protocol fees** with transparent cost structure
+
+### Complete Voucher Management System
+
+- **Create, mint, validate, and redeem vouchers** with full lifecycle management
+- **Voucher Collections** - Organize vouchers by merchant and type
+- **Voucher Analytics** - Track redemption rates, usage patterns, and performance metrics
+- **User Voucher Management** - Get user vouchers with filtering and sorting
+- **Merchant Voucher Operations** - Bulk operations and merchant-specific analytics
+- **Voucher Validation** - Comprehensive validation with expiry and usage tracking
+- **Voucher Redemption** - Multi-type voucher redemption with value calculation
+- **Voucher Expiry Management** - Extend or cancel vouchers with reason tracking
+- **Merchant Identification** - Flexible merchant ID system for off-chain integration
+
+### Supported Voucher Types
+
+- **Percentage Off Vouchers** - Dynamic discounts based on purchase amount
+- **Fixed Credit Vouchers** - Fixed value credits for any purchase
+- **Free Item Vouchers** - Free items up to specified value
+- **Buy One Get One Vouchers** - BOGO promotions with value limits
+- **Custom Reward Vouchers** - Flexible reward structures
+
+### Advanced Features
+
+- **Irys Integration** - Automatic NFT image and metadata uploads
+- **Comprehensive Test Suite** - Full coverage with 100+ test cases
+- **Robust Error Handling** - Detailed validation and error messages
+- **Type Safety** - Full TypeScript support with comprehensive types
+- **Performance Optimized** - Efficient blockchain operations and data structures
 
 ## Installation
 
@@ -25,6 +67,56 @@ npm install @verxioprotocol/core
 yarn add @verxioprotocol/core
 # or
 pnpm add @verxioprotocol/core
+```
+
+## Quick Start
+
+### Initialize Protocol
+
+```typescript
+import { initializeVerxio } from '@verxioprotocol/core'
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
+import { publicKey, keypairIdentity } from '@metaplex-foundation/umi'
+
+// Create UMI instance (Solana & SVM supported)
+const umi = createUmi('RPC_URL')
+
+// Initialize program
+const context = initializeVerxio(
+  umi,
+  publicKey('PROGRAM_AUTHORITY'), // Program authority public key
+)
+
+// Set Signer
+context.umi.use(keypairIdentity('FEE_PAYER'))
+```
+
+### Create Your First Loyalty Program
+
+```typescript
+import { createLoyaltyProgram } from '@verxioprotocol/core'
+
+const result = await createLoyaltyProgram(context, {
+  loyaltyProgramName: 'Coffee Brew Rewards',
+  metadataUri: 'https://arweave.net/...',
+  programAuthority: context.programAuthority,
+  metadata: {
+    organizationName: 'Coffee Brew', // Required
+    brandColor: '#FF5733', // Optional: for UI customization
+  },
+  tiers: [
+    { name: 'Bronze', xpRequired: 500, rewards: ['2% cashback'] },
+    { name: 'Silver', xpRequired: 1000, rewards: ['5% cashback'] },
+    { name: 'Gold', xpRequired: 2000, rewards: ['10% cashback'] },
+  ],
+  pointsPerAction: {
+    purchase: 100,
+    review: 50,
+    referral: 200,
+  },
+})
+
+console.log('Loyalty Program Created:', result.collection.publicKey)
 ```
 
 ## Two Approaches to Using Verxio Protocol
@@ -65,10 +157,17 @@ context.umi.use(keypairIdentity('FEE_PAYER'))
 
 ### Create Loyalty Program
 
+You can either:
+
+- **Provide a pre-uploaded metadata URI** (no image upload needed), or
+- **Provide an image buffer and filename** to auto-upload the image and generate metadata.
+
+#### 1. Using a pre-uploaded metadata URI
+
 ```typescript
 const result = await createLoyaltyProgram(context, {
-  loyaltyProgramName: "Brew's summer discount",
-  metadataUri: 'https://arweave.net/...',
+  loyaltyProgramName: 'Coffee Brew Rewards',
+  metadataUri: 'https://arweave.net/...', // Already uploaded metadata
   programAuthority: context.programAuthority,
   updateAuthority: generateSigner(context.umi), // Optional: Provide custom update authority
   metadata: {
@@ -99,6 +198,41 @@ console.log(result)
 //   signature: string,         // Transaction signature
 //   programAuthority: KeypairSigner // Update authority for the loyalty program
 // }
+```
+
+#### 2. Uploading an image and generating metadata
+
+```typescript
+const fs = require('fs')
+const imageBuffer = fs.readFileSync('logo.png')
+const result = await createLoyaltyProgram(context, {
+  loyaltyProgramName: 'Coffee Brew Rewards',
+  imageBuffer, // Buffer of your image
+  imageFilename: 'logo.png',
+  programAuthority: context.programAuthority,
+  updateAuthority: generateSigner(context.umi), // Optional: Provide custom update authority
+  metadata: {
+    organizationName: 'Coffee Brew', // Required: Name of the host/organization
+    brandColor: '#FF5733', // Optional: Brand color for UI customization
+  },
+  tiers: [
+    {
+      name: 'Bronze',
+      xpRequired: 500,
+      rewards: ['2% cashback'],
+    },
+    {
+      name: 'Silver',
+      xpRequired: 1000,
+      rewards: ['5% cashback'],
+    },
+  ],
+  pointsPerAction: {
+    purchase: 100,
+    review: 50,
+  },
+})
+// The protocol will upload the image, generate metadata, and use the resulting URI
 ```
 
 ### Update Loyalty Program
@@ -154,14 +288,22 @@ console.log(result)
 
 ### Issue Loyalty Pass
 
+You can either:
+
+- **Provide a pre-uploaded metadata URI** (no image upload needed), or
+- **Provide an image buffer and filename** to auto-upload the image and generate metadata.
+
+#### 1. Using a pre-uploaded metadata URI
+
 ```typescript
 const result = await issueLoyaltyPass(context, {
   collectionAddress: context.collectionAddress,
   recipient: publicKey('RECIPIENT_ADDRESS'),
   passName: 'Coffee Rewards Pass',
-  passMetadataUri: 'https://arweave.net/...',
+  passMetadataUri: 'https://arweave.net/...', // Already uploaded metadata
   assetSigner: generateSigner(context.umi), // Optional: Provide a signer for the pass
   updateAuthority: programAuthority, // Required: Program authority of the Loyalty Program
+  organizationName: 'Coffee Brew',
 })
 
 console.log(result)
@@ -169,6 +311,22 @@ console.log(result)
 //   asset: KeypairSigner,  // Pass signer
 //   signature: string      // Transaction signature
 // }
+```
+
+#### 2. Uploading an image and generating metadata
+
+```typescript
+const imageBuffer = fs.readFileSync('pass.png')
+const result = await issueLoyaltyPass(context, {
+  collectionAddress: context.collectionAddress,
+  recipient: publicKey('RECIPIENT_ADDRESS'),
+  passName: 'Coffee Rewards Pass',
+  imageBuffer, // Buffer of your image
+  imageFilename: 'pass.png',
+  updateAuthority: programAuthority, // Required: Program authority of the Loyalty Program
+  organizationName: 'Coffee Brew',
+})
+// The protocol will upload the image, generate metadata, and use the resulting URI
 ```
 
 ### Award Points
@@ -464,6 +622,299 @@ console.log(broadcasts.broadcasts)
 
 ---
 
+## Voucher Management System
+
+Verxio Protocol includes a comprehensive voucher management system for creating, distributing, and redeeming digital vouchers with full lifecycle management.
+
+### Create Voucher Collection
+
+You can either:
+
+- **Provide a pre-uploaded metadata URI** (no image upload needed), or
+- **Provide an image buffer and filename** to auto-upload the image and generate metadata.
+
+#### 1. Using a pre-uploaded metadata URI
+
+```typescript
+const result = await createVoucherCollection(context, {
+  collectionName: 'Summer Sale Vouchers',
+  collectionMetadataUri: 'https://arweave.net/...', // Already uploaded metadata
+  updateAuthority: generateSigner(context.umi),
+  metadata: {
+    merchantName: 'Coffee Brew',
+    description: 'Summer sale vouchers for loyal customers',
+    terms: 'Valid until August 31st, 2024',
+  },
+})
+
+console.log(result)
+// {
+//   collection: KeypairSigner,  // Collection signer
+//   signature: string,         // Transaction signature
+//   updateAuthority: KeypairSigner // Update authority for the collection
+// }
+```
+
+#### 2. Uploading an image and generating metadata
+
+```typescript
+const imageBuffer = fs.readFileSync('voucher-collection.png')
+const result = await createVoucherCollection(context, {
+  collectionName: 'Summer Sale Vouchers',
+  imageBuffer, // Buffer of your image
+  imageFilename: 'voucher-collection.png',
+  updateAuthority: generateSigner(context.umi),
+  metadata: {
+    merchantName: 'Coffee Brew',
+    description: 'Summer sale vouchers for loyal customers',
+    terms: 'Valid until August 31st, 2024',
+  },
+})
+// The protocol will upload the image, generate metadata, and use the resulting URI
+```
+
+### Mint Voucher
+
+You can either:
+
+- **Provide a pre-uploaded metadata URI** (no image upload needed), or
+- **Provide an image buffer and filename** to auto-upload the image and generate metadata.
+
+#### 1. Using a pre-uploaded metadata URI
+
+```typescript
+const result = await mintVoucher(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  voucherName: 'Summer Sale Voucher',
+  voucherMetadataUri: 'https://arweave.net/...', // Already uploaded metadata
+  voucherData: {
+    type: 'percentage_off',
+    value: 15, // 15% off
+    maxUses: 1,
+    expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
+    conditions: [{ type: 'minimum_purchase', value: 50, operator: 'greater_than' }],
+    description: '15% off your next purchase',
+    merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  },
+  recipient: publicKey('RECIPIENT_ADDRESS'),
+  updateAuthority: generateSigner(context.umi),
+})
+
+console.log(result)
+// {
+//   asset: KeypairSigner,  // Voucher signer
+//   signature: string,    // Transaction signature
+//   voucherAddress: PublicKey // Voucher public key
+// }
+```
+
+#### 2. Uploading an image and generating metadata
+
+```typescript
+const imageBuffer = fs.readFileSync('voucher.png')
+const result = await mintVoucher(context, {
+  collectionAddress: publicKey('COLLECTION_ADDRESS'),
+  voucherName: 'Summer Sale Voucher',
+  imageBuffer, // Buffer of your image
+  imageFilename: 'voucher.png',
+  voucherData: {
+    type: 'percentage_off',
+    value: 15, // 15% off
+    maxUses: 1,
+    expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
+    conditions: [{ type: 'minimum_purchase', value: 50, operator: 'greater_than' }],
+    description: '15% off your next purchase',
+    merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  },
+  recipient: publicKey('RECIPIENT_ADDRESS'),
+  updateAuthority: generateSigner(context.umi),
+})
+// The protocol will upload the image, generate metadata, and use the resulting URI
+```
+
+### Validate Voucher
+
+```typescript
+const validation = await validateVoucher(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  purchaseAmount: 100, // Optional: for percentage-based vouchers
+})
+
+console.log(validation)
+// {
+//   isValid: boolean,
+//   errors: string[],
+//   warnings: string[],
+//   voucherData: {
+//     type: string,
+//     value: number,
+//     currentUses: number,
+//     maxUses: number,
+//     expiryDate: number,
+//     conditions: string[],
+//     description: string,
+//     merchantId: string
+//   },
+//   redemptionValue: number
+// }
+```
+
+### Redeem Voucher
+
+```typescript
+const result = await redeemVoucher(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+  purchaseAmount: 100, // Optional: for percentage-based vouchers
+  updateAuthority: generateSigner(context.umi), // Authority that can update the voucher
+})
+
+console.log(result)
+// {
+//   success: boolean,
+//   signature: string,
+//   redemptionValue: number,
+//   updatedVoucher: VoucherData,
+//   errors: string[]
+// }
+```
+
+### Get User Vouchers
+
+```typescript
+const vouchers = await getUserVouchers(context, {
+  userAddress: publicKey('USER_ADDRESS'),
+  filters: {
+    status: 'active', // 'active' | 'expired' | 'fully_used'
+    type: 'percentage_off', // Optional: filter by voucher type
+    minValue: 10, // Optional: minimum value
+  },
+  sortBy: 'expiryDate', // 'expiryDate' | 'value' | 'createdAt'
+  sortOrder: 'asc', // 'asc' | 'desc'
+  limit: 10, // Optional: limit results
+})
+
+console.log(vouchers)
+// {
+//   vouchers: Array<{
+//     address: string,
+//     type: string,
+//     value: number,
+//     currentUses: number,
+//     maxUses: number,
+//     expiryDate: number,
+//     status: string,
+//     description: string,
+//     conditions: string[],
+//     collection: string
+//   }>,
+//   total: number,
+//   expiringSoon: Array<string>, // Voucher addresses expiring in 7 days
+//   redeemable: Array<string>    // Voucher addresses that can be redeemed
+// }
+```
+
+### Extend Voucher Expiry
+
+```typescript
+const result = await extendVoucherExpiry(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  newExpiryDate: Date.now() + 60 * 24 * 60 * 60 * 1000, // 60 days from now
+  reason: 'Customer request',
+  signer: generateSigner(context.umi),
+})
+
+console.log(result)
+// {
+//   signature: string,
+//   newExpiryDate: number
+// }
+```
+
+### Cancel Voucher
+
+```typescript
+const result = await cancelVoucher(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  reason: 'Customer refund',
+  signer: generateSigner(context.umi),
+})
+
+console.log(result)
+// {
+//   signature: string,
+//   status: 'cancelled'
+// }
+```
+
+### Merchant Identification
+
+In the voucher system, merchants are identified using a `merchantId` string rather than a blockchain address. This provides flexibility for:
+
+- **Off-chain Integration**: Merchants can use their existing business identifiers
+- **Multi-chain Support**: Same merchant can operate across different networks
+- **Privacy**: Merchant identity can be managed separately from blockchain addresses
+- **Scalability**: No need to manage multiple wallet addresses per merchant
+
+The `merchantId` is set when creating vouchers and validated during redemption to ensure vouchers are only used at the correct merchant.
+
+### Supported Voucher Types
+
+Verxio Protocol supports multiple voucher types for different use cases:
+
+#### Percentage Off Vouchers
+
+```typescript
+{
+  type: 'percentage_off',
+  value: 15, // 15% discount
+  conditions: ['Minimum purchase: $50']
+}
+```
+
+#### Fixed Credit Vouchers
+
+```typescript
+{
+  type: 'fixed_verxio_credits',
+  value: 100, // $100 in credits
+  conditions: ['Valid for any purchase']
+}
+```
+
+#### Free Item Vouchers
+
+```typescript
+{
+  type: 'free_item',
+  value: 25, // $25 item value
+  conditions: ['Valid for items up to $25']
+}
+```
+
+#### Buy One Get One Vouchers
+
+```typescript
+{
+  type: 'buy_one_get_one',
+  value: 30, // Free item worth $30
+  conditions: ['Buy any item, get one free up to $30']
+}
+```
+
+#### Custom Reward Vouchers
+
+```typescript
+{
+  type: 'custom_reward',
+  value: 50, // Custom value
+  conditions: ['Special promotion', 'Valid with other offers']
+}
+```
+
+---
+
 ## Instruction Functions Usage (Advanced)
 
 Instruction-based functions provide advanced transaction composition capabilities, allowing you to batch multiple operations, optimize fees, and integrate with existing transaction flows.
@@ -474,6 +925,7 @@ Instruction-based functions provide advanced transaction composition capabilitie
 - **Flexibility**: Add custom instructions before/after Verxio operations
 - **Gas Optimization**: Batch operations to save on transaction fees
 - **Integration**: Easier integration with existing transaction flows
+- **Error Handling**: Validate inputs before transaction execution
 
 ### Protocol Fees
 
@@ -482,6 +934,8 @@ Verxio Protocol includes built-in static fees for protocol operations:
 - **CREATE_LOYALTY_PROGRAM**: 0.002 SOL - Creating new loyalty programs
 - **LOYALTY_OPERATIONS**: 0.001 SOL - Pass issuance and program updates
 - **VERXIO_INTERACTION**: 0.0004 SOL - Points management and messaging
+- **VOUCHER_OPERATIONS**: 0.0008 SOL - Voucher creation, minting, and redemption
+- **VOUCHER_MANAGEMENT**: 0.0006 SOL - Voucher validation and analytics
 
 All instruction functions include these fees by default.
 
@@ -532,90 +986,4 @@ const result = await combinedTx.sendAndConfirm(context.umi, {
 #### Points Management
 
 - `awardLoyaltyPointsInstruction` - Award points for actions
-- `revokeLoyaltyPointsInstruction` - Revoke points from users
-- `giftLoyaltyPointsInstruction` - Gift points to users
-
-#### Messaging & Communication
-
-- `sendBroadcastInstruction` - Send broadcasts to all pass holders
-- `sendAssetMessageInstruction` - Send messages to specific pass holders
-- `markBroadcastReadInstruction` - Mark broadcasts as read
-- `markMessageReadInstruction` - Mark messages as read
-
-#### Asset Management
-
-- `approveTransferInstruction` - Approve asset transfers
-
-### Migration from Direct Functions
-
-#### Before (Direct Functions)
-
-```typescript
-import { createLoyaltyProgram } from '@verxioprotocol/core'
-
-// Executes immediately
-const result = await createLoyaltyProgram(context, config)
-console.log('Transaction signature:', result.signature)
-```
-
-#### After (Instruction Functions)
-
-```typescript
-import { createLoyaltyProgramInstruction } from '@verxioprotocol/core'
-
-// Returns instruction builder
-const { instruction, collection } = createLoyaltyProgramInstruction(context, config)
-
-// Execute when ready
-const tx = await instruction.sendAndConfirm(context.umi)
-console.log('Transaction signature:', toBase58(tx.signature))
-```
-
-### Error Handling
-
-All instruction functions perform the same validation as their direct counterparts but throw errors during instruction creation rather than execution:
-
-```typescript
-try {
-  const { instruction } = await awardLoyaltyPointsInstruction(context, config)
-  const result = await instruction.sendAndConfirm(context.umi)
-} catch (error) {
-  if (error.message.includes('Pass not found')) {
-    // Handle pass not found during instruction creation
-  } else {
-    // Handle transaction execution errors
-  }
-}
-```
-
-### Best Practices
-
-1. **Batch Related Operations**: Combine related operations in single transactions
-2. **Validate Early**: Instruction functions validate inputs immediately
-3. **Error Handling**: Separate instruction creation errors from execution errors
-4. **Gas Optimization**: Use `sendAndConfirm` options for priority fees and commitment levels
-
-### Fee Structure Details
-
-| Operation Type         | Fee Amount | When Applied                   |
-| ---------------------- | ---------- | ------------------------------ |
-| CREATE_LOYALTY_PROGRAM | 0.002 SOL  | Creating new loyalty programs  |
-| LOYALTY_OPERATIONS     | 0.001 SOL  | Pass issuance, program updates |
-| VERXIO_INTERACTION     | 0.0004 SOL | Points management, messaging   |
-
-### Read-Only Functions
-
-The following functions are available for querying data (no instruction versions needed):
-
-- `getCollectionAttribute`
-- `calculateNewTier`
-- `getProgramDetails`
-- `getAssetData`
-- `getAssetMessages`
-- `getProgramTiers`
-- `getWalletLoyaltyPasses`
-- `getPointsPerAction`
-
-## License
-
-MIT
+- `

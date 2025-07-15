@@ -1,7 +1,5 @@
 'use client'
 
-import GiftLoyaltyPointsForm from '../components/GiftLoyaltyPointsForm'
-
 export default function GiftPointsPage() {
   return (
     <div className="max-w-4xl">
@@ -86,14 +84,6 @@ const result = await giftLoyaltyPoints(context, {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Gift Loyalty Points</h3>
-          <GiftLoyaltyPointsForm />
-        </div>
       </div>
 
       <div className="doc-section">

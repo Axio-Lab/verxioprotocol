@@ -8,7 +8,6 @@ import { getAssetMessages } from '../lib/get-asset-messages'
 import { DEFAULT_TIER, DEFAULT_PASS_DATA } from '../lib/constants'
 import { getTestContext } from './helpers/get-test-context'
 import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
-import { FEES } from '../utils/fee-structure'
 import { updatePassData } from '../lib'
 import { fetchAsset } from '@metaplex-foundation/mpl-core'
 
@@ -26,7 +25,7 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
     // Ensure we have enough sol for all operations
     await ensureFeePayerBalance(context.umi, {
       account: feePayer.publicKey,
-      amount: 1 + FEES.CREATE_LOYALTY_PROGRAM,
+      amount: 1,
     })
     context.umi.use(keypairIdentity(feePayer))
 
@@ -57,8 +56,9 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
       collectionAddress: collection.publicKey,
       recipient: recipient.publicKey,
       passName: 'Test Pass',
-      passMetadataUri: 'https://example.com/pass',
+      passMetadataUri: 'https://arweave.net/123abc',
       updateAuthority,
+      organizationName: 'Test Organization',
     })
 
     asset = passResult.asset
@@ -135,8 +135,9 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
       collectionAddress: collection.publicKey,
       recipient: recipient.publicKey,
       passName: 'New Test Pass',
-      passMetadataUri: 'https://example.com/new-pass',
+      passMetadataUri: 'https://arweave.net/123abc',
       updateAuthority,
+      organizationName: 'Test Organization',
     })
 
     // Get the app data plugin for the new pass
@@ -172,8 +173,9 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
       collectionAddress: collection.publicKey,
       recipient: recipient.publicKey,
       passName: 'No Messages Pass',
-      passMetadataUri: 'https://example.com/no-messages',
+      passMetadataUri: 'https://arweave.net/123abc',
       updateAuthority,
+      organizationName: 'Test Organization',
     })
 
     const noMessagesAssetData = await fetchAsset(context.umi, noMessagesPass.asset.publicKey)

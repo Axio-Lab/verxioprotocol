@@ -1,7 +1,5 @@
 'use client'
 
-import CreateLoyaltyProgramForm from '../components/CreateLoyaltyProgramForm'
-
 export default function CreateProgramPage() {
   return (
     <div className="max-w-4xl">
@@ -22,36 +20,88 @@ export default function CreateProgramPage() {
           Metaplex CORE collection. This collection will hold all loyalty passes issued for your program and define the
           tier structure, rewards, and point allocation rules.
         </p>
+        <p className="mt-4 text-gray-600">
+          <strong>Note:</strong> You can either provide a pre-uploaded metadata URI or provide an image buffer and
+          filename to auto-upload the image and generate metadata.
+        </p>
+      </div>
+
+      {/* Usage Examples */}
+      <div className="doc-section">
+        <h2>Usage Examples</h2>
+
+        <h3>1. Using a Pre-uploaded Metadata URI</h3>
+        <p>If you already have metadata uploaded to Arweave or another storage service:</p>
 
         <div className="code-block">
           <pre>{`import { createLoyaltyProgram } from '@verxioprotocol/core'
+import { generateSigner } from '@metaplex-foundation/umi'
 
 const result = await createLoyaltyProgram(context, {
-  loyaltyProgramName: "Coffee Rewards Program",
-  metadataUri: "https://arweave.net/metadata.json",
+  loyaltyProgramName: 'Coffee Brew Rewards',
+  metadataUri: 'https://arweave.net/...', // Already uploaded metadata
   programAuthority: context.programAuthority,
-  updateAuthority: generateSigner(context.umi),
+  updateAuthority: generateSigner(context.umi), // Optional: Provide custom update authority
   metadata: {
-    organizationName: "Coffee Brew Co.",
-    brandColor: "#6366f1"
+    organizationName: 'Coffee Brew', // Required: Name of the host/organization
+    brandColor: '#FF5733', // Optional: Brand color for UI customization
   },
   tiers: [
     {
-      name: "Bronze",
+      name: 'Bronze',
       xpRequired: 500,
-      rewards: ["2% cashback"]
+      rewards: ['2% cashback'],
     },
     {
-      name: "Silver", 
+      name: 'Silver',
       xpRequired: 1000,
-      rewards: ["5% cashback", "Free birthday drink"]
-    }
+      rewards: ['5% cashback'],
+    },
   ],
   pointsPerAction: {
     purchase: 100,
-    review: 50
-  }
+    review: 50,
+  },
 })`}</pre>
+        </div>
+
+        <h3>2. Uploading an Image and Generating Metadata</h3>
+        <p>If you want the protocol to handle image upload and metadata generation:</p>
+
+        <div className="code-block">
+          <pre>{`import { createLoyaltyProgram } from '@verxioprotocol/core'
+import { generateSigner } from '@metaplex-foundation/umi'
+import fs from 'fs'
+
+const imageBuffer = fs.readFileSync('logo.png')
+const result = await createLoyaltyProgram(context, {
+  loyaltyProgramName: 'Coffee Brew Rewards',
+  imageBuffer, // Buffer of your image
+  imageFilename: 'logo.png',
+  programAuthority: context.programAuthority,
+  updateAuthority: generateSigner(context.umi), // Optional: Provide custom update authority
+  metadata: {
+    organizationName: 'Coffee Brew', // Required: Name of the host/organization
+    brandColor: '#FF5733', // Optional: Brand color for UI customization
+  },
+  tiers: [
+    {
+      name: 'Bronze',
+      xpRequired: 500,
+      rewards: ['2% cashback'],
+    },
+    {
+      name: 'Silver',
+      xpRequired: 1000,
+      rewards: ['5% cashback'],
+    },
+  ],
+  pointsPerAction: {
+    purchase: 100,
+    review: 50,
+  },
+})
+// The protocol will upload the image, generate metadata, and use the resulting URI`}</pre>
         </div>
       </div>
 
@@ -97,8 +147,38 @@ const result = await createLoyaltyProgram(context, {
               <td>
                 <span className="param-type">string</span>
               </td>
-              <td>✅</td>
-              <td>URI pointing to the program's metadata JSON</td>
+              <td>❌</td>
+              <td>URI pointing to the program's metadata JSON (if not providing imageBuffer)</td>
+            </tr>
+            <tr>
+              <td>
+                <span className="param-name">imageBuffer</span>
+              </td>
+              <td>
+                <span className="param-type">Buffer</span>
+              </td>
+              <td>❌</td>
+              <td>Buffer of your image file (if not providing metadataUri)</td>
+            </tr>
+            <tr>
+              <td>
+                <span className="param-name">imageFilename</span>
+              </td>
+              <td>
+                <span className="param-type">string</span>
+              </td>
+              <td>❌</td>
+              <td>Name of your image file (required if providing imageBuffer)</td>
+            </tr>
+            <tr>
+              <td>
+                <span className="param-name">imageContentType</span>
+              </td>
+              <td>
+                <span className="param-type">string</span>
+              </td>
+              <td>❌</td>
+              <td>MIME type of your image (e.g., "image/png")</td>
             </tr>
             <tr>
               <td>
@@ -258,111 +338,97 @@ const result = await createLoyaltyProgram(context, {
               <td>
                 <span className="param-type">KeypairSigner</span>
               </td>
-              <td>The update authority for the program (optional)</td>
+              <td>The update authority for the loyalty program (if provided)</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      {/* Example */}
+      {/* Error Handling */}
       <div className="doc-section">
-        <h2>Complete Example</h2>
-        <p>Here's a complete example showing how to create a coffee shop loyalty program:</p>
+        <h2>Error Handling</h2>
+        <p>The function will throw errors in the following cases:</p>
 
-        <div className="code-block">
-          <pre>{`import { initializeVerxio, createLoyaltyProgram } from '@verxioprotocol/core'
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
-import { generateSigner } from '@metaplex-foundation/umi'
+        <ul className="list-disc list-inside space-y-2 text-gray-700">
+          <li>
+            <strong>Invalid configuration:</strong> Missing required parameters or invalid parameter values
+          </li>
+          <li>
+            <strong>Image upload failure:</strong> If using imageBuffer and the upload fails
+          </li>
+          <li>
+            <strong>Metadata generation failure:</strong> If metadata cannot be generated from the provided data
+          </li>
+          <li>
+            <strong>Transaction failure:</strong> If the blockchain transaction fails
+          </li>
+          <li>
+            <strong>Insufficient funds:</strong> If the fee payer doesn't have enough SOL for the transaction
+          </li>
+        </ul>
 
-// Initialize UMI and context
-const umi = createUmi('https://api.devnet.solana.com')
-const context = initializeVerxio(umi, programAuthority)
-
-// Create the loyalty program
-try {
-  const result = await createLoyaltyProgram(context, {
-    loyaltyProgramName: "Brew's Coffee Rewards",
-    metadataUri: "https://arweave.net/coffee-metadata.json",
-    programAuthority: context.programAuthority,
-    updateAuthority: generateSigner(umi),
-    metadata: {
-      organizationName: "Brew's Coffee House",
-      brandColor: "#8B4513"
-    },
-    tiers: [
-      {
-        name: "Coffee Lover",
-        xpRequired: 0,
-        rewards: ["Welcome drink discount"]
-      },
-      {
-        name: "Espresso Expert", 
-        xpRequired: 500,
-        rewards: ["5% discount", "Free size upgrade"]
-      },
-      {
-        name: "Caffeine Connoisseur",
-        xpRequired: 1500,
-        rewards: ["10% discount", "Free birthday drink", "Early access to new blends"]
-      }
-    ],
-    pointsPerAction: {
-      purchase: 100,        // 100 points per purchase
-      review: 50,           // 50 points for leaving a review
-      referral: 200,        // 200 points for successful referrals
-      socialShare: 25       // 25 points for social media shares
-    }
-  })
-
-  console.log('Program created successfully!')
-  console.log('Collection address:', result.collection.publicKey.toString())
-  console.log('Transaction signature:', result.signature)
-  
-} catch (error) {
-  console.error('Error creating loyalty program:', error)
-}`}</pre>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">Important Notes</h4>
+          <ul className="text-yellow-700 text-sm space-y-1">
+            <li>
+              • You must provide either <code className="inline-code">metadataUri</code> OR{' '}
+              <code className="inline-code">imageBuffer</code> with <code className="inline-code">imageFilename</code>
+            </li>
+            <li>
+              • The <code className="inline-code">organizationName</code> in metadata is required
+            </li>
+            <li>
+              • At least one tier must be defined in the <code className="inline-code">tiers</code> array
+            </li>
+            <li>• The protocol fee for creating a loyalty program is 0.002 SOL</li>
+          </ul>
         </div>
       </div>
 
-      {/* Interactive Testing */}
+      {/* Related Functions */}
       <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <p>
-          Try creating a loyalty program using the form below. Make sure you have connected your Solana wallet first.
-        </p>
-
-        <div className="interactive-section">
-          <h3>Create Loyalty Program</h3>
-          <CreateLoyaltyProgramForm />
-        </div>
-      </div>
-
-      {/* Best Practices */}
-      <div className="doc-section">
-        <h2>Best Practices</h2>
-        <div className="space-y-4">
-          <div className="card">
-            <h4 className="font-semibold mb-2">🎯 Tier Design</h4>
-            <p className="text-muted text-sm">
-              Design your tiers to encourage engagement. Start with achievable requirements for the first tier and
-              gradually increase them. Consider offering meaningful rewards at each level.
-            </p>
+        <h2>Related Functions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="/issue-pass" className="text-blue-600 hover:underline">
+                  Issue Loyalty Pass
+                </a>
+                - Create loyalty passes for users
+              </li>
+              <li>
+                <a href="/update-program" className="text-blue-600 hover:underline">
+                  Update Loyalty Program
+                </a>
+                - Modify tiers and point values
+              </li>
+              <li>
+                <a href="/award-points" className="text-blue-600 hover:underline">
+                  Award Points
+                </a>
+                - Give points to users for actions
+              </li>
+            </ul>
           </div>
 
-          <div className="card">
-            <h4 className="font-semibold mb-2">📝 Metadata</h4>
-            <p className="text-muted text-sm">
-              Store your metadata on a permanent storage solution like Arweave. Include program description, images, and
-              any additional information about your loyalty program.
-            </p>
-          </div>
-
-          <div className="card">
-            <h4 className="font-semibold mb-2">⚡ Points Strategy</h4>
-            <p className="text-muted text-sm">
-              Balance your points-per-action carefully. Higher-value actions should award more points, and tier
-              thresholds should be reachable but challenging.
-            </p>
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-2">Advanced Usage</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="/instruction-functions" className="text-blue-600 hover:underline">
+                  Instruction Functions
+                </a>
+                - Use transaction composition
+              </li>
+              <li>
+                <a href="/create-voucher-collection" className="text-blue-600 hover:underline">
+                  Voucher Management
+                </a>
+                - Create and manage vouchers
+              </li>
+            </ul>
           </div>
         </div>
       </div>

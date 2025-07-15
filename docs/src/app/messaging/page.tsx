@@ -1,7 +1,5 @@
 'use client'
 
-import MessagingForm from '../components/MessagingForm'
-
 export default function MessagingPage() {
   return (
     <div className="max-w-4xl">
@@ -86,14 +84,6 @@ const result = await sendMessage(context, {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Send Message</h3>
-          <MessagingForm />
-        </div>
       </div>
 
       <div className="doc-section">

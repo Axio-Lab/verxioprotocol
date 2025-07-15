@@ -36,6 +36,7 @@ describe('award-loyalty-points', () => {
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
       updateAuthority: authority!,
+      organizationName: 'Test Organization',
     })
     loyaltyPass = passResult.asset
   })
@@ -206,6 +207,7 @@ describe('award-loyalty-points', () => {
         programAuthority: context.programAuthority,
         loyaltyProgramName: 'Test Program',
         metadataUri: 'https://arweave.net/123abc',
+        updateAuthority: generateSigner(context.umi),
         tiers: [{ name: 'Grind', xpRequired: 0, rewards: ['nothing for you!'] }],
         pointsPerAction: { swap: 0 }, // This will be treated as missing in our function
         metadata: {

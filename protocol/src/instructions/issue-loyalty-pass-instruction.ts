@@ -3,14 +3,21 @@ import { create, ExternalPluginAdapterSchema, writeData } from '@metaplex-founda
 import { ATTRIBUTE_KEYS, DEFAULT_PASS_DATA, PLUGIN_TYPES } from '@/lib/constants'
 import { VerxioContext } from '@schemas/verxio-context'
 import { createFeeInstruction } from '@utils/fee-structure'
+import { generateLoyaltyPassMetadata, uploadImage } from '../lib/metadata/generate-nft-metadata'
 
 export interface IssueLoyaltyPassInstructionConfig {
   collectionAddress: PublicKey
   recipient: PublicKey
   passName: string
-  passMetadataUri: string
   assetSigner?: KeypairSigner
   updateAuthority: KeypairSigner
+  // New image and metadata options
+  imageBuffer?: Buffer
+  imageFilename?: string
+  imageContentType?: string
+  organizationName: string
+  // Legacy support - if passMetadataUri is provided, use it instead of generating
+  passMetadataUri?: string
 }
 
 export interface IssueLoyaltyPassInstructionResult {
@@ -18,19 +25,39 @@ export interface IssueLoyaltyPassInstructionResult {
   asset: KeypairSigner
 }
 
-export function issueLoyaltyPassInstruction(
+export async function issueLoyaltyPassInstruction(
   context: VerxioContext,
   config: IssueLoyaltyPassInstructionConfig,
-): IssueLoyaltyPassInstructionResult {
+): Promise<IssueLoyaltyPassInstructionResult> {
   assertValidIssueLoyaltyPassInstructionConfig(config)
 
   const asset = config.assetSigner ?? generateSigner(context.umi)
+
+  // Generate metadata URI if not provided
+  let metadataUri = config.passMetadataUri
+  if (!metadataUri) {
+    if (!config.imageBuffer || !config.imageFilename) {
+      throw new Error('Either passMetadataUri or imageBuffer with imageFilename must be provided')
+    }
+
+    // Upload image first
+    const imageUri = await uploadImage(context, config.imageBuffer, config.imageFilename, config.imageContentType)
+
+    // Generate metadata
+    metadataUri = await generateLoyaltyPassMetadata(context, {
+      passName: config.passName,
+      organizationName: config.organizationName,
+      imageUri,
+      creator: config.updateAuthority.publicKey,
+      mimeType: config.imageContentType,
+    })
+  }
 
   // Create the base instruction
   let instruction = create(context.umi, {
     asset,
     name: config.passName,
-    uri: config.passMetadataUri,
+    uri: metadataUri,
     owner: config.recipient,
     authority: config.updateAuthority,
     collection: {
@@ -92,12 +119,32 @@ function assertValidIssueLoyaltyPassInstructionConfig(config: IssueLoyaltyPassIn
   if (!config.passName || !config.passName.trim()) {
     throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Pass name is undefined')
   }
-  if (!config.passMetadataUri || !config.passMetadataUri.trim()) {
-    throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Pass metadata URI is undefined')
+  if (!config.organizationName || !config.organizationName.trim()) {
+    throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Organization name is undefined')
   }
-  if (!config.passMetadataUri.startsWith('https://') && !config.passMetadataUri.startsWith('http://')) {
-    throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Pass metadata URI is not a valid URL')
+
+  // Validate metadata URI if provided, or ensure image data is provided
+  if (config.passMetadataUri) {
+    if (!config.passMetadataUri.trim()) {
+      throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Pass metadata URI is empty')
+    }
+    if (!config.passMetadataUri.startsWith('https://') && !config.passMetadataUri.startsWith('http://')) {
+      throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Pass metadata URI is not a valid URL')
+    }
+  } else {
+    // If no passMetadataUri, require image data
+    if (!config.imageBuffer) {
+      throw new Error(
+        'assertValidIssueLoyaltyPassInstructionConfig: Image buffer is required when passMetadataUri is not provided',
+      )
+    }
+    if (!config.imageFilename || !config.imageFilename.trim()) {
+      throw new Error(
+        'assertValidIssueLoyaltyPassInstructionConfig: Image filename is required when passMetadataUri is not provided',
+      )
+    }
   }
+
   if (!config.updateAuthority) {
     throw new Error('assertValidIssueLoyaltyPassInstructionConfig: Update authority is undefined')
   }

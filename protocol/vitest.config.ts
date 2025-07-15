@@ -7,5 +7,6 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     reporters: ['verbose'],
+    setupFiles: ['./src/test/helpers/setup-mock-uploader.ts'],
   },
 })

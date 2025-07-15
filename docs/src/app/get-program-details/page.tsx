@@ -1,7 +1,5 @@
 'use client'
 
-import GetProgramDetailsForm from '../components/GetProgramDetailsForm'
-
 export default function GetProgramDetailsPage() {
   return (
     <div className="max-w-4xl">
@@ -92,14 +90,6 @@ console.log('Available Tiers:', programDetails.tiers)`}</pre>
   createdAt: number,               // Program creation timestamp
   lastUpdated: number              // Last modification timestamp
 }`}</pre>
-        </div>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Get Program Details</h3>
-          <GetProgramDetailsForm />
         </div>
       </div>
 

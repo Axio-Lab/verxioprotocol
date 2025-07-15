@@ -5,6 +5,7 @@ import { transferSol } from '@metaplex-foundation/mpl-toolbox'
 // Fee structure in SOL
 export const FEES = {
   CREATE_LOYALTY_PROGRAM: 0.002, // 0.002 SOL
+  CREATE_VOUCHER_COLLECTION: 0.002, // 0.002 SOL (same as loyalty program)
   LOYALTY_OPERATIONS: 0.001, // 0.001 SOL
   VERXIO_INTERACTION: 0.0004, // 0.0004 SOL
 } as const

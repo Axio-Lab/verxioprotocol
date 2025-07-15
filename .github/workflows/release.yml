@@ -15,17 +15,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 20 and pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org/'
-
-      - name: Install dependencies (pnpm monorepo)
-        run: pnpm install --frozen-lockfile
+          node-version: 22.14.0
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install
         working-directory: ${{ github.workspace }}
 
       - name: Build protocol package

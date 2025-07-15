@@ -59,7 +59,7 @@ const navigation = [
   {
     title: 'Transfer Management',
     items: [{ name: 'Approve Transfer', href: '/approve-transfer' }],
-  }
+  },
 ]
 
 export default function DocLayout({ children }: { children: React.ReactNode }) {

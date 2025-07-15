@@ -158,10 +158,12 @@ context.umi.use(keypairIdentity('FEE_PAYER'))
 ### Create Loyalty Program
 
 You can either:
+
 - **Provide a pre-uploaded metadata URI** (no image upload needed), or
 - **Provide an image buffer and filename** to auto-upload the image and generate metadata.
 
 #### 1. Using a pre-uploaded metadata URI
+
 ```typescript
 const result = await createLoyaltyProgram(context, {
   loyaltyProgramName: 'Coffee Brew Rewards',
@@ -199,6 +201,7 @@ console.log(result)
 ```
 
 #### 2. Uploading an image and generating metadata
+
 ```typescript
 const fs = require('fs')
 const imageBuffer = fs.readFileSync('logo.png')
@@ -286,10 +289,12 @@ console.log(result)
 ### Issue Loyalty Pass
 
 You can either:
+
 - **Provide a pre-uploaded metadata URI** (no image upload needed), or
 - **Provide an image buffer and filename** to auto-upload the image and generate metadata.
 
 #### 1. Using a pre-uploaded metadata URI
+
 ```typescript
 const result = await issueLoyaltyPass(context, {
   collectionAddress: context.collectionAddress,
@@ -309,6 +314,7 @@ console.log(result)
 ```
 
 #### 2. Uploading an image and generating metadata
+
 ```typescript
 const imageBuffer = fs.readFileSync('pass.png')
 const result = await issueLoyaltyPass(context, {
@@ -623,10 +629,12 @@ Verxio Protocol includes a comprehensive voucher management system for creating,
 ### Create Voucher Collection
 
 You can either:
+
 - **Provide a pre-uploaded metadata URI** (no image upload needed), or
 - **Provide an image buffer and filename** to auto-upload the image and generate metadata.
 
 #### 1. Using a pre-uploaded metadata URI
+
 ```typescript
 const result = await createVoucherCollection(context, {
   collectionName: 'Summer Sale Vouchers',
@@ -648,6 +656,7 @@ console.log(result)
 ```
 
 #### 2. Uploading an image and generating metadata
+
 ```typescript
 const imageBuffer = fs.readFileSync('voucher-collection.png')
 const result = await createVoucherCollection(context, {
@@ -667,10 +676,12 @@ const result = await createVoucherCollection(context, {
 ### Mint Voucher
 
 You can either:
+
 - **Provide a pre-uploaded metadata URI** (no image upload needed), or
 - **Provide an image buffer and filename** to auto-upload the image and generate metadata.
 
 #### 1. Using a pre-uploaded metadata URI
+
 ```typescript
 const result = await mintVoucher(context, {
   collectionAddress: publicKey('COLLECTION_ADDRESS'),
@@ -698,6 +709,7 @@ console.log(result)
 ```
 
 #### 2. Uploading an image and generating metadata
+
 ```typescript
 const imageBuffer = fs.readFileSync('voucher.png')
 const result = await mintVoucher(context, {

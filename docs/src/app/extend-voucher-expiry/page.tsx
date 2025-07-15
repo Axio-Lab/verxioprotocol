@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 export default function ExtendVoucherExpiryPage() {
   return (
@@ -29,4 +29,4 @@ const result = await extendVoucherExpiry(context, {
       </div>
     </div>
   )
-} 
+}

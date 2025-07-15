@@ -64,7 +64,8 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
           <div className="card">
             <h3 className="text-lg font-semibold mb-2">🚀 Direct Functions</h3>
             <p className="text-muted mb-4">
-              Traditional functions that execute transactions immediately - perfect for simple, single-operation use cases.
+              Traditional functions that execute transactions immediately - perfect for simple, single-operation use
+              cases.
             </p>
             <div className="text-sm text-gray-600">
               <strong>Best for:</strong> Simple operations, quick prototypes, single transactions
@@ -74,7 +75,8 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
           <div className="card">
             <h3 className="text-lg font-semibold mb-2">⚡ Instruction Functions</h3>
             <p className="text-muted mb-4">
-              Instruction-based functions that return TransactionBuilder objects for advanced transaction composition, batching, and custom fee handling.
+              Instruction-based functions that return TransactionBuilder objects for advanced transaction composition,
+              batching, and custom fee handling.
             </p>
             <div className="text-sm text-gray-600">
               <strong>Best for:</strong> Complex workflows, batch operations, gas optimization
@@ -90,7 +92,8 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
           <div className="card">
             <h3 className="text-lg font-semibold mb-2">🎯 Core Loyalty System</h3>
             <p className="text-muted mb-4">
-              Create loyalty programs with custom tiers, issue NFT passes, track XP progression, and manage points with automatic tier updates.
+              Create loyalty programs with custom tiers, issue NFT passes, track XP progression, and manage points with
+              automatic tier updates.
             </p>
             <Link href="/create-program" className="text-blue-600 text-sm font-medium">
               Learn more →
@@ -100,7 +103,8 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
           <div className="card">
             <h3 className="text-lg font-semibold mb-2">🎫 Voucher Management</h3>
             <p className="text-muted mb-4">
-              Complete voucher lifecycle management with collections, validation, redemption, and analytics. Support for multiple voucher types.
+              Complete voucher lifecycle management with collections, validation, redemption, and analytics. Support for
+              multiple voucher types.
             </p>
             <Link href="/create-voucher-collection" className="text-blue-600 text-sm font-medium">
               Learn more →
@@ -110,7 +114,8 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
           <div className="card">
             <h3 className="text-lg font-semibold mb-2">💬 Communication & Messaging</h3>
             <p className="text-muted mb-4">
-              Direct messaging between programs and pass holders, program-wide broadcasts with targeted delivery, and read status tracking.
+              Direct messaging between programs and pass holders, program-wide broadcasts with targeted delivery, and
+              read status tracking.
             </p>
             <Link href="/messaging" className="text-blue-600 text-sm font-medium">
               Learn more →
@@ -120,7 +125,8 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
           <div className="card">
             <h3 className="text-lg font-semibold mb-2">⚡ Advanced Transaction Composition</h3>
             <p className="text-muted mb-4">
-              Instruction-based functions for advanced transaction batching, custom fee handling, and gas optimization with built-in protocol fees.
+              Instruction-based functions for advanced transaction batching, custom fee handling, and gas optimization
+              with built-in protocol fees.
             </p>
             <Link href="/" className="text-blue-600 text-sm font-medium">
               Learn more →
@@ -228,7 +234,6 @@ console.log('Loyalty Program Created:', result.collection.publicKey)`}</pre>
                   View docs
                 </Link>
               </div>
-              
             </div>
           </div>
 

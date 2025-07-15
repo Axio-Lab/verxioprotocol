@@ -21,7 +21,8 @@ export default function CreateProgramPage() {
           tier structure, rewards, and point allocation rules.
         </p>
         <p className="mt-4 text-gray-600">
-          <strong>Note:</strong> You can either provide a pre-uploaded metadata URI or provide an image buffer and filename to auto-upload the image and generate metadata.
+          <strong>Note:</strong> You can either provide a pre-uploaded metadata URI or provide an image buffer and
+          filename to auto-upload the image and generate metadata.
         </p>
       </div>
 
@@ -349,19 +350,36 @@ const result = await createLoyaltyProgram(context, {
         <p>The function will throw errors in the following cases:</p>
 
         <ul className="list-disc list-inside space-y-2 text-gray-700">
-          <li><strong>Invalid configuration:</strong> Missing required parameters or invalid parameter values</li>
-          <li><strong>Image upload failure:</strong> If using imageBuffer and the upload fails</li>
-          <li><strong>Metadata generation failure:</strong> If metadata cannot be generated from the provided data</li>
-          <li><strong>Transaction failure:</strong> If the blockchain transaction fails</li>
-          <li><strong>Insufficient funds:</strong> If the fee payer doesn't have enough SOL for the transaction</li>
+          <li>
+            <strong>Invalid configuration:</strong> Missing required parameters or invalid parameter values
+          </li>
+          <li>
+            <strong>Image upload failure:</strong> If using imageBuffer and the upload fails
+          </li>
+          <li>
+            <strong>Metadata generation failure:</strong> If metadata cannot be generated from the provided data
+          </li>
+          <li>
+            <strong>Transaction failure:</strong> If the blockchain transaction fails
+          </li>
+          <li>
+            <strong>Insufficient funds:</strong> If the fee payer doesn't have enough SOL for the transaction
+          </li>
         </ul>
 
         <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <h4 className="font-semibold text-yellow-800 mb-2">Important Notes</h4>
           <ul className="text-yellow-700 text-sm space-y-1">
-            <li>• You must provide either <code className="inline-code">metadataUri</code> OR <code className="inline-code">imageBuffer</code> with <code className="inline-code">imageFilename</code></li>
-            <li>• The <code className="inline-code">organizationName</code> in metadata is required</li>
-            <li>• At least one tier must be defined in the <code className="inline-code">tiers</code> array</li>
+            <li>
+              • You must provide either <code className="inline-code">metadataUri</code> OR{' '}
+              <code className="inline-code">imageBuffer</code> with <code className="inline-code">imageFilename</code>
+            </li>
+            <li>
+              • The <code className="inline-code">organizationName</code> in metadata is required
+            </li>
+            <li>
+              • At least one tier must be defined in the <code className="inline-code">tiers</code> array
+            </li>
             <li>• The protocol fee for creating a loyalty program is 0.002 SOL</li>
           </ul>
         </div>

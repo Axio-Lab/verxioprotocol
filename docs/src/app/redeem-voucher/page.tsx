@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 export default function RedeemVoucherPage() {
   return (
@@ -32,4 +32,4 @@ const result = await redeemVoucher(context, {
       </div>
     </div>
   )
-} 
+}

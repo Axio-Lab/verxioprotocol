@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 export default function GetUserVouchersPage() {
   return (
@@ -47,4 +47,4 @@ const vouchers = await getUserVouchers(context, {
       </div>
     </div>
   )
-} 
+}

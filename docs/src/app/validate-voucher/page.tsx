@@ -1,11 +1,14 @@
-"use client"
+'use client'
 
 export default function ValidateVoucherPage() {
   return (
     <div className="max-w-4xl">
       <div className="doc-section">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Validate Voucher</h1>
-        <p>Validate a voucher without redeeming it. This is useful for checking voucher status and calculating redemption value.</p>
+        <p>
+          Validate a voucher without redeeming it. This is useful for checking voucher status and calculating redemption
+          value.
+        </p>
 
         <div className="code-block">
           <pre>{`import { validateVoucher } from '@verxioprotocol/core'
@@ -40,4 +43,4 @@ const validation = await validateVoucher(context, {
       </div>
     </div>
   )
-} 
+}

@@ -21,7 +21,8 @@ export default function IssuePassPage() {
           all their loyalty data on-chain.
         </p>
         <p className="mt-4 text-gray-600">
-          <strong>Note:</strong> You can either provide a pre-uploaded metadata URI or provide an image buffer and filename to auto-upload the image and generate metadata.
+          <strong>Note:</strong> You can either provide a pre-uploaded metadata URI or provide an image buffer and
+          filename to auto-upload the image and generate metadata.
         </p>
       </div>
 
@@ -247,20 +248,40 @@ const result = await issueLoyaltyPass(context, {
         <p>The function will throw errors in the following cases:</p>
 
         <ul className="list-disc list-inside space-y-2 text-gray-700">
-          <li><strong>Invalid configuration:</strong> Missing required parameters or invalid parameter values</li>
-          <li><strong>Image upload failure:</strong> If using imageBuffer and the upload fails</li>
-          <li><strong>Metadata generation failure:</strong> If metadata cannot be generated from the provided data</li>
-          <li><strong>Transaction failure:</strong> If the blockchain transaction fails</li>
-          <li><strong>Insufficient funds:</strong> If the fee payer doesn't have enough SOL for the transaction</li>
-          <li><strong>Invalid authority:</strong> If the updateAuthority is not the program authority</li>
+          <li>
+            <strong>Invalid configuration:</strong> Missing required parameters or invalid parameter values
+          </li>
+          <li>
+            <strong>Image upload failure:</strong> If using imageBuffer and the upload fails
+          </li>
+          <li>
+            <strong>Metadata generation failure:</strong> If metadata cannot be generated from the provided data
+          </li>
+          <li>
+            <strong>Transaction failure:</strong> If the blockchain transaction fails
+          </li>
+          <li>
+            <strong>Insufficient funds:</strong> If the fee payer doesn't have enough SOL for the transaction
+          </li>
+          <li>
+            <strong>Invalid authority:</strong> If the updateAuthority is not the program authority
+          </li>
         </ul>
 
         <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <h4 className="font-semibold text-yellow-800 mb-2">Important Notes</h4>
           <ul className="text-yellow-700 text-sm space-y-1">
-            <li>• You must provide either <code className="inline-code">passMetadataUri</code> OR <code className="inline-code">imageBuffer</code> with <code className="inline-code">imageFilename</code></li>
-            <li>• The <code className="inline-code">organizationName</code> is required for metadata generation</li>
-            <li>• The <code className="inline-code">updateAuthority</code> must be the program authority from the loyalty program creation</li>
+            <li>
+              • You must provide either <code className="inline-code">passMetadataUri</code> OR{' '}
+              <code className="inline-code">imageBuffer</code> with <code className="inline-code">imageFilename</code>
+            </li>
+            <li>
+              • The <code className="inline-code">organizationName</code> is required for metadata generation
+            </li>
+            <li>
+              • The <code className="inline-code">updateAuthority</code> must be the program authority from the loyalty
+              program creation
+            </li>
             <li>• The protocol fee for issuing a loyalty pass is 0.001 SOL</li>
           </ul>
         </div>

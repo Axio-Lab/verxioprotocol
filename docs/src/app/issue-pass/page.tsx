@@ -1,7 +1,5 @@
 'use client'
 
-import IssueLoyaltyPassForm from '../components/IssueLoyaltyPassForm'
-
 export default function IssuePassPage() {
   return (
     <div className="max-w-4xl">
@@ -22,18 +20,52 @@ export default function IssuePassPage() {
           specific user within your loyalty program. The pass serves as the user's digital membership card and stores
           all their loyalty data on-chain.
         </p>
+        <p className="mt-4 text-gray-600">
+          <strong>Note:</strong> You can either provide a pre-uploaded metadata URI or provide an image buffer and filename to auto-upload the image and generate metadata.
+        </p>
+      </div>
+
+      {/* Usage Examples */}
+      <div className="doc-section">
+        <h2>Usage Examples</h2>
+
+        <h3>1. Using a Pre-uploaded Metadata URI</h3>
+        <p>If you already have pass metadata uploaded to Arweave or another storage service:</p>
 
         <div className="code-block">
           <pre>{`import { issueLoyaltyPass } from '@verxioprotocol/core'
+import { generateSigner, publicKey } from '@metaplex-foundation/umi'
 
 const result = await issueLoyaltyPass(context, {
-  collectionAddress: publicKey('YOUR_COLLECTION_ADDRESS'),
-  recipient: publicKey('USER_WALLET_ADDRESS'),
+  collectionAddress: context.collectionAddress,
+  recipient: publicKey('RECIPIENT_ADDRESS'),
   passName: 'Coffee Rewards Pass',
-  passMetadataUri: 'https://arweave.net/pass-metadata.json',
-  assetSigner: generateSigner(context.umi),  // Optional
-  updateAuthority: programAuthority
+  passMetadataUri: 'https://arweave.net/...', // Already uploaded metadata
+  assetSigner: generateSigner(context.umi), // Optional: Provide a signer for the pass
+  updateAuthority: programAuthority, // Required: Program authority of the Loyalty Program
+  organizationName: 'Coffee Brew',
 })`}</pre>
+        </div>
+
+        <h3>2. Uploading an Image and Generating Metadata</h3>
+        <p>If you want the protocol to handle image upload and metadata generation:</p>
+
+        <div className="code-block">
+          <pre>{`import { issueLoyaltyPass } from '@verxioprotocol/core'
+import { generateSigner, publicKey } from '@metaplex-foundation/umi'
+import fs from 'fs'
+
+const imageBuffer = fs.readFileSync('pass.png')
+const result = await issueLoyaltyPass(context, {
+  collectionAddress: context.collectionAddress,
+  recipient: publicKey('RECIPIENT_ADDRESS'),
+  passName: 'Coffee Rewards Pass',
+  imageBuffer, // Buffer of your image
+  imageFilename: 'pass.png',
+  updateAuthority: programAuthority, // Required: Program authority of the Loyalty Program
+  organizationName: 'Coffee Brew',
+})
+// The protocol will upload the image, generate metadata, and use the resulting URI`}</pre>
         </div>
       </div>
 
@@ -99,8 +131,38 @@ const result = await issueLoyaltyPass(context, {
               <td>
                 <span className="param-type">string</span>
               </td>
-              <td>✅</td>
-              <td>URI pointing to the pass's metadata JSON</td>
+              <td>❌</td>
+              <td>URI pointing to the pass's metadata JSON (if not providing imageBuffer)</td>
+            </tr>
+            <tr>
+              <td>
+                <span className="param-name">imageBuffer</span>
+              </td>
+              <td>
+                <span className="param-type">Buffer</span>
+              </td>
+              <td>❌</td>
+              <td>Buffer of your image file (if not providing passMetadataUri)</td>
+            </tr>
+            <tr>
+              <td>
+                <span className="param-name">imageFilename</span>
+              </td>
+              <td>
+                <span className="param-type">string</span>
+              </td>
+              <td>❌</td>
+              <td>Name of your image file (required if providing imageBuffer)</td>
+            </tr>
+            <tr>
+              <td>
+                <span className="param-name">imageContentType</span>
+              </td>
+              <td>
+                <span className="param-type">string</span>
+              </td>
+              <td>❌</td>
+              <td>MIME type of your image (e.g., "image/png")</td>
             </tr>
             <tr>
               <td>
@@ -122,46 +184,18 @@ const result = await issueLoyaltyPass(context, {
               <td>✅</td>
               <td>Program authority required for issuing passes</td>
             </tr>
+            <tr>
+              <td>
+                <span className="param-name">organizationName</span>
+              </td>
+              <td>
+                <span className="param-type">string</span>
+              </td>
+              <td>✅</td>
+              <td>Name of the organization (required for metadata generation)</td>
+            </tr>
           </tbody>
         </table>
-      </div>
-
-      {/* Metadata Structure */}
-      <div className="doc-section">
-        <h3>Pass Metadata Structure</h3>
-        <p>The loyalty pass metadata should follow this recommended structure:</p>
-
-        <div className="code-block">
-          <pre>{`{
-  "name": "Coffee Rewards Pass",
-  "description": "Premium membership pass for Brew's Coffee loyalty program",
-  "image": "https://arweave.net/pass-image.png",
-  "animation_url": "https://arweave.net/pass-animation.mp4", // Optional
-  "attributes": [
-    {
-      "trait_type": "Program",
-      "value": "Coffee Rewards"
-    },
-    {
-      "trait_type": "Issue Date",
-      "value": "2024-01-15"
-    },
-    {
-      "trait_type": "Pass Type",
-      "value": "Standard"
-    }
-  ],
-  "properties": {
-    "category": "utility",
-    "creators": [
-      {
-        "address": "CREATOR_WALLET_ADDRESS",
-        "share": 100
-      }
-    ]
-  }
-}`}</pre>
-        </div>
       </div>
 
       {/* Return Value */}
@@ -207,163 +241,74 @@ const result = await issueLoyaltyPass(context, {
         </table>
       </div>
 
-      {/* Usage Examples */}
+      {/* Error Handling */}
       <div className="doc-section">
-        <h2>Usage Examples</h2>
+        <h2>Error Handling</h2>
+        <p>The function will throw errors in the following cases:</p>
 
-        <h3>Basic Pass Issuance</h3>
-        <p>Issue a standard loyalty pass to a new user:</p>
-        <div className="code-block">
-          <pre>{`import { issueLoyaltyPass } from '@verxioprotocol/core'
-import { generateSigner, publicKey } from '@metaplex-foundation/umi'
+        <ul className="list-disc list-inside space-y-2 text-gray-700">
+          <li><strong>Invalid configuration:</strong> Missing required parameters or invalid parameter values</li>
+          <li><strong>Image upload failure:</strong> If using imageBuffer and the upload fails</li>
+          <li><strong>Metadata generation failure:</strong> If metadata cannot be generated from the provided data</li>
+          <li><strong>Transaction failure:</strong> If the blockchain transaction fails</li>
+          <li><strong>Insufficient funds:</strong> If the fee payer doesn't have enough SOL for the transaction</li>
+          <li><strong>Invalid authority:</strong> If the updateAuthority is not the program authority</li>
+        </ul>
 
-const result = await issueLoyaltyPass(context, {
-  collectionAddress: publicKey('YOUR_COLLECTION_ADDRESS'),
-  recipient: publicKey('USER_WALLET_ADDRESS'),
-  passName: 'VIP Coffee Pass',
-  passMetadataUri: 'https://arweave.net/vip-pass-metadata.json',
-  updateAuthority: programAuthority
-})
-
-console.log('Pass issued successfully!')
-console.log('Pass address:', result.asset.publicKey.toString())
-console.log('Transaction:', result.signature)`}</pre>
-        </div>
-
-        <h3>Bulk Pass Issuance</h3>
-        <p>Issue multiple passes for a list of users:</p>
-        <div className="code-block">
-          <pre>{`const users = [
-  { wallet: 'USER1_ADDRESS', name: 'Premium Pass #1' },
-  { wallet: 'USER2_ADDRESS', name: 'Premium Pass #2' },
-  { wallet: 'USER3_ADDRESS', name: 'Premium Pass #3' }
-]
-
-const results = []
-
-for (const user of users) {
-  try {
-    const result = await issueLoyaltyPass(context, {
-      collectionAddress: publicKey('YOUR_COLLECTION_ADDRESS'),
-      recipient: publicKey(user.wallet),
-      passName: user.name,
-      passMetadataUri: 'https://arweave.net/standard-pass-metadata.json',
-      updateAuthority: programAuthority
-    })
-    
-    results.push({
-      user: user.wallet,
-      passAddress: result.asset.publicKey.toString(),
-      signature: result.signature
-    })
-    
-    console.log(\`Pass issued to \${user.wallet}\`)
-  } catch (error) {
-    console.error(\`Failed to issue pass to \${user.wallet}:\`, error)
-  }
-}
-
-console.log('Bulk issuance completed:', results)`}</pre>
-        </div>
-
-        <h3>Custom Pass with Signer</h3>
-        <p>Issue a pass with a predetermined address:</p>
-        <div className="code-block">
-          <pre>{`// Generate a specific signer for the pass
-const customPassSigner = generateSigner(context.umi)
-
-const result = await issueLoyaltyPass(context, {
-  collectionAddress: publicKey('YOUR_COLLECTION_ADDRESS'),
-  recipient: publicKey('USER_WALLET_ADDRESS'),
-  passName: 'Founder Pass #001',
-  passMetadataUri: 'https://arweave.net/founder-pass-metadata.json',
-  assetSigner: customPassSigner,
-  updateAuthority: programAuthority
-})
-
-// The pass will have the predetermined address
-console.log('Predetermined pass address:', customPassSigner.publicKey.toString())
-console.log('Actual pass address:', result.asset.publicKey.toString())
-// These should match`}</pre>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">Important Notes</h4>
+          <ul className="text-yellow-700 text-sm space-y-1">
+            <li>• You must provide either <code className="inline-code">passMetadataUri</code> OR <code className="inline-code">imageBuffer</code> with <code className="inline-code">imageFilename</code></li>
+            <li>• The <code className="inline-code">organizationName</code> is required for metadata generation</li>
+            <li>• The <code className="inline-code">updateAuthority</code> must be the program authority from the loyalty program creation</li>
+            <li>• The protocol fee for issuing a loyalty pass is 0.001 SOL</li>
+          </ul>
         </div>
       </div>
 
-      {/* Interactive Testing */}
+      {/* Related Functions */}
       <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <p>
-          Test issuing a loyalty pass using the form below. Make sure you have a valid collection address from a created
-          loyalty program.
-        </p>
-
-        <div className="interactive-section">
-          <h3>Issue Loyalty Pass</h3>
-          <IssueLoyaltyPassForm />
-        </div>
-      </div>
-
-      {/* Initial Pass State */}
-      <div className="doc-section">
-        <h2>Initial Pass State</h2>
-        <p>When a loyalty pass is first issued, it starts with the following default values:</p>
-
-        <div className="card">
-          <h4 className="font-semibold mb-3 text-blue-600">📋 Default Pass Properties</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <strong className="text-gray-700">XP Points:</strong> 0
-            </div>
-            <div>
-              <strong className="text-gray-700">Current Tier:</strong> Grind (lowest tier)
-            </div>
-            <div>
-              <strong className="text-gray-700">Last Action:</strong> null
-            </div>
-            <div>
-              <strong className="text-gray-700">Action History:</strong> Empty array
-            </div>
-            <div>
-              <strong className="text-gray-700">Tier Updated At:</strong> Current timestamp
-            </div>
-            <div>
-              <strong className="text-gray-700">Transfer Approval:</strong> Not required initially
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Best Practices */}
-      <div className="doc-section">
-        <h2>Best Practices</h2>
-        <div className="space-y-4">
-          <div className="card">
-            <h4 className="font-semibold mb-2 text-green-600">✅ Recommended Practices</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-              <li>Store pass metadata on permanent storage (Arweave, IPFS)</li>
-              <li>Include meaningful attributes in metadata for discoverability</li>
-              <li>Use descriptive pass names that include your brand</li>
-              <li>Implement proper error handling for failed issuances</li>
-              <li>Consider rate limiting to prevent spam issuance</li>
+        <h2>Related Functions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="/award-points" className="text-blue-600 hover:underline">
+                  Award Points
+                </a>
+                - Give points to users for actions
+              </li>
+              <li>
+                <a href="/get-asset-data" className="text-blue-600 hover:underline">
+                  Get Asset Data
+                </a>
+                - Retrieve pass data and user information
+              </li>
+              <li>
+                <a href="/messaging" className="text-blue-600 hover:underline">
+                  Send Message
+                </a>
+                - Send direct messages to pass holders
+              </li>
             </ul>
           </div>
 
-          <div className="card">
-            <h4 className="font-semibold mb-2 text-amber-600">⚠️ Important Considerations</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-              <li>Only issue one pass per user per program to avoid confusion</li>
-              <li>Verify recipient addresses before issuing passes</li>
-              <li>Keep track of issued passes for customer support</li>
-              <li>Ensure metadata URIs are accessible and permanent</li>
-            </ul>
-          </div>
-
-          <div className="card">
-            <h4 className="font-semibold mb-2 text-red-600">❌ Common Mistakes</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-              <li>Using temporary or changing metadata URIs</li>
-              <li>Issuing multiple passes to the same user</li>
-              <li>Not validating recipient wallet addresses</li>
-              <li>Missing proper error handling in batch operations</li>
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-2">Advanced Usage</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="/instruction-functions" className="text-blue-600 hover:underline">
+                  Instruction Functions
+                </a>
+                - Use transaction composition
+              </li>
+              <li>
+                <a href="/approve-transfer" className="text-blue-600 hover:underline">
+                  Approve Transfer
+                </a>
+                - Allow pass transfers between users
+              </li>
             </ul>
           </div>
         </div>

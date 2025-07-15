@@ -1,7 +1,5 @@
 'use client'
 
-import ApproveTransferForm from '../components/ApproveTransferForm'
-
 export default function ApproveTransferPage() {
   return (
     <div className="max-w-4xl">
@@ -168,14 +166,6 @@ const result = await approveTransfer(context, {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Approve Transfer</h3>
-          <ApproveTransferForm />
-        </div>
       </div>
 
       <div className="doc-section">

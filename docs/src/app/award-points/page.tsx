@@ -1,7 +1,5 @@
 'use client'
 
-import AwardLoyaltyPointsForm from '../components/AwardLoyaltyPointsForm'
-
 export default function AwardPointsPage() {
   return (
     <div className="max-w-4xl">
@@ -107,14 +105,6 @@ const result = await awardLoyaltyPoints(context, {
   signature: string,        // Transaction signature
   newTier?: LoyaltyProgramTier  // New tier if user was upgraded
 }`}</pre>
-        </div>
-      </div>
-
-      <div className="doc-section">
-        <h2>Interactive Testing</h2>
-        <div className="interactive-section">
-          <h3>Award Loyalty Points</h3>
-          <AwardLoyaltyPointsForm />
         </div>
       </div>
 

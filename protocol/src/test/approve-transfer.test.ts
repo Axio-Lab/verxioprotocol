@@ -35,6 +35,7 @@ describe('approve-transfer', () => {
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
       updateAuthority: authority!,
+      organizationName: 'Test Organization',
     })
     loyaltyPass = passResult.asset
   })

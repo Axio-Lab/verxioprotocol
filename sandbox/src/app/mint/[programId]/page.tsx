@@ -37,6 +37,9 @@ interface ProgramDetails {
     rewards: string[]
   }>
   pointsPerAction: Record<string, number>
+  metadata: {
+    organizationName: string
+  }
 }
 
 interface MintedPass {
@@ -124,6 +127,7 @@ function MintPageContent() {
         passName: `${programDetails.name} Loyalty Pass`,
         passMetadataUri: programDetails.uri,
         updateAuthority: authority,
+        organizationName: programDetails.metadata.organizationName,
       })
 
       setMintedPass({

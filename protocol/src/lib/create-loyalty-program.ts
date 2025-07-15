@@ -12,10 +12,10 @@ import { toBase58 } from '@utils/to-base58'
 import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
 import { assertValidContext } from '@utils/assert-valid-context'
 import { createFeeInstruction } from '@utils/fee-structure'
+import { generateLoyaltyProgramMetadata, uploadImage } from './metadata/generate-nft-metadata'
 
 export interface CreateLoyaltyProgramConfig {
   collectionSigner?: KeypairSigner
-  metadataUri: string
   loyaltyProgramName: string
   pointsPerAction: Record<string, number>
   programAuthority: PublicKey
@@ -26,6 +26,12 @@ export interface CreateLoyaltyProgramConfig {
     brandColor?: string
     [key: string]: any // Allow additional metadata fields
   }
+  // New image and metadata options
+  imageBuffer?: Buffer
+  imageFilename?: string
+  imageContentType?: string
+  // Legacy support - if metadataUri is provided, use it instead of generating
+  metadataUri?: string
 }
 
 export async function createLoyaltyProgram(
@@ -38,6 +44,28 @@ export async function createLoyaltyProgram(
   const updateAuthority = config.updateAuthority ?? generateSigner(context.umi)
 
   try {
+    // Generate metadata URI if not provided
+    let metadataUri = config.metadataUri
+    if (!metadataUri) {
+      if (!config.imageBuffer || !config.imageFilename) {
+        throw new Error('Either metadataUri or imageBuffer with imageFilename must be provided')
+      }
+
+      // Upload image first
+      const imageUri = await uploadImage(context, config.imageBuffer, config.imageFilename, config.imageContentType)
+
+      // Generate metadata
+      metadataUri = await generateLoyaltyProgramMetadata(context, {
+        loyaltyProgramName: config.loyaltyProgramName,
+        metadata: config.metadata,
+        tiers: config.tiers,
+        pointsPerAction: config.pointsPerAction,
+        imageUri,
+        creator: config.programAuthority,
+        mimeType: config.imageContentType,
+      })
+    }
+
     const feeInstruction = createFeeInstruction(context.umi, context.umi.identity.publicKey, 'CREATE_LOYALTY_PROGRAM')
 
     // Create collection with plugins
@@ -45,7 +73,7 @@ export async function createLoyaltyProgram(
       collection,
       name: config.loyaltyProgramName,
       plugins: createLoyaltyProgramPlugins(config, updateAuthority.publicKey),
-      uri: config.metadataUri,
+      uri: metadataUri,
       updateAuthority: updateAuthority.publicKey,
     })
       .add(feeInstruction)
@@ -119,35 +147,47 @@ export function createLoyaltyProgramPlugins(
 }
 
 // TODO: Replace with zod validation
-function assertValidCreateLoyaltyProgramConfig(
-  config: CreateLoyaltyProgramConfig,
-): config is CreateLoyaltyProgramConfig {
+function assertValidCreateLoyaltyProgramConfig(config: CreateLoyaltyProgramConfig) {
   if (!config) {
     throw new Error('assertValidCreateLoyaltyProgramConfig: Config is undefined')
   }
   if (!config.loyaltyProgramName || !config.loyaltyProgramName.trim() || !config.loyaltyProgramName.trim().length) {
     throw new Error('assertValidCreateLoyaltyProgramConfig: Loyalty program name is undefined')
   }
-  if (!config.metadataUri || !config.metadataUri.trim() || !config.metadataUri.trim().length) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Metadata URI is undefined')
+
+  // Validate metadata URI if provided, or ensure image data is provided
+  if (config.metadataUri) {
+    if (!config.metadataUri.trim() || !config.metadataUri.trim().length) {
+      throw new Error('assertValidCreateLoyaltyProgramConfig: Metadata URI is empty')
+    }
+    if (!config.metadataUri.startsWith('https://') && !config.metadataUri.startsWith('http://')) {
+      throw new Error('assertValidCreateLoyaltyProgramConfig: Metadata URI is not a valid URL')
+    }
+  } else {
+    // If no metadataUri, require image data
+    if (!config.imageBuffer) {
+      throw new Error(
+        'assertValidCreateLoyaltyProgramConfig: Image buffer is required when metadataUri is not provided',
+      )
+    }
+    if (!config.imageFilename || !config.imageFilename.trim()) {
+      throw new Error(
+        'assertValidCreateLoyaltyProgramConfig: Image filename is required when metadataUri is not provided',
+      )
+    }
   }
-  if (!config.metadataUri.startsWith('https://') && !config.metadataUri.startsWith('http://')) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Metadata URI is not a valid URL')
-  }
-  if (!config.programAuthority || !config.programAuthority.trim() || !config.programAuthority.trim().length) {
+
+  if (!config.programAuthority) {
     throw new Error('assertValidCreateLoyaltyProgramConfig: Program authority is undefined')
   }
-  if (!config.tiers) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Tiers are undefined')
+  if (!config.updateAuthority) {
+    throw new Error('assertValidCreateLoyaltyProgramConfig: Update authority is undefined')
   }
-  if (!config.tiers.length) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Tiers are empty')
+  if (!config.tiers || config.tiers.length === 0) {
+    throw new Error('assertValidCreateLoyaltyProgramConfig: Tiers configuration is missing')
   }
-  if (!config.pointsPerAction) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Points per action are undefined')
-  }
-  if (!Object.values(config.pointsPerAction).length) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Points per action must not be empty')
+  if (!config.pointsPerAction || Object.keys(config.pointsPerAction).length === 0) {
+    throw new Error('assertValidCreateLoyaltyProgramConfig: Points per action configuration is missing')
   }
   if (!config.metadata) {
     throw new Error('assertValidCreateLoyaltyProgramConfig: Metadata is undefined')
@@ -157,7 +197,6 @@ function assertValidCreateLoyaltyProgramConfig(
     !config.metadata.organizationName.trim() ||
     !config.metadata.organizationName.trim().length
   ) {
-    throw new Error('assertValidCreateLoyaltyProgramConfig: Host name is undefined')
+    throw new Error('assertValidCreateLoyaltyProgramConfig: Organization name is undefined')
   }
-  return true
 }

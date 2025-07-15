@@ -1,16 +1,18 @@
 import { VerxioContext } from '@/schemas/verxio-context'
 import { createLoyaltyProgram, CreateLoyaltyProgramConfig } from '@/lib/create-loyalty-program'
-import { KeypairSigner, PublicKey, publicKey } from '@metaplex-foundation/umi'
+import { KeypairSigner, PublicKey, publicKey, generateSigner } from '@metaplex-foundation/umi'
 
 // Creates an empty config object for CreateLoyaltyProgramConfig.
 // This is useful for testing the cases in the config validation.
 export function createTestLoyaltyProgramConfigEmpty(
   config: Partial<CreateLoyaltyProgramConfig> = {},
+  umi?: any,
 ): CreateLoyaltyProgramConfig {
   return {
     metadataUri: '',
     loyaltyProgramName: '',
     programAuthority: publicKey('11111111111111111111111111111111'),
+    updateAuthority: generateSigner(umi),
     pointsPerAction: {},
     tiers: [],
     metadata: {
@@ -23,10 +25,12 @@ export function createTestLoyaltyProgramConfigEmpty(
 // Generates a default config object for CreateLoyaltyProgramConfig with option to override the config.
 export function createTestLoyaltyProgramConfig(
   config: Partial<CreateLoyaltyProgramConfig> & { programAuthority: PublicKey },
+  umi?: any,
 ): CreateLoyaltyProgramConfig {
   return {
     loyaltyProgramName: 'Test Loyalty Program',
     metadataUri: 'https://arweave.net/123abc',
+    updateAuthority: generateSigner(umi),
     tiers: [
       { name: 'Grind', xpRequired: 0, rewards: ['nothing for you!'] },
       { name: 'Bronze', xpRequired: 500, rewards: ['2% cashback'] },
@@ -48,6 +52,6 @@ export async function createTestLoyaltyProgram(
 ): Promise<{ collection: KeypairSigner; signature: string; updateAuthority?: KeypairSigner }> {
   return await createLoyaltyProgram(
     context,
-    createTestLoyaltyProgramConfig({ programAuthority: context.programAuthority }),
+    createTestLoyaltyProgramConfig({ programAuthority: context.programAuthority }, context.umi),
   )
 }

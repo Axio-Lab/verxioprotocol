@@ -276,17 +276,30 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
           collectionAddress: collectionAddress,
           recipient: context.umi.identity.publicKey,
           voucherName: 'Test Voucher',
-          voucherMetadataUri: '',
           updateAuthority: collectionUpdateAuthority,
+          voucherData: {
+            type: 'percentage_off',
+            value: 10,
+            description: 'Test voucher',
+            expiryDate: Date.now() + 86400000,
+            maxUses: 1,
+            merchantId: 'test-merchant',
+          },
         })
 
         // ACT
         try {
-          await mintVoucher(context, brokenConfig)
+          await mintVoucher(context, {
+            ...brokenConfig,
+            voucherMetadataUri: undefined,
+            imageBuffer: undefined,
+          } as unknown as MintVoucherConfig)
         } catch (error) {
           // ASSERT
           expect(error).toBeDefined()
-          expect(error.message).toEqual('assertValidMintVoucherConfig: Voucher metadata URI is undefined')
+          expect(error.message).toEqual(
+            'assertValidMintVoucherConfig: Image buffer is required when voucherMetadataUri is not provided',
+          )
         }
       })
 
@@ -297,8 +310,16 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
           collectionAddress: collectionAddress,
           recipient: context.umi.identity.publicKey,
           voucherName: 'Test Voucher',
-          voucherMetadataUri: 'foobar',
+          voucherMetadataUri: 'invalid-url',
           updateAuthority: collectionUpdateAuthority,
+          voucherData: {
+            type: 'percentage_off',
+            value: 10,
+            description: 'Test voucher',
+            expiryDate: Date.now() + 86400000,
+            maxUses: 1,
+            merchantId: 'test-merchant',
+          },
         })
 
         // ACT
@@ -346,12 +367,12 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
           voucherMetadataUri: 'https://arweave.net/test-metadata',
           updateAuthority: collectionUpdateAuthority,
           voucherData: {
-            type: 'percentage_off' as any,
+            type: 'percentage_off',
             value: 10,
             description: 'Test voucher',
-            expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            expiryDate: Date.now() + 86400000,
             maxUses: 1,
-            merchantId: 'test_shop_001',
+            merchantId: 'test-merchant',
           },
         })
 
@@ -361,9 +382,9 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
             ...brokenConfig,
             voucherData: {
               ...brokenConfig.voucherData,
-              type: undefined,
+              type: '' as any, // Use empty string to trigger validation
             },
-          } as unknown as MintVoucherConfig)
+          })
         } catch (error) {
           // ASSERT
           expect(error).toBeDefined()
@@ -384,9 +405,9 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
             type: 'percentage_off',
             value: -10,
             description: 'Test voucher',
-            expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            expiryDate: Date.now() + 86400000,
             maxUses: 1,
-            merchantId: 'test_shop_001',
+            merchantId: 'test-merchant',
           },
         })
 
@@ -413,9 +434,9 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
             type: 'percentage_off',
             value: 10,
             description: '',
-            expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            expiryDate: Date.now() + 86400000,
             maxUses: 1,
-            merchantId: 'test_shop_001',
+            merchantId: 'test-merchant',
           },
         })
 
@@ -442,9 +463,9 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
             type: 'percentage_off',
             value: 10,
             description: 'Test voucher',
-            expiryDate: Date.now() - 24 * 60 * 60 * 1000, // 1 day ago
+            expiryDate: Date.now() - 86400000, // Past date
             maxUses: 1,
-            merchantId: 'test_shop_001',
+            merchantId: 'test-merchant',
           },
         })
 
@@ -471,9 +492,9 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
             type: 'percentage_off',
             value: 10,
             description: 'Test voucher',
-            expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            expiryDate: Date.now() + 86400000,
             maxUses: 0,
-            merchantId: 'test_shop_001',
+            merchantId: 'test-merchant',
           },
         })
 
@@ -483,28 +504,28 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
         } catch (error) {
           // ASSERT
           expect(error).toBeDefined()
-          expect(error.message).toEqual('assertValidMintVoucherConfig: Voucher max uses must be greater than 0')
+          expect(error.message).toEqual('assertValidMintVoucherConfig: Voucher max uses must be a positive number')
         }
       })
 
       it('should throw an error if the merchant ID is not set', async () => {
         expect.assertions(2)
         // ARRANGE
-        const brokenConfig: MintVoucherConfig = {
+        const brokenConfig: MintVoucherConfig = createTestVoucherConfigEmpty({
           collectionAddress: collectionAddress,
           recipient: context.umi.identity.publicKey,
           voucherName: 'Test Voucher',
           voucherMetadataUri: 'https://arweave.net/test-metadata',
-          updateAuthority: feePayerSigner,
+          updateAuthority: collectionUpdateAuthority,
           voucherData: {
             type: 'percentage_off',
             value: 10,
             description: 'Test voucher',
-            expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            expiryDate: Date.now() + 86400000,
             maxUses: 1,
-            merchantId: '', // This should trigger the error
+            merchantId: '',
           },
-        }
+        })
 
         // ACT
         try {
@@ -512,7 +533,7 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
         } catch (error) {
           // ASSERT
           expect(error).toBeDefined()
-          expect(error.message).toEqual('assertValidMintVoucherConfig: Merchant ID is undefined')
+          expect(error.message).toContain('assertValidMintVoucherConfig: Merchant ID is undefined')
         }
       })
     })

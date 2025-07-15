@@ -59,10 +59,11 @@ describe('send-asset-message', { sequential: true, timeout: 30000 }, () => {
     // Issue loyalty pass
     const passResult = await issueLoyaltyPass(context, {
       collectionAddress: collection.publicKey,
-      recipient: recipient.publicKey,
       passName: 'Test Pass',
-      passMetadataUri: 'https://example.com/pass',
-      updateAuthority,
+      passMetadataUri: 'https://arweave.net/123abc',
+      recipient: recipient.publicKey,
+      updateAuthority: updateAuthority, // Pass the full signer, not just .publicKey
+      organizationName: 'Test Organization',
     })
     console.log('✅ Loyalty pass issued:', passResult.asset.publicKey.toString())
 

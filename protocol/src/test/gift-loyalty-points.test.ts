@@ -33,6 +33,7 @@ describe('gift-loyalty-points', () => {
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
       updateAuthority: authority!,
+      organizationName: 'Test Organization',
     })
     loyaltyPass = passResult.asset
   })

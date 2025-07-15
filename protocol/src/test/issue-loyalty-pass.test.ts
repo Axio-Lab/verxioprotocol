@@ -35,6 +35,7 @@ describe('issue-loyalty-pass', () => {
         passMetadataUri: 'https://arweave.net/123abc',
         recipient: feePayer.publicKey,
         updateAuthority: authority!,
+        organizationName: 'Test Organization',
       }
 
       // ACT
@@ -58,6 +59,7 @@ describe('issue-loyalty-pass', () => {
         recipient: feePayer.publicKey,
         assetSigner,
         updateAuthority: authority!,
+        organizationName: 'Test Organization',
       }
 
       // ACT
@@ -92,6 +94,7 @@ describe('issue-loyalty-pass', () => {
         passMetadataUri: 'https://arweave.net/123abc',
         recipient: feePayer.publicKey,
         updateAuthority: authority!,
+        organizationName: 'Test Organization',
       }
 
       // ACT
@@ -113,6 +116,7 @@ describe('issue-loyalty-pass', () => {
         passMetadataUri: 'https://arweave.net/123abc',
         recipient: feePayer.publicKey,
         updateAuthority: authority!,
+        organizationName: 'Test Organization',
       }
 
       // ACT
@@ -129,22 +133,28 @@ describe('issue-loyalty-pass', () => {
   describe('unexpected usage: config validation', () => {
     it('should throw an error if the name is not set', async () => {
       expect.assertions(2)
+      if (!collection || !authority) throw new Error('Test setup failed')
+
       // ARRANGE
-      const brokenConfig: IssueLoyaltyPassConfig = {
-        collectionAddress: collection!.publicKey,
+      const invalidConfig = {
+        collectionAddress: collection.publicKey,
         passName: '',
         passMetadataUri: 'https://arweave.net/123abc',
-        recipient: feePayer.publicKey,
-        updateAuthority: authority!,
+        recipient: authority.publicKey,
+        updateAuthority: generateSigner(context.umi),
+        organizationName: 'Test Organization',
       }
 
-      // ACT
+      // ACT & ASSERT
       try {
-        await issueLoyaltyPass(context, brokenConfig)
+        await issueLoyaltyPass(context, invalidConfig)
+        expect(true).toBe(false) // Should not reach here
       } catch (error) {
         // ASSERT
         expect(error).toBeDefined()
-        expect(error.message).toEqual('assertValidIssueLoyaltyPassConfig: Pass name is undefined')
+        expect(error.message).toEqual(
+          'Failed to issue loyalty pass: Error: assertValidIssueLoyaltyPassConfig: Pass name is undefined',
+        )
       }
     })
   })

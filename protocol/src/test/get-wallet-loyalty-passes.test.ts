@@ -33,6 +33,7 @@ describe('get-wallet-loyalty-passes', () => {
       recipient: feePayer.publicKey,
       assetSigner: passSigner,
       updateAuthority: authority!,
+      organizationName: 'Test Organization',
     })
     loyaltyPass = passResult.asset
   })

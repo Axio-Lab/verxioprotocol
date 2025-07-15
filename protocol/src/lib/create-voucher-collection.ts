@@ -11,10 +11,10 @@ import { VerxioContext } from '@schemas/verxio-context'
 import { toBase58 } from '@utils/to-base58'
 import { assertValidContext } from '@utils/assert-valid-context'
 import { createFeeInstruction } from '@utils/fee-structure'
+import { generateVoucherCollectionMetadata, uploadImage } from './metadata/generate-nft-metadata'
 
 export interface CreateVoucherCollectionConfig {
   collectionSigner?: KeypairSigner
-  metadataUri: string
   voucherCollectionName: string
   programAuthority: PublicKey
   updateAuthority?: KeypairSigner
@@ -25,6 +25,13 @@ export interface CreateVoucherCollectionConfig {
     voucherTypes: string[] // ["discount", "free_item", "credits"]
     [key: string]: any // Allow additional metadata fields
   }
+  // New image and metadata options
+  imageBuffer?: Buffer
+  imageFilename?: string
+  imageContentType?: string
+  description?: string
+  // Legacy support - if metadataUri is provided, use it instead of generating
+  metadataUri?: string
 }
 
 export async function createVoucherCollection(
@@ -37,6 +44,27 @@ export async function createVoucherCollection(
   const updateAuthority = config.updateAuthority ?? generateSigner(context.umi)
 
   try {
+    // Generate metadata URI if not provided
+    let metadataUri = config.metadataUri
+    if (!metadataUri) {
+      if (!config.imageBuffer || !config.imageFilename) {
+        throw new Error('Either metadataUri or imageBuffer with imageFilename must be provided')
+      }
+
+      // Upload image first
+      const imageUri = await uploadImage(context, config.imageBuffer, config.imageFilename, config.imageContentType)
+
+      // Generate metadata
+      metadataUri = await generateVoucherCollectionMetadata(context, {
+        collectionName: config.voucherCollectionName,
+        merchantName: config.metadata.merchantName,
+        description: config.description || `Voucher collection for ${config.metadata.merchantName}`,
+        imageUri,
+        creator: config.programAuthority,
+        mimeType: config.imageContentType,
+      })
+    }
+
     const feeInstruction = createFeeInstruction(
       context.umi,
       context.umi.identity.publicKey,
@@ -48,7 +76,7 @@ export async function createVoucherCollection(
       collection,
       name: config.voucherCollectionName,
       plugins: createVoucherCollectionPlugins(config, updateAuthority.publicKey),
-      uri: config.metadataUri,
+      uri: metadataUri,
       updateAuthority: updateAuthority.publicKey,
     })
       .add(feeInstruction)
@@ -121,9 +149,7 @@ export function createVoucherCollectionPlugins(
 }
 
 // TODO: Replace with zod validation
-function assertValidCreateVoucherCollectionConfig(
-  config: CreateVoucherCollectionConfig,
-): config is CreateVoucherCollectionConfig {
+function assertValidCreateVoucherCollectionConfig(config: CreateVoucherCollectionConfig) {
   if (!config) {
     throw new Error('assertValidCreateVoucherCollectionConfig: Config is undefined')
   }
@@ -134,13 +160,30 @@ function assertValidCreateVoucherCollectionConfig(
   ) {
     throw new Error('assertValidCreateVoucherCollectionConfig: Voucher collection name is undefined')
   }
-  if (!config.metadataUri || !config.metadataUri.trim() || !config.metadataUri.trim().length) {
-    throw new Error('assertValidCreateVoucherCollectionConfig: Metadata URI is undefined')
+
+  // Validate metadata URI if provided, or ensure image data is provided
+  if (config.metadataUri) {
+    if (!config.metadataUri.trim() || !config.metadataUri.trim().length) {
+      throw new Error('assertValidCreateVoucherCollectionConfig: Metadata URI is empty')
+    }
+    if (!config.metadataUri.startsWith('https://') && !config.metadataUri.startsWith('http://')) {
+      throw new Error('assertValidCreateVoucherCollectionConfig: Metadata URI is not a valid URL')
+    }
+  } else {
+    // If no metadataUri, require image data
+    if (!config.imageBuffer) {
+      throw new Error(
+        'assertValidCreateVoucherCollectionConfig: Image buffer is required when metadataUri is not provided',
+      )
+    }
+    if (!config.imageFilename || !config.imageFilename.trim()) {
+      throw new Error(
+        'assertValidCreateVoucherCollectionConfig: Image filename is required when metadataUri is not provided',
+      )
+    }
   }
-  if (!config.metadataUri.startsWith('https://') && !config.metadataUri.startsWith('http://')) {
-    throw new Error('assertValidCreateVoucherCollectionConfig: Metadata URI is not a valid URL')
-  }
-  if (!config.programAuthority || !config.programAuthority.trim() || !config.programAuthority.trim().length) {
+
+  if (!config.programAuthority) {
     throw new Error('assertValidCreateVoucherCollectionConfig: Program authority is undefined')
   }
   if (!config.metadata) {
@@ -167,5 +210,4 @@ function assertValidCreateVoucherCollectionConfig(
   ) {
     throw new Error('assertValidCreateVoucherCollectionConfig: Voucher types are undefined or empty')
   }
-  return true
 }

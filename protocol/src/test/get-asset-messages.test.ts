@@ -57,8 +57,9 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
       collectionAddress: collection.publicKey,
       recipient: recipient.publicKey,
       passName: 'Test Pass',
-      passMetadataUri: 'https://example.com/pass',
+      passMetadataUri: 'https://arweave.net/123abc',
       updateAuthority,
+      organizationName: 'Test Organization',
     })
 
     asset = passResult.asset
@@ -135,8 +136,9 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
       collectionAddress: collection.publicKey,
       recipient: recipient.publicKey,
       passName: 'New Test Pass',
-      passMetadataUri: 'https://example.com/new-pass',
+      passMetadataUri: 'https://arweave.net/123abc',
       updateAuthority,
+      organizationName: 'Test Organization',
     })
 
     // Get the app data plugin for the new pass
@@ -172,8 +174,9 @@ describe('getAssetMessages', { sequential: true, timeout: 30000 }, () => {
       collectionAddress: collection.publicKey,
       recipient: recipient.publicKey,
       passName: 'No Messages Pass',
-      passMetadataUri: 'https://example.com/no-messages',
+      passMetadataUri: 'https://arweave.net/123abc',
       updateAuthority,
+      organizationName: 'Test Organization',
     })
 
     const noMessagesAssetData = await fetchAsset(context.umi, noMessagesPass.asset.publicKey)

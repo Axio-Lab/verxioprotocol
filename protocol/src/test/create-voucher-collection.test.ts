@@ -173,7 +173,9 @@ describe('create-voucher-collection', { sequential: true, timeout: 30000 }, () =
         } catch (error) {
           // ASSERT
           expect(error).toBeDefined()
-          expect(error.message).toEqual('assertValidCreateVoucherCollectionConfig: Metadata URI is undefined')
+          expect(error.message).toEqual(
+            'assertValidCreateVoucherCollectionConfig: Image buffer is required when metadataUri is not provided',
+          )
         }
       })
 

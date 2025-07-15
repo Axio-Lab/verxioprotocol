@@ -6,7 +6,6 @@ import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
 import { sendBroadcast } from '../lib/send-broadcast'
 import { getProgramDetails } from '../lib/get-program-details'
 import { markBroadcastRead } from '../lib/mark-broadcast-read'
-import { FEES } from '../utils/fee-structure'
 
 const { feePayer, context } = getTestContext()
 
@@ -20,7 +19,7 @@ describe('send-broadcast', { sequential: true, timeout: 30000 }, () => {
     // Ensure we have enough sol for all operations
     await ensureFeePayerBalance(context.umi, {
       account: feePayer.publicKey,
-      amount: 1 + FEES.CREATE_LOYALTY_PROGRAM,
+      amount: 1,
     })
     context.umi.use(keypairIdentity(feePayer))
 

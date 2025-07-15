@@ -6,6 +6,7 @@ import { redeemVoucher } from '../lib/redeem-voucher'
 import { validateVoucher } from '../lib/validate-voucher'
 import { getTestContext } from './helpers/get-test-context'
 import { createTestVoucherConfig } from './helpers/create-test-voucher'
+import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
 
 const { feePayer, context } = getTestContext()
 
@@ -16,6 +17,10 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
 
   beforeAll(async () => {
     // Set the signer identity
+    await ensureFeePayerBalance(context.umi, {
+      account: feePayer.publicKey,
+      amount: 1,
+    })
     context.umi.use(keypairIdentity(feePayer))
     // Create voucher collection
     const collectionSigner = generateSigner(context.umi)

@@ -8,7 +8,6 @@ import { getAssetMessages } from '../lib/get-asset-messages'
 import { DEFAULT_TIER, DEFAULT_PASS_DATA } from '../lib/constants'
 import { getTestContext } from './helpers/get-test-context'
 import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
-import { FEES } from '../utils/fee-structure'
 import { updatePassData } from '../lib'
 import { fetchAsset } from '@metaplex-foundation/mpl-core'
 
@@ -29,7 +28,7 @@ describe('send-asset-message', { sequential: true, timeout: 30000 }, () => {
     // Ensure we have enough sol for all operations
     await ensureFeePayerBalance(context.umi, {
       account: feePayer.publicKey,
-      amount: 1 + FEES.CREATE_LOYALTY_PROGRAM,
+      amount: 1,
     })
     context.umi.use(keypairIdentity(feePayer))
 

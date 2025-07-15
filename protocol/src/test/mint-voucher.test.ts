@@ -13,7 +13,6 @@ import { getTestContext } from './helpers/get-test-context'
 import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
 import { mintVoucher, MintVoucherConfig } from '../lib/mint-voucher'
 import { createVoucherCollection } from '../lib/create-voucher-collection'
-import { FEES } from '../utils/fee-structure'
 
 const { feePayer, context } = getTestContext()
 
@@ -26,7 +25,7 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
     // Ensure we have enough sol for both the collection creation and voucher minting
     await ensureFeePayerBalance(context.umi, {
       account: feePayer.publicKey,
-      amount: 2 + FEES.CREATE_VOUCHER_COLLECTION + FEES.LOYALTY_OPERATIONS,
+      amount: 1,
     })
     context.umi.use(keypairIdentity(feePayer))
     feePayerSigner = createSignerFromKeypair(context.umi, feePayer)

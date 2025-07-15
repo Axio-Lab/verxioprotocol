@@ -3,7 +3,7 @@
  * These examples show various patterns for composing and executing transactions
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest'
 import { generateSigner, publicKey } from '@metaplex-foundation/umi'
 import { keypairIdentity } from '@metaplex-foundation/umi'
 import { getTestContext } from './helpers/get-test-context'
@@ -32,12 +32,19 @@ import { createVoucherCollection } from '../lib/create-voucher-collection'
 import { mintVoucher } from '../lib/mint-voucher'
 import { createTestVoucherConfig } from './helpers/create-test-voucher'
 import { createMockUmiUploader } from './helpers/mock-uploader'
+import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
 
 describe('verxio-instructions', () => {
   let context: VerxioContext
 
   beforeEach(async () => {
     const { context: testContext, feePayer } = getTestContext()
+
+    // Ensure we have enough sol for loyalty program creation and fees
+    await ensureFeePayerBalance(testContext.umi, {
+      account: feePayer.publicKey,
+      amount: 1,
+    })
     // Set the signer identity on the UMI instance
     testContext.umi.use(keypairIdentity(feePayer))
     // Set mock uploader for image upload tests

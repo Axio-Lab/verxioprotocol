@@ -20,12 +20,14 @@ const redeemVoucherSchema = z.object({
   voucherAddress: z.string().min(1, 'Voucher address is required'),
   merchantId: z.string().min(1, 'Merchant ID is required'),
   purchaseAmount: z.number().optional(),
-  redemptionDetails: z.object({
-    transactionId: z.string().optional(),
-    items: z.string().optional(),
-    totalAmount: z.number().optional(),
-    discountApplied: z.number().optional(),
-  }).optional(),
+  redemptionDetails: z
+    .object({
+      transactionId: z.string().optional(),
+      items: z.string().optional(),
+      totalAmount: z.number().optional(),
+      discountApplied: z.number().optional(),
+    })
+    .optional(),
 })
 
 type RedeemVoucherFormData = z.infer<typeof redeemVoucherSchema>
@@ -37,12 +39,7 @@ interface RedeemVoucherFormProps {
   onError?: (error: any) => void
 }
 
-export default function RedeemVoucherForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: RedeemVoucherFormProps) {
+export default function RedeemVoucherForm({ context, signer, onSuccess, onError }: RedeemVoucherFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [redemptionResult, setRedemptionResult] = useState<any>(null)
 
@@ -121,25 +118,15 @@ export default function RedeemVoucherForm({
         <CardContent className="space-y-6">
           <VerxioFormSection title="Voucher Information">
             <VerxioFormField label="Voucher Address" error={errors.voucherAddress?.message}>
-              <Input
-                {...register('voucherAddress')}
-                placeholder="Voucher public key"
-              />
+              <Input {...register('voucherAddress')} placeholder="Voucher public key" />
             </VerxioFormField>
 
             <VerxioFormField label="Merchant ID" error={errors.merchantId?.message}>
-              <Input
-                {...register('merchantId')}
-                placeholder="coffee_brew_merchant_001"
-              />
+              <Input {...register('merchantId')} placeholder="coffee_brew_merchant_001" />
             </VerxioFormField>
 
             <VerxioFormField label="Purchase Amount (Optional)">
-              <Input
-                type="number"
-                {...register('purchaseAmount', { valueAsNumber: true })}
-                placeholder="100"
-              />
+              <Input type="number" {...register('purchaseAmount', { valueAsNumber: true })} placeholder="100" />
               <p className="text-sm text-gray-500 mt-1">
                 Required for percentage-based vouchers to calculate redemption value
               </p>
@@ -148,18 +135,11 @@ export default function RedeemVoucherForm({
 
           <VerxioFormSection title="Redemption Details (Optional)">
             <VerxioFormField label="Transaction ID">
-              <Input
-                {...register('redemptionDetails.transactionId')}
-                placeholder="tx_123456"
-              />
+              <Input {...register('redemptionDetails.transactionId')} placeholder="tx_123456" />
             </VerxioFormField>
 
             <VerxioFormField label="Items Purchased">
-              <Textarea
-                {...register('redemptionDetails.items')}
-                placeholder="Coffee, Pastry, Sandwich"
-                rows={2}
-              />
+              <Textarea {...register('redemptionDetails.items')} placeholder="Coffee, Pastry, Sandwich" rows={2} />
             </VerxioFormField>
 
             <VerxioFormField label="Total Amount">
@@ -273,4 +253,4 @@ export default function RedeemVoucherForm({
       </Card>
     </VerxioForm>
   )
-} 
+}

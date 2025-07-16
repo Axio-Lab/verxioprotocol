@@ -116,7 +116,8 @@ export default function UpdateLoyaltyProgramForm({
       })
     } catch (error) {
       console.error(error)
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred while updating the loyalty program'
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred while updating the loyalty program'
       form.setError('root', { message: errorMessage })
       onError?.(error instanceof Error ? error : new Error(errorMessage))
     }

@@ -18,11 +18,13 @@ import { Users, Calendar, Filter, SortAsc, SortDesc } from 'lucide-react'
 
 const getUserVouchersSchema = z.object({
   userAddress: z.string().min(1, 'User address is required'),
-  filters: z.object({
-    status: z.enum(['active', 'expired', 'fully_used']).optional(),
-    type: z.string().optional(),
-    minValue: z.number().optional(),
-  }).optional(),
+  filters: z
+    .object({
+      status: z.enum(['active', 'expired', 'fully_used']).optional(),
+      type: z.string().optional(),
+      minValue: z.number().optional(),
+    })
+    .optional(),
   sortBy: z.enum(['expiryDate', 'value', 'createdAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
   limit: z.number().optional(),
@@ -37,12 +39,7 @@ interface GetUserVouchersFormProps {
   onError?: (error: any) => void
 }
 
-export default function GetUserVouchersForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: GetUserVouchersFormProps) {
+export default function GetUserVouchersForm({ context, signer, onSuccess, onError }: GetUserVouchersFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [vouchersResult, setVouchersResult] = useState<any>(null)
 
@@ -129,10 +126,7 @@ export default function GetUserVouchersForm({
         <CardContent className="space-y-6">
           <VerxioFormSection title="User Information">
             <VerxioFormField label="User Address" error={errors.userAddress?.message}>
-              <Input
-                {...register('userAddress')}
-                placeholder="User wallet address"
-              />
+              <Input {...register('userAddress')} placeholder="User wallet address" />
             </VerxioFormField>
           </VerxioFormSection>
 
@@ -155,26 +149,15 @@ export default function GetUserVouchersForm({
               </VerxioFormField>
 
               <VerxioFormField label="Voucher Type">
-                <Input
-                  {...register('filters.type')}
-                  placeholder="percentage_off, fixed_credits, etc."
-                />
+                <Input {...register('filters.type')} placeholder="percentage_off, fixed_credits, etc." />
               </VerxioFormField>
 
               <VerxioFormField label="Minimum Value">
-                <Input
-                  type="number"
-                  {...register('filters.minValue', { valueAsNumber: true })}
-                  placeholder="10"
-                />
+                <Input type="number" {...register('filters.minValue', { valueAsNumber: true })} placeholder="10" />
               </VerxioFormField>
 
               <VerxioFormField label="Limit">
-                <Input
-                  type="number"
-                  {...register('limit', { valueAsNumber: true })}
-                  placeholder="10"
-                />
+                <Input type="number" {...register('limit', { valueAsNumber: true })} placeholder="10" />
               </VerxioFormField>
             </div>
           </VerxioFormSection>
@@ -182,10 +165,7 @@ export default function GetUserVouchersForm({
           <VerxioFormSection title="Sorting">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <VerxioFormField label="Sort By">
-                <Select
-                  onValueChange={(value) => setValue('sortBy', value as any)}
-                  defaultValue={watch('sortBy')}
-                >
+                <Select onValueChange={(value) => setValue('sortBy', value as any)} defaultValue={watch('sortBy')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select sort field" />
                   </SelectTrigger>
@@ -225,9 +205,7 @@ export default function GetUserVouchersForm({
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-blue-500" />
-                  <span className="font-medium">
-                    Total Vouchers: {vouchersResult.total}
-                  </span>
+                  <span className="font-medium">Total Vouchers: {vouchersResult.total}</span>
                 </div>
 
                 {vouchersResult.expiringSoon && vouchersResult.expiringSoon.length > 0 && (
@@ -238,9 +216,7 @@ export default function GetUserVouchersForm({
                         Expiring Soon ({vouchersResult.expiringSoon.length} vouchers)
                       </span>
                     </div>
-                    <div className="text-sm text-yellow-700">
-                      These vouchers will expire in the next 7 days
-                    </div>
+                    <div className="text-sm text-yellow-700">These vouchers will expire in the next 7 days</div>
                   </div>
                 )}
 
@@ -252,9 +228,7 @@ export default function GetUserVouchersForm({
                         Redeemable ({vouchersResult.redeemable.length} vouchers)
                       </span>
                     </div>
-                    <div className="text-sm text-green-700">
-                      These vouchers are currently available for redemption
-                    </div>
+                    <div className="text-sm text-green-700">These vouchers are currently available for redemption</div>
                   </div>
                 )}
 
@@ -320,4 +294,4 @@ export default function GetUserVouchersForm({
       </Card>
     </VerxioForm>
   )
-} 
+}

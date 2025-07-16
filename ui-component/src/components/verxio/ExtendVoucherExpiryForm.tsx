@@ -31,12 +31,7 @@ interface ExtendVoucherExpiryFormProps {
   onError?: (error: any) => void
 }
 
-export default function ExtendVoucherExpiryForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: ExtendVoucherExpiryFormProps) {
+export default function ExtendVoucherExpiryForm({ context, signer, onSuccess, onError }: ExtendVoucherExpiryFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [extensionResult, setExtensionResult] = useState<any>(null)
 
@@ -95,37 +90,23 @@ export default function ExtendVoucherExpiryForm({
     <VerxioForm form={form} onSubmit={onSubmit}>
       <Card>
         <CardHeader>
-          <CardDescription>
-            Extend the expiration date of a voucher with a reason for tracking.
-          </CardDescription>
+          <CardDescription>Extend the expiration date of a voucher with a reason for tracking.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <VerxioFormSection title="Voucher Information">
             <VerxioFormField label="Voucher Address" error={errors.voucherAddress?.message}>
-              <Input
-                {...register('voucherAddress')}
-                placeholder="Voucher public key"
-              />
+              <Input {...register('voucherAddress')} placeholder="Voucher public key" />
             </VerxioFormField>
           </VerxioFormSection>
 
           <VerxioFormSection title="Extension Details">
             <VerxioFormField label="New Expiry Date" error={errors.newExpiryDate?.message}>
-              <Input
-                type="datetime-local"
-                {...register('newExpiryDate')}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Select a new expiration date and time for the voucher
-              </p>
+              <Input type="datetime-local" {...register('newExpiryDate')} />
+              <p className="text-sm text-gray-500 mt-1">Select a new expiration date and time for the voucher</p>
             </VerxioFormField>
 
             <VerxioFormField label="Reason for Extension" error={errors.reason?.message}>
-              <Textarea
-                {...register('reason')}
-                placeholder="Customer request, technical issue, etc."
-                rows={3}
-              />
+              <Textarea {...register('reason')} placeholder="Customer request, technical issue, etc." rows={3} />
               <p className="text-sm text-gray-500 mt-1">
                 Provide a reason for extending the voucher expiry (required for tracking)
               </p>
@@ -137,8 +118,8 @@ export default function ExtendVoucherExpiryForm({
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  Extending voucher expiry will update the voucher's expiration date. This action
-                  is tracked for audit purposes.
+                  Extending voucher expiry will update the voucher's expiration date. This action is tracked for audit
+                  purposes.
                 </span>
               </div>
             </AlertDescription>
@@ -227,4 +208,4 @@ export default function ExtendVoucherExpiryForm({
       </Card>
     </VerxioForm>
   )
-} 
+}

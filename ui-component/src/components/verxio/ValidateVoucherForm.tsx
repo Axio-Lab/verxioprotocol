@@ -30,12 +30,7 @@ interface ValidateVoucherFormProps {
   onError?: (error: any) => void
 }
 
-export default function ValidateVoucherForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: ValidateVoucherFormProps) {
+export default function ValidateVoucherForm({ context, signer, onSuccess, onError }: ValidateVoucherFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [validationResult, setValidationResult] = useState<any>(null)
 
@@ -98,32 +93,22 @@ export default function ValidateVoucherForm({
       <Card>
         <CardHeader>
           <CardDescription>
-            Validate a voucher without redeeming it. This is useful for checking voucher status and
-            calculating redemption value.
+            Validate a voucher without redeeming it. This is useful for checking voucher status and calculating
+            redemption value.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <VerxioFormSection title="Voucher Information">
             <VerxioFormField label="Voucher Address" error={errors.voucherAddress?.message}>
-              <Input
-                {...register('voucherAddress')}
-                placeholder="Voucher public key"
-              />
+              <Input {...register('voucherAddress')} placeholder="Voucher public key" />
             </VerxioFormField>
 
             <VerxioFormField label="Merchant ID" error={errors.merchantId?.message}>
-              <Input
-                {...register('merchantId')}
-                placeholder="coffee_brew_merchant_001"
-              />
+              <Input {...register('merchantId')} placeholder="coffee_brew_merchant_001" />
             </VerxioFormField>
 
             <VerxioFormField label="Purchase Amount (Optional)">
-              <Input
-                type="number"
-                {...register('purchaseAmount', { valueAsNumber: true })}
-                placeholder="100"
-              />
+              <Input type="number" {...register('purchaseAmount', { valueAsNumber: true })} placeholder="100" />
               <p className="text-sm text-gray-500 mt-1">
                 Required for percentage-based vouchers to calculate redemption value
               </p>
@@ -145,9 +130,7 @@ export default function ValidateVoucherForm({
                   ) : (
                     <XCircle className="h-5 w-5 text-red-500" />
                   )}
-                  <span className="font-medium">
-                    Status: {validationResult.isValid ? 'Valid' : 'Invalid'}
-                  </span>
+                  <span className="font-medium">Status: {validationResult.isValid ? 'Valid' : 'Invalid'}</span>
                   <Badge variant={validationResult.isValid ? 'default' : 'destructive'}>
                     {validationResult.isValid ? 'VALID' : 'INVALID'}
                   </Badge>
@@ -228,4 +211,4 @@ export default function ValidateVoucherForm({
       </Card>
     </VerxioForm>
   )
-} 
+}

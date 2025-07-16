@@ -36,16 +36,18 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await sendMessage(context, messageData)
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       result,
-      signature: result.signature
+      signature: result.signature,
     })
-
   } catch (error) {
     console.error('Error sending message:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

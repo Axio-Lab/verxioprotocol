@@ -27,7 +27,6 @@ import CancelVoucherForm from '@/components/verxio/CancelVoucherForm'
 import { WalletMultiButton as WalletButton } from '@solana/wallet-adapter-react-ui'
 import { convertSecretKeyToKeypair } from '@/lib/utils'
 
-
 const FORMS = {
   'create-loyalty-program': CreateLoyaltyProgramForm,
   'issue-loyalty-pass': IssueLoyaltyPassForm,

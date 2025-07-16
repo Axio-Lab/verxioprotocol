@@ -30,12 +30,7 @@ interface CancelVoucherFormProps {
   onError?: (error: any) => void
 }
 
-export default function CancelVoucherForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: CancelVoucherFormProps) {
+export default function CancelVoucherForm({ context, signer, onSuccess, onError }: CancelVoucherFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [cancellationResult, setCancellationResult] = useState<any>(null)
 
@@ -92,25 +87,20 @@ export default function CancelVoucherForm({
     <VerxioForm form={form} onSubmit={onSubmit}>
       <Card>
         <CardHeader>
-          <CardDescription>
-            Cancel a voucher with a reason for tracking. This action cannot be undone.
-          </CardDescription>
+          <CardDescription>Cancel a voucher with a reason for tracking. This action cannot be undone.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Warning:</strong> Canceling a voucher will permanently disable it. This action
-              cannot be undone and the voucher will no longer be redeemable.
+              <strong>Warning:</strong> Canceling a voucher will permanently disable it. This action cannot be undone
+              and the voucher will no longer be redeemable.
             </AlertDescription>
           </Alert>
 
           <VerxioFormSection title="Voucher Information">
             <VerxioFormField label="Voucher Address" error={errors.voucherAddress?.message}>
-              <Input
-                {...register('voucherAddress')}
-                placeholder="Voucher public key"
-              />
+              <Input {...register('voucherAddress')} placeholder="Voucher public key" />
             </VerxioFormField>
           </VerxioFormSection>
 
@@ -132,8 +122,8 @@ export default function CancelVoucherForm({
               <div className="flex items-center gap-2">
                 <XCircle className="h-4 w-4" />
                 <span>
-                  Canceling a voucher will mark it as cancelled and prevent any future redemptions.
-                  This action is tracked for audit and compliance purposes.
+                  Canceling a voucher will mark it as cancelled and prevent any future redemptions. This action is
+                  tracked for audit and compliance purposes.
                 </span>
               </div>
             </AlertDescription>
@@ -175,7 +165,8 @@ export default function CancelVoucherForm({
                         <span className="font-medium">Value:</span> {cancellationResult.updatedVoucher.value}
                       </div>
                       <div>
-                        <span className="font-medium">Current Uses:</span> {cancellationResult.updatedVoucher.currentUses}
+                        <span className="font-medium">Current Uses:</span>{' '}
+                        {cancellationResult.updatedVoucher.currentUses}
                       </div>
                       <div>
                         <span className="font-medium">Max Uses:</span> {cancellationResult.updatedVoucher.maxUses}
@@ -210,8 +201,8 @@ export default function CancelVoucherForm({
                     <span className="font-medium text-yellow-800">Important Note</span>
                   </div>
                   <div className="text-sm text-yellow-700 mt-1">
-                    The voucher cancellation has been recorded on the blockchain. The voucher is now
-                    permanently disabled and cannot be reactivated or redeemed.
+                    The voucher cancellation has been recorded on the blockchain. The voucher is now permanently
+                    disabled and cannot be reactivated or redeemed.
                   </div>
                 </div>
               </div>
@@ -221,4 +212,4 @@ export default function CancelVoucherForm({
       </Card>
     </VerxioForm>
   )
-} 
+}

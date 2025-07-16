@@ -48,11 +48,13 @@ function App() {
 The component library includes server-side image upload functionality. To enable this, you need to:
 
 1. **Install the Irys uploader package** in your server environment:
+
 ```bash
 npm install @metaplex-foundation/umi-uploader-irys
 ```
 
 2. **Create an API route** for image uploads (already included in this library):
+
 ```typescript
 // app/api/upload-image/route.ts
 import { NextRequest, NextResponse } from 'next/server'
@@ -66,6 +68,7 @@ export async function POST(request: NextRequest) {
 ```
 
 3. **Use the upload functionality** in your forms:
+
 ```tsx
 // The forms automatically handle image uploads when you select "Upload Image"
 <CreateLoyaltyProgramForm
@@ -78,11 +81,13 @@ export async function POST(request: NextRequest) {
 ## Available Components
 
 ### Loyalty Program Management
+
 - `CreateLoyaltyProgramForm` - Create new loyalty programs
 - `UpdateLoyaltyProgramForm` - Update existing programs
 - `IssueLoyaltyPassForm` - Issue loyalty passes to users
 
 ### Voucher Management
+
 - `CreateVoucherCollectionForm` - Create voucher collections
 - `MintVoucherForm` - Mint individual vouchers
 - `ValidateVoucherForm` - Validate voucher status
@@ -92,15 +97,18 @@ export async function POST(request: NextRequest) {
 - `CancelVoucherForm` - Cancel vouchers
 
 ### Points Management
+
 - `AwardLoyaltyPointsForm` - Award points to users
 - `RevokeLoyaltyPointsForm` - Revoke points from users
 - `GiftLoyaltyPointsForm` - Gift points between users
 
 ### Communication
+
 - `MessagingForm` - Send direct messages
 - `BroadcastsForm` - Send broadcast messages
 
 ### Data Retrieval
+
 - `GetAssetDataForm` - Get asset data
 - `GetProgramDetailsForm` - Get program details
 - `ApproveTransferForm` - Approve transfers
@@ -108,17 +116,20 @@ export async function POST(request: NextRequest) {
 ## Form Features
 
 ### Image Upload Support
+
 All forms that support metadata can handle image uploads:
 
 1. **Pre-uploaded URI**: Provide a metadata URI that's already uploaded
 2. **Image Upload**: Upload an image file that gets automatically processed
 
 ### Validation
+
 - Comprehensive form validation using Zod schemas
 - Real-time error feedback
 - Type-safe form handling
 
 ### Loading States
+
 - Upload progress indicators
 - Transaction status feedback
 - Disabled states during operations
@@ -178,6 +189,7 @@ MIT License - see LICENSE file for details.
 ## Support
 
 For support and questions:
+
 - GitHub Issues: [Create an issue](https://github.com/your-repo/issues)
 - Documentation: [Read the docs](https://docs.verxio.com)
 - Community: [Join our Discord](https://discord.gg/verxio)

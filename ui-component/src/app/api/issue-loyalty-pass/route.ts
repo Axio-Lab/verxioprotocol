@@ -8,15 +8,15 @@ import { convertSecretKeyToKeypair } from '@/lib/utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      collectionAddress, 
-      recipientAddress, 
-      passName, 
+    const {
+      collectionAddress,
+      recipientAddress,
+      passName,
       organizationName,
-      passMetadataUri, 
-      imageBuffer, 
-      imageFilename, 
-      imageContentType 
+      passMetadataUri,
+      imageBuffer,
+      imageFilename,
+      imageContentType,
     } = body
 
     // Create signer from environment variable
@@ -59,19 +59,21 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await issueLoyaltyPass(context, passData)
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       result,
       signature: result.signature,
       asset: {
         publicKey: result.asset.publicKey,
-      }
+      },
     })
-
   } catch (error) {
     console.error('Error issuing loyalty pass:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

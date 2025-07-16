@@ -35,15 +35,17 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await validateVoucher(context, config)
 
-    return NextResponse.json({ 
-      success: true, 
-      result
+    return NextResponse.json({
+      success: true,
+      result,
     })
-
   } catch (error) {
     console.error('Error validating voucher:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

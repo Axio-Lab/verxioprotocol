@@ -8,15 +8,15 @@ import { convertSecretKeyToKeypair } from '@/lib/utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      collectionAddress, 
-      voucherName, 
-      recipient, 
-      metadataUri, 
-      imageBuffer, 
-      imageFilename, 
-      imageContentType, 
-      voucherData 
+    const {
+      collectionAddress,
+      voucherName,
+      recipient,
+      metadataUri,
+      imageBuffer,
+      imageFilename,
+      imageContentType,
+      voucherData,
     } = body
 
     // Create signer from environment variable
@@ -62,20 +62,22 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await mintVoucher(context, config)
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       result,
       signature: result.signature,
       asset: {
         publicKey: result.asset.publicKey,
       },
-      voucherAddress: result.voucherAddress
+      voucherAddress: result.voucherAddress,
     })
-
   } catch (error) {
     console.error('Error minting voucher:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

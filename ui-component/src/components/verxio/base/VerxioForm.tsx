@@ -51,12 +51,8 @@ interface VerxioFormSectionProps {
 export function VerxioFormSection({ title, children, className }: VerxioFormSectionProps) {
   return (
     <div className={cn('space-y-4', className)}>
-      <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-        {title}
-      </h3>
-      <div className="space-y-4">
-        {children}
-      </div>
+      <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">{title}</h3>
+      <div className="space-y-4">{children}</div>
     </div>
   )
 }
@@ -71,13 +67,9 @@ interface VerxioFormFieldProps {
 export function VerxioFormField({ label, children, error, className }: VerxioFormFieldProps) {
   return (
     <div className={cn('space-y-2', className)}>
-      <label className="text-sm font-medium text-gray-700">
-        {label}
-      </label>
+      <label className="text-sm font-medium text-gray-700">{label}</label>
       {children}
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   )
 }

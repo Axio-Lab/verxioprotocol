@@ -45,12 +45,7 @@ interface MintVoucherFormProps {
   onError?: (error: any) => void
 }
 
-export default function MintVoucherForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: MintVoucherFormProps) {
+export default function MintVoucherForm({ context, signer, onSuccess, onError }: MintVoucherFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -99,7 +94,10 @@ export default function MintVoucherForm({
     const newConditions = [...conditions]
     newConditions[index] = value
     setConditions(newConditions)
-    setValue('voucherData.conditions', newConditions.filter(c => c.trim() !== ''))
+    setValue(
+      'voucherData.conditions',
+      newConditions.filter((c) => c.trim() !== ''),
+    )
   }
 
   const removeCondition = (index: number) => {
@@ -129,7 +127,7 @@ export default function MintVoucherForm({
         const arrayBuffer = await selectedFile.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
         const base64Buffer = buffer.toString('base64')
-        
+
         payload.imageBuffer = base64Buffer
         payload.imageFilename = selectedFile.name
         payload.imageContentType = selectedFile.type
@@ -171,31 +169,22 @@ export default function MintVoucherForm({
         <Card>
           <CardHeader>
             <CardDescription>
-              Create and distribute individual vouchers within a collection. You can either provide a
-              pre-uploaded metadata URI or upload an image to auto-generate metadata.
+              Create and distribute individual vouchers within a collection. You can either provide a pre-uploaded
+              metadata URI or upload an image to auto-generate metadata.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <VerxioFormSection title="">
               <VerxioFormField label="Voucher Collection Address" error={errors.collectionAddress?.message}>
-                <Input
-                  {...register('collectionAddress')}
-                  placeholder="Collection public key"
-                />
+                <Input {...register('collectionAddress')} placeholder="Collection public key" />
               </VerxioFormField>
 
               <VerxioFormField label="Voucher Name" error={errors.voucherName?.message}>
-                <Input
-                  {...register('voucherName')}
-                  placeholder="Summer Sale Voucher"
-                />
+                <Input {...register('voucherName')} placeholder="Summer Sale Voucher" />
               </VerxioFormField>
 
               <VerxioFormField label="Recipient Address" error={errors.recipient?.message}>
-                <Input
-                  {...register('recipient')}
-                  placeholder="Recipient wallet address"
-                />
+                <Input {...register('recipient')} placeholder="Recipient wallet address" />
               </VerxioFormField>
             </VerxioFormSection>
 
@@ -214,15 +203,12 @@ export default function MintVoucherForm({
 
                 <TabsContent value="uri" className="space-y-4">
                   <VerxioFormField label="Metadata URI" error={errors.metadataUri?.message}>
-                    <Input
-                      {...register('metadataUri')}
-                      placeholder="https://arweave.net/..."
-                    />
+                    <Input {...register('metadataUri')} placeholder="https://arweave.net/..." />
                   </VerxioFormField>
                   <Alert>
                     <AlertDescription>
-                      Provide a pre-uploaded metadata URI. The image and metadata should already be
-                      uploaded to Arweave or another decentralized storage.
+                      Provide a pre-uploaded metadata URI. The image and metadata should already be uploaded to Arweave
+                      or another decentralized storage.
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
@@ -230,23 +216,13 @@ export default function MintVoucherForm({
                 <TabsContent value="image" className="space-y-4">
                   <VerxioFormField label="Voucher Image">
                     <div className="flex items-center gap-4">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="flex-1"
-                      />
-                      {selectedFile && (
-                        <div className="text-sm text-gray-600">
-                          Selected: {selectedFile.name}
-                        </div>
-                      )}
+                      <Input type="file" accept="image/*" onChange={handleFileSelect} className="flex-1" />
+                      {selectedFile && <div className="text-sm text-gray-600">Selected: {selectedFile.name}</div>}
                     </div>
                   </VerxioFormField>
                   <Alert>
                     <AlertDescription>
-                      Upload an image file. The protocol will automatically upload it to Irys and
-                      generate metadata.
+                      Upload an image file. The protocol will automatically upload it to Irys and generate metadata.
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
@@ -274,11 +250,7 @@ export default function MintVoucherForm({
 
               <VerxioFormField label="Value" error={errors.voucherData?.value?.message}>
                 <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    {...register('voucherData.value', { valueAsNumber: true })}
-                    placeholder="15"
-                  />
+                  <Input type="number" {...register('voucherData.value', { valueAsNumber: true })} placeholder="15" />
                   <span className="text-sm text-gray-500">
                     {watch('voucherData.type') === 'percentage_off' ? '%' : 'credits'}
                   </span>
@@ -286,33 +258,19 @@ export default function MintVoucherForm({
               </VerxioFormField>
 
               <VerxioFormField label="Max Uses" error={errors.voucherData?.maxUses?.message}>
-                <Input
-                  type="number"
-                  {...register('voucherData.maxUses', { valueAsNumber: true })}
-                  placeholder="1"
-                />
+                <Input type="number" {...register('voucherData.maxUses', { valueAsNumber: true })} placeholder="1" />
               </VerxioFormField>
 
               <VerxioFormField label="Expiry Date" error={errors.voucherData?.expiryDate?.message}>
-                <Input
-                  type="datetime-local"
-                  {...register('voucherData.expiryDate')}
-                />
+                <Input type="datetime-local" {...register('voucherData.expiryDate')} />
               </VerxioFormField>
 
               <VerxioFormField label="Description" error={errors.voucherData?.description?.message}>
-                <Textarea
-                  {...register('voucherData.description')}
-                  placeholder="15% off your next purchase"
-                  rows={2}
-                />
+                <Textarea {...register('voucherData.description')} placeholder="15% off your next purchase" rows={2} />
               </VerxioFormField>
 
               <VerxioFormField label="Merchant ID" error={errors.voucherData?.merchantId?.message}>
-                <Input
-                  {...register('voucherData.merchantId')}
-                  placeholder="coffee_brew_merchant_001"
-                />
+                <Input {...register('voucherData.merchantId')} placeholder="coffee_brew_merchant_001" />
               </VerxioFormField>
             </VerxioFormSection>
 
@@ -326,22 +284,12 @@ export default function MintVoucherForm({
                       onChange={(e) => updateCondition(index, e.target.value)}
                       placeholder="Minimum purchase: $50"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeCondition(index)}
-                    >
+                    <Button type="button" variant="outline" size="sm" onClick={() => removeCondition(index)}>
                       Remove
                     </Button>
                   </div>
                 ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addCondition}
-                  className="w-full"
-                >
+                <Button type="button" variant="outline" onClick={addCondition} className="w-full">
                   Add Condition
                 </Button>
               </div>
@@ -385,9 +333,7 @@ export default function MintVoucherForm({
                   <span className="font-medium">Voucher Public Key:</span>
                 </p>
                 <p className="font-mono text-sm break-all">{mintedVoucher.asset.publicKey}</p>
-                <p>
-                  {/* <span className="font-medium">Voucher Address:</span> */}
-                </p>
+                <p>{/* <span className="font-medium">Voucher Address:</span> */}</p>
                 {/* <p className="font-mono text-sm break-all">{mintedVoucher.voucherAddress}</p> */}
               </div>
             </div>
@@ -409,4 +355,4 @@ export default function MintVoucherForm({
       )}
     </div>
   )
-} 
+}

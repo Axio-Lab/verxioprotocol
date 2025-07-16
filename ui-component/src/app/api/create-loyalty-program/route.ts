@@ -8,15 +8,15 @@ import { convertSecretKeyToKeypair } from '@/lib/utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      loyaltyProgramName, 
-      metadataUri, 
-      imageBuffer, 
-      imageFilename, 
-      imageContentType, 
+    const {
+      loyaltyProgramName,
+      metadataUri,
+      imageBuffer,
+      imageFilename,
+      imageContentType,
       metadata,
       tiers,
-      pointsPerAction
+      pointsPerAction,
     } = body
 
     // Create signer from environment variable
@@ -67,22 +67,26 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await createLoyaltyProgram(context, programData)
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       result,
       signature: result.signature,
       collection: {
         publicKey: result.collection.publicKey,
       },
-      updateAuthority: result.updateAuthority ? {
-        publicKey: result.updateAuthority.publicKey,
-      } : undefined
+      updateAuthority: result.updateAuthority
+        ? {
+            publicKey: result.updateAuthority.publicKey,
+          }
+        : undefined,
     })
-
   } catch (error) {
     console.error('Error creating loyalty program:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

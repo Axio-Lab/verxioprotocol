@@ -76,13 +76,7 @@ export default function CreateVoucherCollectionForm({
 
   const watchedVoucherTypes = watch('metadata.voucherTypes')
 
-  const voucherTypeOptions = [
-    'percentage_off',
-    'fixed_verxio_credits',
-    'free_item',
-    'buy_one_get_one',
-    'custom_reward',
-  ]
+  const voucherTypeOptions = ['percentage_off', 'fixed_verxio_credits', 'free_item', 'buy_one_get_one', 'custom_reward']
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -100,7 +94,7 @@ export default function CreateVoucherCollectionForm({
     } else {
       setValue(
         'metadata.voucherTypes',
-        currentTypes.filter((t) => t !== type)
+        currentTypes.filter((t) => t !== type),
       )
     }
   }
@@ -116,7 +110,8 @@ export default function CreateVoucherCollectionForm({
           merchantAddress: data.metadata.merchantAddress,
           voucherTypes: data.metadata.voucherTypes,
         },
-        description: data.description || data.metadata.description || `Voucher collection for ${data.metadata.merchantName}`,
+        description:
+          data.description || data.metadata.description || `Voucher collection for ${data.metadata.merchantName}`,
       }
 
       if (uploadMethod === 'uri' && data.metadataUri) {
@@ -127,14 +122,14 @@ export default function CreateVoucherCollectionForm({
         const arrayBuffer = await selectedFile.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
         const base64Buffer = buffer.toString('base64')
-        
+
         payload.imageBuffer = base64Buffer
         payload.imageFilename = selectedFile.name
         payload.imageContentType = selectedFile.type
       } else {
         throw new Error('Either metadata URI or image file must be provided')
       }
-      
+
       // Call the backend API
       const response = await fetch('/api/create-voucher-collection', {
         method: 'POST',
@@ -169,21 +164,17 @@ export default function CreateVoucherCollectionForm({
         <Card>
           <CardHeader>
             <CardDescription>
-              Create a collection to organize vouchers by merchant and type. You can either provide a
-              pre-uploaded metadata URI or upload an image to auto-generate metadata.
+              Create a collection to organize vouchers by merchant and type. You can either provide a pre-uploaded
+              metadata URI or upload an image to auto-generate metadata.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <VerxioFormSection title="Collection Details">
               <VerxioFormField label="Collection Name" error={errors.voucherCollectionName?.message}>
-                <Input
-                  {...register('voucherCollectionName')}
-                  placeholder="Summer Sale Vouchers"
-                />
+                <Input {...register('voucherCollectionName')} placeholder="Summer Sale Vouchers" />
               </VerxioFormField>
-
             </VerxioFormSection>
-            
+
             <VerxioFormSection title="Metadata Upload Method">
               <Tabs value={uploadMethod} onValueChange={(value: string) => setUploadMethod(value as 'uri' | 'image')}>
                 <TabsList className="grid w-full grid-cols-2">
@@ -199,15 +190,12 @@ export default function CreateVoucherCollectionForm({
 
                 <TabsContent value="uri" className="space-y-4">
                   <VerxioFormField label="Metadata URI" error={errors.metadataUri?.message}>
-                    <Input
-                      {...register('metadataUri')}
-                      placeholder="https://arweave.net/..."
-                    />
+                    <Input {...register('metadataUri')} placeholder="https://arweave.net/..." />
                   </VerxioFormField>
                   <Alert>
                     <AlertDescription>
-                      Provide a pre-uploaded metadata URI. The image and metadata should already be
-                      uploaded to Arweave or another decentralized storage.
+                      Provide a pre-uploaded metadata URI. The image and metadata should already be uploaded to Arweave
+                      or another decentralized storage.
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
@@ -215,23 +203,13 @@ export default function CreateVoucherCollectionForm({
                 <TabsContent value="image" className="space-y-4">
                   <VerxioFormField label="Collection Image">
                     <div className="flex items-center gap-4">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="flex-1"
-                      />
-                      {selectedFile && (
-                        <div className="text-sm text-gray-600">
-                          Selected: {selectedFile.name}
-                        </div>
-                      )}
+                      <Input type="file" accept="image/*" onChange={handleFileSelect} className="flex-1" />
+                      {selectedFile && <div className="text-sm text-gray-600">Selected: {selectedFile.name}</div>}
                     </div>
                   </VerxioFormField>
                   <Alert>
                     <AlertDescription>
-                      Upload an image file. The protocol will automatically upload it to Irys and
-                      generate metadata.
+                      Upload an image file. The protocol will automatically upload it to Irys and generate metadata.
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
@@ -240,17 +218,11 @@ export default function CreateVoucherCollectionForm({
 
             <VerxioFormSection title="Merchant Information">
               <VerxioFormField label="Merchant Name" error={errors.metadata?.merchantName?.message}>
-                <Input
-                  {...register('metadata.merchantName')}
-                  placeholder="Coffee Brew"
-                />
+                <Input {...register('metadata.merchantName')} placeholder="Coffee Brew" />
               </VerxioFormField>
 
               <VerxioFormField label="Merchant Address" error={errors.metadata?.merchantAddress?.message}>
-                <Input
-                  {...register('metadata.merchantAddress')}
-                  placeholder="coffee_brew_merchant_001"
-                />
+                <Input {...register('metadata.merchantAddress')} placeholder="coffee_brew_merchant_001" />
               </VerxioFormField>
             </VerxioFormSection>
 
@@ -268,7 +240,10 @@ export default function CreateVoucherCollectionForm({
                         className="rounded border-gray-300"
                       />
                       <Label htmlFor={type} className="text-sm font-medium">
-                        {type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        {type
+                          .split('_')
+                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ')}
                       </Label>
                     </div>
                   ))}
@@ -316,12 +291,10 @@ export default function CreateVoucherCollectionForm({
                   <span className="font-medium">Collection Public Key:</span>
                 </p>
                 <p className="font-mono text-sm break-all">{createdCollection.collection.publicKey}</p>
-                                <p>
+                <p>
                   <span className="font-medium">Collection Secret Key:</span>
                 </p>
-                <p className="font-mono text-sm break-all">
-                  {createdCollection.collection.secretKey}
-                </p>
+                <p className="font-mono text-sm break-all">{createdCollection.collection.secretKey}</p>
               </div>
             </div>
 
@@ -334,12 +307,10 @@ export default function CreateVoucherCollectionForm({
                     <span className="font-medium">Update Authority Public Key:</span>
                   </p>
                   <p className="font-mono text-sm break-all">{createdCollection.updateAuthority.publicKey}</p>
-                                      <p>
-                      <span className="font-medium">Update Authority Secret Key:</span>
-                    </p>
-                    <p className="font-mono text-sm break-all">
-                      {createdCollection.updateAuthority.secretKey }
-                    </p>
+                  <p>
+                    <span className="font-medium">Update Authority Secret Key:</span>
+                  </p>
+                  <p className="font-mono text-sm break-all">{createdCollection.updateAuthority.secretKey}</p>
                 </div>
               </div>
             )}
@@ -359,4 +330,4 @@ export default function CreateVoucherCollectionForm({
       )}
     </div>
   )
-} 
+}

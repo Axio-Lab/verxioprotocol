@@ -25,15 +25,17 @@ export async function POST(request: NextRequest) {
     // Call the protocol function with correct arguments
     await approveTransfer(context, publicKey(passAddress), publicKey(newOwner))
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Transfer approved successfully'
+    return NextResponse.json({
+      success: true,
+      message: 'Transfer approved successfully',
     })
-
   } catch (error) {
     console.error('Error approving transfer:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

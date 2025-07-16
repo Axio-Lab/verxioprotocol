@@ -126,7 +126,7 @@ export default function CreateLoyaltyProgramForm({
         const arrayBuffer = await selectedFile.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
         const base64Buffer = buffer.toString('base64')
-        
+
         payload.imageBuffer = base64Buffer
         payload.imageFilename = selectedFile.name
         payload.imageContentType = selectedFile.type
@@ -135,7 +135,7 @@ export default function CreateLoyaltyProgramForm({
       }
 
       console.log('programData', payload)
-      
+
       // Call the backend API
       const response = await fetch('/api/create-loyalty-program', {
         method: 'POST',
@@ -283,8 +283,8 @@ export default function CreateLoyaltyProgramForm({
                     </VerxioFormField>
                     <Alert>
                       <AlertDescription>
-                        Provide a pre-uploaded metadata URI. The image and metadata should already be
-                        uploaded to Arweave or another decentralized storage.
+                        Provide a pre-uploaded metadata URI. The image and metadata should already be uploaded to
+                        Arweave or another decentralized storage.
                       </AlertDescription>
                     </Alert>
                   </TabsContent>
@@ -293,23 +293,13 @@ export default function CreateLoyaltyProgramForm({
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Program Image</label>
                       <div className="flex items-center gap-4">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileSelect}
-                          className="flex-1"
-                        />
-                        {selectedFile && (
-                          <div className="text-sm text-gray-600">
-                            Selected: {selectedFile.name}
-                          </div>
-                        )}
+                        <Input type="file" accept="image/*" onChange={handleFileSelect} className="flex-1" />
+                        {selectedFile && <div className="text-sm text-gray-600">Selected: {selectedFile.name}</div>}
                       </div>
                     </div>
                     <Alert>
                       <AlertDescription>
-                        Upload an image file. The protocol will automatically upload it to Irys and
-                        generate metadata.
+                        Upload an image file. The protocol will automatically upload it to Irys and generate metadata.
                       </AlertDescription>
                     </Alert>
                   </TabsContent>

@@ -35,18 +35,20 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await revokeLoyaltyPoints(context, revokeData)
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       result,
       points: result.points,
       signature: result.signature,
-      newTier: result.newTier
+      newTier: result.newTier,
     })
-
   } catch (error) {
     console.error('Error revoking loyalty points:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

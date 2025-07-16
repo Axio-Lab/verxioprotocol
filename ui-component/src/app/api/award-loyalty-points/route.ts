@@ -36,17 +36,19 @@ export async function POST(request: NextRequest) {
     // Call the protocol function
     const result = await awardLoyaltyPoints(context, awardData)
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       result,
       points: result.points,
-      signature: result.signature
+      signature: result.signature,
     })
-
   } catch (error) {
     console.error('Error awarding loyalty points:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    )
   }
-} 
+}

@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize Verxio context
     const context = initializeVerxio(umi, publicKey(keypair.publicKey.toString()))
+    context.collectionAddress = publicKey(collectionAddress)
 
     // Prepare config for giftLoyaltyPoints
     const giftData = {

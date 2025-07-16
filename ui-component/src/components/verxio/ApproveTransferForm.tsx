@@ -3,16 +3,15 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { approveTransfer, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
+  collectionAddress: z.string().min(1, 'Collection address is required'),
   passAddress: z.string().min(1, 'Pass address is required'),
   newOwner: z.string().min(1, 'New owner address is required'),
 })
@@ -20,18 +19,16 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 interface ApproveTransferFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
-  onSuccess?: () => void
   onError?: (error: Error) => void
 }
 
-export default function ApproveTransferForm({ context, signer, onSuccess, onError }: ApproveTransferFormProps) {
+export default function ApproveTransferForm({ onError }: ApproveTransferFormProps) {
   const [isSuccess, setIsSuccess] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      collectionAddress: '',
       passAddress: '',
       newOwner: '',
     },
@@ -71,8 +68,7 @@ export default function ApproveTransferForm({ context, signer, onSuccess, onErro
       }
 
       const result = await response.json()
-      setTransferResult(result.result)
-      onSuccess?.(result.result)
+      setIsSuccess(true)
 
       // Reset form after successful approval
       form.reset({
@@ -93,6 +89,17 @@ export default function ApproveTransferForm({ context, signer, onSuccess, onErro
       <VerxioForm form={form} onSubmit={onSubmit} className="space-y-8">
         <VerxioFormSection title="Transfer Information" description="Enter the details of the loyalty pass transfer">
           <div className="space-y-6">
+            <VerxioFormField
+              form={form}
+              name="collectionAddress"
+              label="Collection Address"
+              description="The address of the voucher or pass collection"
+            >
+              <Input
+                placeholder="Enter the collection address"
+                onChange={(e) => form.setValue('collectionAddress', e.target.value)}
+              />
+            </VerxioFormField>
             <VerxioFormField
               form={form}
               name="passAddress"

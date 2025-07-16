@@ -1,11 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { initializeVerxio } from '@verxioprotocol/core'
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
+import { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { publicKey, signerIdentity } from '@metaplex-foundation/umi'
-import { createSignerFromWalletAdapter } from '@metaplex-foundation/umi-signer-wallet-adapters'
 import ApproveTransferForm from '@/components/verxio/ApproveTransferForm'
 import CreateLoyaltyProgramForm from '@/components/verxio/CreateLoyaltyProgramForm'
 import UpdateLoyaltyProgramForm from '@/components/verxio/UpdateLoyaltyProgramForm'
@@ -25,7 +21,6 @@ import GetUserVouchersForm from '@/components/verxio/GetUserVouchersForm'
 import ExtendVoucherExpiryForm from '@/components/verxio/ExtendVoucherExpiryForm'
 import CancelVoucherForm from '@/components/verxio/CancelVoucherForm'
 import { WalletMultiButton as WalletButton } from '@solana/wallet-adapter-react-ui'
-import { convertSecretKeyToKeypair } from '@/lib/utils'
 
 const FORMS = {
   'create-loyalty-program': CreateLoyaltyProgramForm,
@@ -39,13 +34,13 @@ const FORMS = {
   'cancel-voucher': CancelVoucherForm,
   'approve-transfer': ApproveTransferForm,
   'update-loyalty-program': UpdateLoyaltyProgramForm,
-  messaging: MessagingForm,
+  'send-message': MessagingForm,
   'revoke-points': RevokeLoyaltyPointsForm,
   'gift-points': GiftLoyaltyPointsForm,
   'get-asset': GetAssetDataForm,
   'get-program': GetProgramDetailsForm,
   'award-points': AwardLoyaltyPointsForm,
-  broadcasts: BroadcastsForm,
+  'send-broadcast': BroadcastsForm,
 } as const
 
 type FormType = keyof typeof FORMS
@@ -88,7 +83,7 @@ function FormNavigation({
   )
 }
 
-function FormDisplay({ activeForm, context, signer }: { activeForm: FormType; context: any; signer: any }) {
+function FormDisplay({ activeForm }: { activeForm: FormType }) {
   const ActiveFormComponent = FORMS[activeForm]
 
   return (
@@ -100,7 +95,7 @@ function FormDisplay({ activeForm, context, signer }: { activeForm: FormType; co
           .join(' ')}
       </h1>
       <div className="bg-white rounded-lg">
-        <ActiveFormComponent key={activeForm} context={context} signer={signer} />
+        <ActiveFormComponent key={activeForm} />
       </div>
     </div>
   )
@@ -145,15 +140,6 @@ export default function TestFormPage() {
     )
   }
 
-  const signer = convertSecretKeyToKeypair(process.env.NEXT_PUBLIC_SECRET_KEY as string)
-  const umi = createUmi('https://api.devnet.solana.com')
-
-  // Set up wallet signer first
-  const walletSigner = createSignerFromWalletAdapter(wallet!.adapter)
-  umi.use(signerIdentity(walletSigner))
-
-  const context = initializeVerxio(umi, publicKey(signer.publicKey.toString()))
-
   const handleFormSelect = (form: FormType) => {
     setActiveForm(form)
   }
@@ -165,7 +151,7 @@ export default function TestFormPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="flex flex-col md:flex-row gap-6">
             <FormNavigation activeForm={activeForm} onFormSelect={handleFormSelect} />
-            <FormDisplay activeForm={activeForm} context={context} signer={signer} />
+            <FormDisplay activeForm={activeForm} />
           </div>
         </div>
       </div>

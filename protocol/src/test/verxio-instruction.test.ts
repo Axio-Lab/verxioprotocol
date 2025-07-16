@@ -669,7 +669,6 @@ describe('verxio-instructions', () => {
 
         const config = {
           voucherAddress: testVoucherAddress,
-          merchantId: 'test_coffee_shop_001',
         }
 
         const result = await validateVoucherInstruction(context, config)
@@ -680,19 +679,18 @@ describe('verxio-instructions', () => {
         expect(result.validation.voucher).toBeDefined()
       })
 
-      it('should fail validation for wrong merchant', async () => {
+      it('should return voucher data for inspection (merchant validation happens during redemption)', async () => {
         expect.assertions(3)
 
         const config = {
           voucherAddress: testVoucherAddress,
-          merchantId: 'wrong_merchant',
         }
 
         const result = await validateVoucherInstruction(context, config)
 
         expect(result.validation).toBeDefined()
-        expect(result.validation.isValid).toBe(false)
-        expect(result.validation.errors.length).toBeGreaterThan(0)
+        expect(result.validation.isValid).toBe(true)
+        expect(result.validation.voucher).toBeDefined()
       })
     })
 
@@ -717,7 +715,7 @@ describe('verxio-instructions', () => {
 
         expect(result.instruction).toBeDefined()
         expect(result.validation).toBeDefined()
-        expect(result.validation.isValid).toBe(true)
+        expect(result.validation.errors).toHaveLength(0)
         expect(result.redemptionValue).toBe(25) // 25% of $100
         expect(result.updatedVoucher).toBeDefined()
       })

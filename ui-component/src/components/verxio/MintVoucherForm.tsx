@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { mintVoucher } from '@verxioprotocol/core'
-import { generateSigner, publicKey } from '@metaplex-foundation/umi'
 import { VerxioForm, VerxioFormSection, VerxioFormField } from './base/VerxioForm'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -13,9 +11,9 @@ import { Label } from '../ui/label'
 import { Textarea } from '../ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Alert, AlertDescription } from '../ui/alert'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '../ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import { Upload, Link, Calendar, Hash } from 'lucide-react'
+import { Upload, Link } from 'lucide-react'
 
 const mintVoucherSchema = z.object({
   collectionAddress: z.string().min(1, 'Collection address is required'),
@@ -39,13 +37,11 @@ const mintVoucherSchema = z.object({
 type MintVoucherFormData = z.infer<typeof mintVoucherSchema>
 
 interface MintVoucherFormProps {
-  context: any
-  signer: any
   onSuccess?: (result: any) => void
   onError?: (error: any) => void
 }
 
-export default function MintVoucherForm({ context, signer, onSuccess, onError }: MintVoucherFormProps) {
+export default function MintVoucherForm({ onSuccess, onError }: MintVoucherFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)

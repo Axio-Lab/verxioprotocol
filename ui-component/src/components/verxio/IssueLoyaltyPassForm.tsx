@@ -3,7 +3,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { issueLoyaltyPass, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
@@ -11,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { generateSigner, publicKey, KeypairSigner } from '@metaplex-foundation/umi'
+import { KeypairSigner } from '@metaplex-foundation/umi'
 import { Upload, Link } from 'lucide-react'
 import { useState } from 'react'
 
@@ -34,13 +33,11 @@ interface IssueLoyaltyPassResult {
 }
 
 interface IssueLoyaltyPassFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: IssueLoyaltyPassResult) => void
   onError?: (error: Error) => void
 }
 
-export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onError }: IssueLoyaltyPassFormProps) {
+export default function IssueLoyaltyPassForm({ onSuccess, onError }: IssueLoyaltyPassFormProps) {
   const [issuedPass, setIssuedPass] = useState<IssueLoyaltyPassResult | null>(null)
   const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)

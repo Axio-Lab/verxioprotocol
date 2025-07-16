@@ -4,14 +4,11 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { extendVoucherExpiry } from '@verxioprotocol/core'
-import { publicKey, generateSigner } from '@metaplex-foundation/umi'
 import { VerxioForm, VerxioFormSection, VerxioFormField } from './base/VerxioForm'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { Label } from '../ui/label'
 import { Textarea } from '../ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '../ui/card'
 import { Alert, AlertDescription } from '../ui/alert'
 import { Badge } from '../ui/badge'
 import { Calendar, Clock, CheckCircle } from 'lucide-react'
@@ -25,13 +22,11 @@ const extendVoucherExpirySchema = z.object({
 type ExtendVoucherExpiryFormData = z.infer<typeof extendVoucherExpirySchema>
 
 interface ExtendVoucherExpiryFormProps {
-  context: any
-  signer: any
   onSuccess?: (result: any) => void
   onError?: (error: any) => void
 }
 
-export default function ExtendVoucherExpiryForm({ context, signer, onSuccess, onError }: ExtendVoucherExpiryFormProps) {
+export default function ExtendVoucherExpiryForm({ onSuccess, onError }: ExtendVoucherExpiryFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [extensionResult, setExtensionResult] = useState<any>(null)
 
@@ -76,7 +71,9 @@ export default function ExtendVoucherExpiryForm({ context, signer, onSuccess, on
       }
 
       const result = await response.json()
+      console.log(result)
       setExtensionResult(result.result)
+      form.reset()
       onSuccess?.(result.result)
     } catch (error) {
       console.error('Error extending voucher expiry:', error)
@@ -146,7 +143,7 @@ export default function ExtendVoucherExpiryForm({ context, signer, onSuccess, on
                     <span className="font-medium text-green-800">New Expiry Date</span>
                   </div>
                   <div className="text-sm text-green-700">
-                    {new Date(extensionResult.newExpiryDate).toLocaleString()}
+                    {new Date(extensionResult.updatedVoucher.expiryDate).toLocaleString()}
                   </div>
                 </div>
 
@@ -154,10 +151,10 @@ export default function ExtendVoucherExpiryForm({ context, signer, onSuccess, on
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-4 w-4 text-gray-600" />
-                      <span className="font-medium text-gray-800">Previous Expiry Date</span>
+                      <span className="font-medium text-gray-800">Date of Issue</span>
                     </div>
                     <div className="text-sm text-gray-700">
-                      {new Date(extensionResult.previousExpiryDate).toLocaleString()}
+                      {new Date(extensionResult.updatedVoucher.issuedAt).toLocaleString()}
                     </div>
                   </div>
                 )}

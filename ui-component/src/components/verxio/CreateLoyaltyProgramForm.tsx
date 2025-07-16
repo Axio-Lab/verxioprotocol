@@ -3,8 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { createLoyaltyProgram, VerxioContext } from '@verxioprotocol/core'
-import { generateSigner, KeypairSigner } from '@metaplex-foundation/umi'
+import { KeypairSigner } from '@metaplex-foundation/umi'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
@@ -47,22 +46,14 @@ interface CreateLoyaltyProgramResult {
 }
 
 interface CreateLoyaltyProgramFormProps {
-  context: VerxioContext
-  signer?: KeypairSigner
   onSuccess?: (result: CreateLoyaltyProgramResult) => void
   onError?: (error: Error) => void
 }
 
-export default function CreateLoyaltyProgramForm({
-  context,
-  signer: providedSigner,
-  onSuccess,
-  onError,
-}: CreateLoyaltyProgramFormProps) {
+export default function CreateLoyaltyProgramForm({ onSuccess, onError }: CreateLoyaltyProgramFormProps) {
   const [createdProgram, setCreatedProgram] = useState<CreateLoyaltyProgramResult | null>(null)
   const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const signer = providedSigner || generateSigner(context.umi)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

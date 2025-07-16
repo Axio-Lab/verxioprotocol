@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { revokeLoyaltyPoints, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -31,13 +29,11 @@ interface RevokeLoyaltyPointsResult {
 }
 
 interface RevokeLoyaltyPointsFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: RevokeLoyaltyPointsResult) => void
   onError?: (error: Error) => void
 }
 
-export default function RevokeLoyaltyPointsForm({ context, signer, onSuccess, onError }: RevokeLoyaltyPointsFormProps) {
+export default function RevokeLoyaltyPointsForm({ onSuccess, onError }: RevokeLoyaltyPointsFormProps) {
   const [revokeResult, setRevokeResult] = useState<RevokeLoyaltyPointsResult | null>(null)
 
   const form = useForm<FormData>({

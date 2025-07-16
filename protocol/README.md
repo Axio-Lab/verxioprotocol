@@ -740,8 +740,6 @@ const result = await mintVoucher(context, {
 ```typescript
 const validation = await validateVoucher(context, {
   voucherAddress: publicKey('VOUCHER_ADDRESS'),
-  merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
-  purchaseAmount: 100, // Optional: for percentage-based vouchers
 })
 
 console.log(validation)
@@ -765,21 +763,31 @@ console.log(validation)
 
 ### Redeem Voucher
 
+The `redeemVoucher` function performs comprehensive validation and redemption of vouchers. It enforces merchant ID matching, validates expiry dates, usage limits, and conditions, then records the redemption in the voucher's history.
+
 ```typescript
 const result = await redeemVoucher(context, {
   voucherAddress: publicKey('VOUCHER_ADDRESS'),
   merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
-  purchaseAmount: 100, // Optional: for percentage-based vouchers
   updateAuthority: generateSigner(context.umi), // Authority that can update the voucher
+  redemptionAmount: 100, // Purchase amount for percentage-based vouchers
+  redemptionDetails: {
+    transactionId: 'tx_123',
+    items: ['Coffee', 'Pastry'],
+    totalAmount: 100,
+    discountApplied: 25,
+  },
 })
 
 console.log(result)
 // {
-//   success: boolean,
-//   signature: string,
-//   redemptionValue: number,
-//   updatedVoucher: VoucherData,
-//   errors: string[]
+//   instruction: TransactionBuilder, // Transaction instruction for execution
+//   validation: {
+//     errors: string[], // Validation errors if any
+//     voucher: VoucherData // Voucher data after validation
+//   },
+//   redemptionValue: number, // Calculated redemption value
+//   updatedVoucher: VoucherData // Voucher data after redemption
 // }
 ```
 

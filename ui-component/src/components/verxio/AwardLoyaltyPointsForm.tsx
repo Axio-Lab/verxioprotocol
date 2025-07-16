@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { awardLoyaltyPoints, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -32,13 +30,11 @@ interface AwardLoyaltyPointsResult {
 }
 
 interface AwardLoyaltyPointsFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: AwardLoyaltyPointsResult) => void
   onError?: (error: Error) => void
 }
 
-export default function AwardLoyaltyPointsForm({ context, signer, onSuccess, onError }: AwardLoyaltyPointsFormProps) {
+export default function AwardLoyaltyPointsForm({ onSuccess, onError }: AwardLoyaltyPointsFormProps) {
   const [awardResult, setAwardResult] = useState<AwardLoyaltyPointsResult | null>(null)
 
   const form = useForm<FormData>({

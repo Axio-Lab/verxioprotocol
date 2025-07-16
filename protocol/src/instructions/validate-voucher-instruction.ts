@@ -1,6 +1,4 @@
 import { VerxioContext } from '@schemas/verxio-context'
-import { PublicKey, TransactionBuilder } from '@metaplex-foundation/umi'
-import { fetchAsset } from '@metaplex-foundation/mpl-core'
 import { validateVoucher, ValidateVoucherConfig, VoucherValidationResult } from '../lib/validate-voucher'
 
 export interface ValidateVoucherInstructionConfig extends ValidateVoucherConfig {
@@ -8,7 +6,7 @@ export interface ValidateVoucherInstructionConfig extends ValidateVoucherConfig 
 }
 
 export interface ValidateVoucherInstructionResult {
-  validation: VoucherValidationResult
+  validation: VoucherValidationResult & { isValid: boolean }
   // Note: This instruction doesn't create a transaction, it just validates
   // The result is returned directly without a TransactionBuilder
 }
@@ -22,8 +20,14 @@ export async function validateVoucherInstruction(
   // Perform validation (this is a read-only operation, no transaction needed)
   const validation = await validateVoucher(context, config)
 
+  // Add isValid property for backward compatibility
+  const result = {
+    ...validation,
+    isValid: validation.errors.length === 0 && validation.voucher !== undefined,
+  }
+
   return {
-    validation,
+    validation: result,
   }
 }
 
@@ -34,8 +38,5 @@ function assertValidValidateVoucherInstructionConfig(config: ValidateVoucherInst
   }
   if (!config.voucherAddress) {
     throw new Error('assertValidValidateVoucherInstructionConfig: Voucher address is undefined')
-  }
-  if (!config.merchantId || !config.merchantId.trim()) {
-    throw new Error('assertValidValidateVoucherInstructionConfig: Merchant ID is undefined')
   }
 }

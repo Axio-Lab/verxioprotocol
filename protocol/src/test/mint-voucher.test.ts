@@ -210,6 +210,68 @@ describe('mint-voucher', { sequential: true, timeout: 30000 }, () => {
     })
   })
 
+  describe('transferability', () => {
+    it('should mint a soulbound (non-transferable) voucher', async () => {
+      // ARRANGE
+      const config = createTestVoucherConfigWithSigners(context.umi, {
+        collectionAddress: collectionAddress,
+        recipient: context.umi.identity.publicKey,
+        updateAuthority: collectionUpdateAuthority,
+        voucherData: {
+          type: 'percentage_off',
+          value: 10,
+          description: 'Soulbound voucher',
+          expiryDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
+          maxUses: 1,
+          transferable: false,
+          merchantId: 'test_shop_001',
+        },
+      })
+      // ACT
+      const result = await mintVoucher(context, config)
+      // ASSERT
+      expect(result).toBeTruthy()
+      // Fetch and check transferable
+      const { validateVoucher } = await import('../lib/validate-voucher')
+      const validation = await validateVoucher(context, {
+        voucherAddress: result.voucherAddress,
+        merchantId: 'test_shop_001',
+      })
+      expect(validation.voucher).toBeDefined()
+      expect(validation.voucher!.transferable).toBe(false)
+    })
+
+    it('should mint a transferable voucher', async () => {
+      // ARRANGE
+      const config = createTestVoucherConfigWithSigners(context.umi, {
+        collectionAddress: collectionAddress,
+        recipient: context.umi.identity.publicKey,
+        updateAuthority: collectionUpdateAuthority,
+        voucherData: {
+          type: 'percentage_off',
+          value: 15,
+          description: 'Transferable voucher',
+          expiryDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
+          maxUses: 1,
+          transferable: true,
+          merchantId: 'test_shop_001',
+        },
+      })
+      // ACT
+      const result = await mintVoucher(context, config)
+      // ASSERT
+      expect(result).toBeTruthy()
+      // Fetch and check transferable
+      const { validateVoucher } = await import('../lib/validate-voucher')
+      const validation = await validateVoucher(context, {
+        voucherAddress: result.voucherAddress,
+        merchantId: 'test_shop_001',
+      })
+      expect(validation.voucher).toBeDefined()
+      expect(validation.voucher!.transferable).toBe(true)
+    })
+  })
+
   describe('unexpected usage', () => {
     describe('config validation', () => {
       it('should throw an error if the collection address is not set', async () => {

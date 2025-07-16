@@ -4,13 +4,10 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { createVoucherCollection } from '@verxioprotocol/core'
-import { generateSigner } from '@metaplex-foundation/umi'
 import { VerxioForm, VerxioFormSection, VerxioFormField } from './base/VerxioForm'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { Textarea } from '../ui/textarea'
 import { Alert, AlertDescription } from '../ui/alert'
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
@@ -35,18 +32,11 @@ const voucherCollectionSchema = z.object({
 type VoucherCollectionFormData = z.infer<typeof voucherCollectionSchema>
 
 interface CreateVoucherCollectionFormProps {
-  context: any
-  signer: any
   onSuccess?: (result: any) => void
   onError?: (error: any) => void
 }
 
-export default function CreateVoucherCollectionForm({
-  context,
-  signer,
-  onSuccess,
-  onError,
-}: CreateVoucherCollectionFormProps) {
+export default function CreateVoucherCollectionForm({ onSuccess, onError }: CreateVoucherCollectionFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)

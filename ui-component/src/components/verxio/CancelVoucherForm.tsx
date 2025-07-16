@@ -4,14 +4,11 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { cancelVoucher } from '@verxioprotocol/core'
-import { publicKey, generateSigner } from '@metaplex-foundation/umi'
 import { VerxioForm, VerxioFormSection, VerxioFormField } from './base/VerxioForm'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { Label } from '../ui/label'
 import { Textarea } from '../ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '../ui/card'
 import { Alert, AlertDescription } from '../ui/alert'
 import { Badge } from '../ui/badge'
 import { XCircle, AlertTriangle, CheckCircle } from 'lucide-react'
@@ -24,13 +21,11 @@ const cancelVoucherSchema = z.object({
 type CancelVoucherFormData = z.infer<typeof cancelVoucherSchema>
 
 interface CancelVoucherFormProps {
-  context: any
-  signer: any
   onSuccess?: (result: any) => void
   onError?: (error: any) => void
 }
 
-export default function CancelVoucherForm({ context, signer, onSuccess, onError }: CancelVoucherFormProps) {
+export default function CancelVoucherForm({ onSuccess, onError }: CancelVoucherFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [cancellationResult, setCancellationResult] = useState<any>(null)
 
@@ -73,7 +68,9 @@ export default function CancelVoucherForm({ context, signer, onSuccess, onError 
       }
 
       const result = await response.json()
+      // console.log(result)
       setCancellationResult(result.result)
+      form.reset()
       onSuccess?.(result.result)
     } catch (error) {
       console.error('Error canceling voucher:', error)

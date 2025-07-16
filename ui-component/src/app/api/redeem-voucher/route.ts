@@ -7,7 +7,7 @@ import { convertSecretKeyToKeypair } from '@/lib/utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { voucherAddress, merchantId, purchaseAmount, redemptionDetails } = body
+    const { voucherAddress, merchantId, redemptionAmount, redemptionDetails } = body
 
     // Create signer from environment variable
     const secretKey = process.env.SECRET_KEY
@@ -26,11 +26,11 @@ export async function POST(request: NextRequest) {
     const config: any = {
       voucherAddress: publicKey(voucherAddress),
       merchantId,
-      updateAuthority: generateSigner(context.umi),
+      updateAuthority: signer,
     }
 
-    if (purchaseAmount) {
-      config.purchaseAmount = purchaseAmount
+    if (redemptionAmount) {
+      config.redemptionAmount = redemptionAmount
     }
 
     if (redemptionDetails) {

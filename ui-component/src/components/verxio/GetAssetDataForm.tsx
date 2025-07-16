@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { getAssetData, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -58,12 +56,11 @@ interface AssetData {
 }
 
 interface GetAssetDataFormProps {
-  context: VerxioContext
   onSuccess?: (result: AssetData) => void
   onError?: (error: Error) => void
 }
 
-export default function GetAssetDataForm({ context, onSuccess, onError }: GetAssetDataFormProps) {
+export default function GetAssetDataForm({ onSuccess, onError }: GetAssetDataFormProps) {
   const [assetData, setAssetData] = useState<AssetData | null>(null)
 
   const form = useForm<FormData>({

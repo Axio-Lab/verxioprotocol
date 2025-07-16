@@ -2,6 +2,5 @@ packages:
   - client
   - docs
   - protocol
-  - sandbox
   - starter-template
   - ui-component

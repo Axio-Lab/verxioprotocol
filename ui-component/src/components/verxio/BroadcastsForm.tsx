@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { sendBroadcast, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -24,13 +22,11 @@ interface BroadcastResult {
 }
 
 interface BroadcastsFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: BroadcastResult) => void
   onError?: (error: Error) => void
 }
 
-export default function BroadcastsForm({ context, signer, onSuccess, onError }: BroadcastsFormProps) {
+export default function BroadcastsForm({ onSuccess, onError }: BroadcastsFormProps) {
   const [broadcastResult, setBroadcastResult] = useState<BroadcastResult | null>(null)
 
   const form = useForm<FormData>({

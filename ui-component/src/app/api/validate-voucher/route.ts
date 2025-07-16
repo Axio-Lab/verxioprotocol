@@ -7,7 +7,7 @@ import { convertSecretKeyToKeypair } from '@/lib/utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { voucherAddress, merchantId, purchaseAmount } = body
+    const { voucherAddress } = body
 
     // Create signer from environment variable
     const secretKey = process.env.SECRET_KEY
@@ -25,11 +25,6 @@ export async function POST(request: NextRequest) {
     // Prepare config for validateVoucher
     const config: any = {
       voucherAddress: publicKey(voucherAddress),
-      merchantId,
-    }
-
-    if (purchaseAmount) {
-      config.purchaseAmount = purchaseAmount
     }
 
     // Call the protocol function

@@ -63,20 +63,32 @@ export default function GiftLoyaltyPointsForm({ context, signer, onSuccess, onEr
         return
       }
 
-      context.collectionAddress = publicKey(data.collectionAddress)
-
-      // Format data for giftLoyaltyPoints
-      const giftData = {
-        passAddress: publicKey(data.passAddress),
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
         pointsToGift: data.pointsToGift,
-        signer,
         action: data.action,
       }
 
-      const result = await giftLoyaltyPoints(context, giftData)
+      // Call the backend API
+      const response = await fetch('/api/gift-loyalty-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to gift loyalty points')
+      }
+
+      const result = await response.json()
       console.log('result', result)
-      setGiftResult(result)
-      onSuccess?.(result)
+      setGiftResult(result.result)
+      onSuccess?.(result.result)
 
       // Reset form after successful gifting
       form.reset({

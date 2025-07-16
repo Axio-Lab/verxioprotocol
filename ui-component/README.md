@@ -1,81 +1,183 @@
-# @verxio/components
+# Verxio UI Component Library
 
-A React component library for Verxio Protocol's functionalities.
+A comprehensive React component library for building Verxio Protocol applications with beautiful, accessible, and customizable UI components.
+
+## Features
+
+- **Complete Form Library**: All Verxio Protocol operations with full form validation
+- **Image Upload Support**: Server-side image uploads to Irys for metadata generation
+- **TypeScript Support**: Full type safety with comprehensive TypeScript definitions
+- **Accessible Components**: Built on Radix UI primitives for excellent accessibility
+- **Customizable Styling**: Tailwind CSS with customizable design tokens
+- **Wallet Integration**: Seamless Solana wallet integration
 
 ## Installation
 
 ```bash
-npm install @verxio/components
+npm install @verxioprotocol/components
 # or
-yarn add @verxio/components
+yarn add @verxioprotocol/components
 # or
-pnpm add @verxio/components
+pnpm add @verxioprotocol/components
 ```
 
-## Usage
+## Quick Start
+
+### Basic Setup
 
 ```tsx
-import { CreateLoyaltyProgramForm } from '@verxio/components'
+import { CreateLoyaltyProgramForm } from '@verxioprotocol/components'
 
 function App() {
+  const context = // Your Verxio context
+  const signer = // Your signer
+
   return (
     <CreateLoyaltyProgramForm
       context={context}
       signer={signer}
-      onSuccess={(result) => {
-        console.log('Program created:', result)
-      }}
-      onError={(error) => {
-        console.error('Error:', error)
-      }}
+      onSuccess={(result) => console.log('Program created:', result)}
+      onError={(error) => console.error('Error:', error)}
     />
   )
 }
 ```
 
+### Image Upload Setup
+
+The component library includes server-side image upload functionality. To enable this, you need to:
+
+1. **Install the Irys uploader package** in your server environment:
+```bash
+npm install @metaplex-foundation/umi-uploader-irys
+```
+
+2. **Create an API route** for image uploads (already included in this library):
+```typescript
+// app/api/upload-image/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
+import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
+import { createGenericFile } from '@metaplex-foundation/umi'
+
+export async function POST(request: NextRequest) {
+  // Implementation included in the library
+}
+```
+
+3. **Use the upload functionality** in your forms:
+```tsx
+// The forms automatically handle image uploads when you select "Upload Image"
+<CreateLoyaltyProgramForm
+  context={context}
+  signer={signer}
+  // Image upload is handled automatically
+/>
+```
+
 ## Available Components
 
-- `CreateLoyaltyProgramForm` - Create a new loyalty program
-- `UpdateLoyaltyProgramForm` - Update an existing loyalty program
-- `IssueLoyaltyPassForm` - Issue a new loyalty pass
-- `ApproveTransferForm` - Approve transfer of a loyalty pass
-- `MessagingForm` - Send messages to loyalty pass holders
-- `RevokeLoyaltyPointsForm` - Revoke points from a loyalty pass
-- `GiftLoyaltyPointsForm` - Gift points to a loyalty pass
-- `GetAssetDataForm` - Get data for a specific asset
-- `GetProgramDetailsForm` - Get details of a loyalty program
-- `AwardLoyaltyPointsForm` - Award points for specific actions
-- `BroadcastsForm` - Send broadcasts to loyalty pass holders
+### Loyalty Program Management
+- `CreateLoyaltyProgramForm` - Create new loyalty programs
+- `UpdateLoyaltyProgramForm` - Update existing programs
+- `IssueLoyaltyPassForm` - Issue loyalty passes to users
 
-## Base Components
+### Voucher Management
+- `CreateVoucherCollectionForm` - Create voucher collections
+- `MintVoucherForm` - Mint individual vouchers
+- `ValidateVoucherForm` - Validate voucher status
+- `RedeemVoucherForm` - Redeem vouchers
+- `GetUserVouchersForm` - Get user's vouchers
+- `ExtendVoucherExpiryForm` - Extend voucher expiry
+- `CancelVoucherForm` - Cancel vouchers
 
-The library also exports base components that can be used to create custom forms:
+### Points Management
+- `AwardLoyaltyPointsForm` - Award points to users
+- `RevokeLoyaltyPointsForm` - Revoke points from users
+- `GiftLoyaltyPointsForm` - Gift points between users
 
-- `VerxioForm` - Base form component
-- `VerxioFormSection` - Form section component
-- `VerxioFormField` - Form field component
+### Communication
+- `MessagingForm` - Send direct messages
+- `BroadcastsForm` - Send broadcast messages
 
-## Development
+### Data Retrieval
+- `GetAssetDataForm` - Get asset data
+- `GetProgramDetailsForm` - Get program details
+- `ApproveTransferForm` - Approve transfers
 
-1. Clone the repository
-2. Install dependencies:
+## Form Features
 
-```bash
-pnpm install
+### Image Upload Support
+All forms that support metadata can handle image uploads:
+
+1. **Pre-uploaded URI**: Provide a metadata URI that's already uploaded
+2. **Image Upload**: Upload an image file that gets automatically processed
+
+### Validation
+- Comprehensive form validation using Zod schemas
+- Real-time error feedback
+- Type-safe form handling
+
+### Loading States
+- Upload progress indicators
+- Transaction status feedback
+- Disabled states during operations
+
+## Styling
+
+The components use Tailwind CSS and can be customized using:
+
+```css
+/* Custom CSS variables */
+:root {
+  --verxio-primary: #00adef;
+  --verxio-secondary: #6366f1;
+}
 ```
 
-3. Start the development server:
+## TypeScript Support
 
-```bash
-pnpm dev
+All components are fully typed with TypeScript:
+
+```tsx
+import type { VerxioContext } from '@verxioprotocol/core'
+
+interface FormProps {
+  context: VerxioContext
+  signer: KeypairSigner
+  onSuccess?: (result: any) => void
+  onError?: (error: Error) => void
+}
 ```
 
-4. Build the library:
+## Error Handling
 
-```bash
-pnpm build
+Components include comprehensive error handling:
+
+```tsx
+<CreateLoyaltyProgramForm
+  onError={(error) => {
+    console.error('Form error:', error)
+    // Handle error appropriately
+  }}
+/>
 ```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
 ## License
 
-MIT
+MIT License - see LICENSE file for details.
+
+## Support
+
+For support and questions:
+- GitHub Issues: [Create an issue](https://github.com/your-repo/issues)
+- Documentation: [Read the docs](https://docs.verxio.com)
+- Community: [Join our Discord](https://discord.gg/verxio)

@@ -9,6 +9,9 @@ import { VerxioFormSection } from '@/components/verxio/base/VerxioFormSection'
 import { VerxioFormField } from '@/components/verxio/base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Upload, Link } from 'lucide-react'
 import { generateSigner, publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
@@ -16,7 +19,11 @@ const formSchema = z.object({
   collectionAddress: z.string().min(1, 'Collection address is required'),
   recipientAddress: z.string().min(1, 'Recipient address is required'),
   passName: z.string().min(1, 'Pass name is required'),
-  passMetadataUri: z.string().url('Must be a valid URL'),
+  passMetadataUri: z.string().optional(),
+  imageBuffer: z.any().optional(),
+  imageFilename: z.string().optional(),
+  imageContentType: z.string().optional(),
+  organizationName: z.string().min(1, 'Organization name is required'),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -35,6 +42,8 @@ interface IssueLoyaltyPassFormProps {
 
 export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onError }: IssueLoyaltyPassFormProps) {
   const [issuedPass, setIssuedPass] = useState<IssueLoyaltyPassResult | null>(null)
+  const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -43,8 +52,18 @@ export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onErr
       recipientAddress: '',
       passName: '',
       passMetadataUri: '',
+      organizationName: '',
     },
   })
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      form.setValue('imageFilename', file.name)
+      form.setValue('imageContentType', file.type)
+    }
+  }
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -59,13 +78,23 @@ export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onErr
       }
 
       // Format data for issueLoyaltyPass
-      const passData = {
+      const passData: any = {
         collectionAddress: publicKey(data.collectionAddress),
         recipient: publicKey(data.recipientAddress),
         passName: data.passName,
-        passMetadataUri: data.passMetadataUri,
+        organizationName: data.organizationName,
         assetSigner: generateSigner(context.umi),
         updateAuthority: signer,
+      }
+
+      // Add metadata based on upload method
+      if (uploadMethod === 'uri' && data.passMetadataUri) {
+        passData.passMetadataUri = data.passMetadataUri
+      } else if (uploadMethod === 'image' && selectedFile) {
+        const arrayBuffer = await selectedFile.arrayBuffer()
+        passData.imageBuffer = Buffer.from(arrayBuffer)
+        passData.imageFilename = data.imageFilename
+        passData.imageContentType = data.imageContentType
       }
 
       const result = await issueLoyaltyPass(context, passData)
@@ -85,7 +114,7 @@ export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onErr
   return (
     <div className="space-y-8">
       <VerxioForm form={form} onSubmit={onSubmit} className="space-y-8">
-        <VerxioFormSection title="" description="">
+        <VerxioFormSection title="Collection & Recipient" description="">
           <VerxioFormField
             form={form}
             name="collectionAddress"
@@ -98,32 +127,60 @@ export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onErr
               className="bg-gray-800 border-gray-700 text-gray-100"
             />
           </VerxioFormField>
+
+          <VerxioFormField
+            form={form}
+            name="recipientAddress"
+            label="Recipient Address"
+            description="The wallet address that will receive the loyalty pass"
+          >
+            <Input
+              placeholder="Enter the wallet address of the recipient"
+              onChange={(e) => form.setValue('recipientAddress', e.target.value)}
+              className="bg-gray-800 border-gray-700 text-gray-100"
+            />
+          </VerxioFormField>
         </VerxioFormSection>
 
-        <VerxioFormSection title="" description="">
-          <div className="space-y-6">
-            <VerxioFormField
-              form={form}
-              name="recipientAddress"
-              label="Recipient Address"
-              description="The wallet address that will receive the loyalty pass"
-            >
+        <VerxioFormSection title="Pass Details" description="">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <VerxioFormField form={form} name="passName" label="Pass Name" description="Name of the loyalty pass">
               <Input
-                placeholder="Enter the wallet address of the recipient"
-                onChange={(e) => form.setValue('recipientAddress', e.target.value)}
+                placeholder="e.g., Coffee Rewards Pass"
+                onChange={(e) => form.setValue('passName', e.target.value)}
                 className="bg-gray-800 border-gray-700 text-gray-100"
               />
             </VerxioFormField>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <VerxioFormField form={form} name="passName" label="Pass Name" description="Name of the loyalty pass">
-                <Input
-                  placeholder="e.g., Coffee Rewards Pass"
-                  onChange={(e) => form.setValue('passName', e.target.value)}
-                  className="bg-gray-800 border-gray-700 text-gray-100"
-                />
-              </VerxioFormField>
+            <VerxioFormField
+              form={form}
+              name="organizationName"
+              label="Organization Name"
+              description="Your organization's name"
+            >
+              <Input
+                placeholder="e.g., Coffee Brew Co."
+                onChange={(e) => form.setValue('organizationName', e.target.value)}
+                className="bg-gray-800 border-gray-700 text-gray-100"
+              />
+            </VerxioFormField>
+          </div>
+        </VerxioFormSection>
 
+        <VerxioFormSection title="Metadata Upload Method" description="">
+          <Tabs value={uploadMethod} onValueChange={(value: string) => setUploadMethod(value as 'uri' | 'image')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="uri" className="flex items-center gap-2">
+                <Link className="h-4 w-4" />
+                Pre-uploaded URI
+              </TabsTrigger>
+              <TabsTrigger value="image" className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload Image
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="uri" className="space-y-4">
               <VerxioFormField
                 form={form}
                 name="passMetadataUri"
@@ -136,8 +193,38 @@ export default function IssueLoyaltyPassForm({ context, signer, onSuccess, onErr
                   className="bg-gray-800 border-gray-700 text-gray-100"
                 />
               </VerxioFormField>
-            </div>
-          </div>
+              <Alert>
+                <AlertDescription>
+                  Provide a pre-uploaded metadata URI. The image and metadata should already be
+                  uploaded to Arweave or another decentralized storage.
+                </AlertDescription>
+              </Alert>
+            </TabsContent>
+
+            <TabsContent value="image" className="space-y-4">
+              <VerxioFormField label="Pass Image">
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="flex-1 bg-gray-800 border-gray-700 text-gray-100"
+                  />
+                  {selectedFile && (
+                    <div className="text-sm text-gray-400">
+                      Selected: {selectedFile.name}
+                    </div>
+                  )}
+                </div>
+              </VerxioFormField>
+              <Alert>
+                <AlertDescription>
+                  Upload an image file. The protocol will automatically upload it to Irys and
+                  generate metadata.
+                </AlertDescription>
+              </Alert>
+            </TabsContent>
+          </Tabs>
         </VerxioFormSection>
 
         <div className="flex justify-center pt-8">

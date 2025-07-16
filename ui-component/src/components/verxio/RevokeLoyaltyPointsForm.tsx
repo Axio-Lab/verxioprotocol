@@ -61,18 +61,30 @@ export default function RevokeLoyaltyPointsForm({ context, signer, onSuccess, on
         return
       }
 
-      context.collectionAddress = publicKey(data.collectionAddress)
-
-      // Format data for revokeLoyaltyPoints
-      const revokeData = {
-        passAddress: publicKey(data.passAddress),
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
         pointsToRevoke: data.pointsToRevoke,
-        signer,
       }
 
-      const result = await revokeLoyaltyPoints(context, revokeData)
-      setRevokeResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/revoke-loyalty-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to revoke loyalty points')
+      }
+
+      const result = await response.json()
+      setRevokeResult(result.result)
+      onSuccess?.(result.result)
       // Reset form after successful revoking
       form.reset({
         collectionAddress: '',

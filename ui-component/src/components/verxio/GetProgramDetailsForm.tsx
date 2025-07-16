@@ -76,10 +76,28 @@ export default function GetProgramDetailsForm({ context, onSuccess, onError }: G
         return
       }
 
-      context.collectionAddress = publicKey(data.collectionAddress)
-      const result = await getProgramDetails(context)
-      setProgramDetails(result)
-      onSuccess?.(result)
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+      }
+
+      // Call the backend API
+      const response = await fetch('/api/get-program-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to get program details')
+      }
+
+      const result = await response.json()
+      setProgramDetails(result.result)
+      onSuccess?.(result.result)
 
       // Reset form after successful fetching
       form.reset()

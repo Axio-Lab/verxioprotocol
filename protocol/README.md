@@ -81,6 +81,9 @@ import { publicKey, keypairIdentity } from '@metaplex-foundation/umi'
 // Create UMI instance (Solana & SVM supported)
 const umi = createUmi('RPC_URL')
 
+// Add Irys uploader for metadata/image uploads (Optional)
+umi.use(irysUploader())
+
 // Initialize program
 const context = initializeVerxio(
   umi,

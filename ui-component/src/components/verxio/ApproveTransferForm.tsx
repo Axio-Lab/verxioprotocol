@@ -49,15 +49,40 @@ export default function ApproveTransferForm({ context, signer, onSuccess, onErro
         return
       }
 
-      await approveTransfer(context, publicKey(data.passAddress), publicKey(data.newOwner))
-      setIsSuccess(true)
-      onSuccess?.()
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
+        newOwner: data.newOwner,
+      }
 
-      // Reset form after successful transfer
-      form.reset()
+      // Call the backend API
+      const response = await fetch('/api/approve-transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to approve transfer')
+      }
+
+      const result = await response.json()
+      setTransferResult(result.result)
+      onSuccess?.(result.result)
+
+      // Reset form after successful approval
+      form.reset({
+        collectionAddress: '',
+        passAddress: '',
+        newOwner: '',
+      })
     } catch (error) {
       console.error(error)
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred while approving the transfer'
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while approving transfer'
       form.setError('root', { message: errorMessage })
       onError?.(error instanceof Error ? error : new Error(errorMessage))
     }

@@ -57,18 +57,31 @@ export default function MessagingForm({ context, signer, onSuccess, onError }: M
         })
         return
       }
-      context.collectionAddress = publicKey(data.collectionAddress)
-      // Format data for sendMessage
-      const messageData = {
-        passAddress: publicKey(data.passAddress),
+
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
         message: data.message,
-        sender: context.programAuthority,
-        signer,
       }
 
-      const result = await sendMessage(context, messageData)
-      setMessageResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send message')
+      }
+
+      const result = await response.json()
+      setMessageResult(result.result)
+      onSuccess?.(result.result)
 
       // Reset form after successful sending
       form.reset({

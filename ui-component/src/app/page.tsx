@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { initializeVerxio } from '@verxioprotocol/core'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -17,17 +17,32 @@ import GetAssetDataForm from '@/components/verxio/GetAssetDataForm'
 import GetProgramDetailsForm from '@/components/verxio/GetProgramDetailsForm'
 import AwardLoyaltyPointsForm from '@/components/verxio/AwardLoyaltyPointsForm'
 import BroadcastsForm from '@/components/verxio/BroadcastsForm'
+import CreateVoucherCollectionForm from '@/components/verxio/CreateVoucherCollectionForm'
+import MintVoucherForm from '@/components/verxio/MintVoucherForm'
+import ValidateVoucherForm from '@/components/verxio/ValidateVoucherForm'
+import RedeemVoucherForm from '@/components/verxio/RedeemVoucherForm'
+import GetUserVouchersForm from '@/components/verxio/GetUserVouchersForm'
+import ExtendVoucherExpiryForm from '@/components/verxio/ExtendVoucherExpiryForm'
+import CancelVoucherForm from '@/components/verxio/CancelVoucherForm'
 import { WalletMultiButton as WalletButton } from '@solana/wallet-adapter-react-ui'
 import { convertSecretKeyToKeypair } from '@/lib/utils'
 
+
 const FORMS = {
   'create-loyalty-program': CreateLoyaltyProgramForm,
+  'issue-loyalty-pass': IssueLoyaltyPassForm,
+  'create-voucher-collection': CreateVoucherCollectionForm,
+  'mint-voucher': MintVoucherForm,
+  'validate-voucher': ValidateVoucherForm,
+  'redeem-voucher': RedeemVoucherForm,
+  'get-user-vouchers': GetUserVouchersForm,
+  'extend-voucher-expiry': ExtendVoucherExpiryForm,
+  'cancel-voucher': CancelVoucherForm,
   'approve-transfer': ApproveTransferForm,
   'update-loyalty-program': UpdateLoyaltyProgramForm,
   messaging: MessagingForm,
   'revoke-points': RevokeLoyaltyPointsForm,
   'gift-points': GiftLoyaltyPointsForm,
-  'issue-pass': IssueLoyaltyPassForm,
   'get-asset': GetAssetDataForm,
   'get-program': GetProgramDetailsForm,
   'award-points': AwardLoyaltyPointsForm,

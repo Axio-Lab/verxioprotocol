@@ -85,10 +85,29 @@ export default function GetAssetDataForm({ context, onSuccess, onError }: GetAss
         return
       }
 
-      const result = await getAssetData(context, publicKey(data.passAddress))
-      setAssetData(result)
-      if (result) {
-        onSuccess?.(result)
+      // Prepare the request payload
+      const payload = {
+        passAddress: data.passAddress,
+      }
+
+      // Call the backend API
+      const response = await fetch('/api/get-asset-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to get asset data')
+      }
+
+      const result = await response.json()
+      setAssetData(result.result)
+      if (result.result) {
+        onSuccess?.(result.result)
       }
       // Reset form after successful fetching
       form.reset()

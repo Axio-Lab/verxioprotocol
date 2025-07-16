@@ -53,17 +53,29 @@ export default function BroadcastsForm({ context, signer, onSuccess, onError }: 
         return
       }
 
-      // Format data for sendBroadcast
-      const broadcastData = {
-        collectionAddress: publicKey(data.collectionAddress),
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
         message: data.message,
-        sender: context.programAuthority,
-        signer,
       }
 
-      const result = await sendBroadcast(context, broadcastData)
-      setBroadcastResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/send-broadcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send broadcast')
+      }
+
+      const result = await response.json()
+      setBroadcastResult(result.result)
+      onSuccess?.(result.result)
       // Reset form after successful broadcast
       form.reset({
         collectionAddress: '',

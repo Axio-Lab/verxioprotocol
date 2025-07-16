@@ -11,6 +11,15 @@ export { default as GetProgramDetailsForm } from './components/verxio/GetProgram
 export { default as AwardLoyaltyPointsForm } from './components/verxio/AwardLoyaltyPointsForm'
 export { default as BroadcastsForm } from './components/verxio/BroadcastsForm'
 
+// Export voucher management components
+export { default as CreateVoucherCollectionForm } from './components/verxio/CreateVoucherCollectionForm'
+export { default as MintVoucherForm } from './components/verxio/MintVoucherForm'
+export { default as ValidateVoucherForm } from './components/verxio/ValidateVoucherForm'
+export { default as RedeemVoucherForm } from './components/verxio/RedeemVoucherForm'
+export { default as GetUserVouchersForm } from './components/verxio/GetUserVouchersForm'
+export { default as ExtendVoucherExpiryForm } from './components/verxio/ExtendVoucherExpiryForm'
+export { default as CancelVoucherForm } from './components/verxio/CancelVoucherForm'
+
 // Export base components
 export { VerxioForm } from './components/verxio/base/VerxioForm'
 export { VerxioFormSection } from './components/verxio/base/VerxioFormSection'

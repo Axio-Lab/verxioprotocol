@@ -77,22 +77,30 @@ export default function UpdateLoyaltyProgramForm({
         return
       }
 
-      // Format data for updateLoyaltyProgram
-      const updateData = {
-        collectionAddress: publicKey(data.collectionAddress),
-        programAuthority: context.programAuthority,
-        updateAuthority: signer,
-        newTiers: data.tiers.map((tier) => ({
-          name: tier.name,
-          xpRequired: tier.points,
-          rewards: tier.rewards,
-        })),
-        newPointsPerAction: Object.fromEntries(data.pointsPerAction.map((action) => [action.name, action.points])),
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        newTiers: data.tiers,
+        newPointsPerAction: data.pointsPerAction,
       }
 
-      const result = await updateLoyaltyProgram(context, updateData)
-      setUpdateResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/update-loyalty-program', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update loyalty program')
+      }
+
+      const result = await response.json()
+      setUpdateResult(result.result)
+      onSuccess?.(result.result)
 
       // Reset form after successful update
       form.reset({
@@ -108,8 +116,7 @@ export default function UpdateLoyaltyProgramForm({
       })
     } catch (error) {
       console.error(error)
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred while updating the loyalty program'
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while updating the loyalty program'
       form.setError('root', { message: errorMessage })
       onError?.(error instanceof Error ? error : new Error(errorMessage))
     }

@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { sendBroadcast, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -24,13 +22,11 @@ interface BroadcastResult {
 }
 
 interface BroadcastsFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: BroadcastResult) => void
   onError?: (error: Error) => void
 }
 
-export default function BroadcastsForm({ context, signer, onSuccess, onError }: BroadcastsFormProps) {
+export default function BroadcastsForm({ onSuccess, onError }: BroadcastsFormProps) {
   const [broadcastResult, setBroadcastResult] = useState<BroadcastResult | null>(null)
 
   const form = useForm<FormData>({
@@ -53,17 +49,29 @@ export default function BroadcastsForm({ context, signer, onSuccess, onError }: 
         return
       }
 
-      // Format data for sendBroadcast
-      const broadcastData = {
-        collectionAddress: publicKey(data.collectionAddress),
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
         message: data.message,
-        sender: context.programAuthority,
-        signer,
       }
 
-      const result = await sendBroadcast(context, broadcastData)
-      setBroadcastResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/send-broadcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send broadcast')
+      }
+
+      const result = await response.json()
+      setBroadcastResult(result.result)
+      onSuccess?.(result.result)
       // Reset form after successful broadcast
       form.reset({
         collectionAddress: '',

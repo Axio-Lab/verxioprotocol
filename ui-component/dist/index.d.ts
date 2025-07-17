@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
-import { VerxioContext } from '@verxioprotocol/core';
 import { KeypairSigner } from '@metaplex-foundation/umi';
 import * as react_hook_form from 'react-hook-form';
 import { UseFormReturn, Path, FieldValues, FieldPath, ControllerProps } from 'react-hook-form';
@@ -15,54 +14,43 @@ interface CreateLoyaltyProgramResult {
     updateAuthority?: KeypairSigner;
 }
 interface CreateLoyaltyProgramFormProps {
-    context: VerxioContext;
-    signer?: KeypairSigner;
     onSuccess?: (result: CreateLoyaltyProgramResult) => void;
     onError?: (error: Error) => void;
 }
-declare function CreateLoyaltyProgramForm({ context, signer: providedSigner, onSuccess, onError, }: CreateLoyaltyProgramFormProps): React.JSX.Element;
+declare function CreateLoyaltyProgramForm({ onSuccess, onError }: CreateLoyaltyProgramFormProps): React.JSX.Element;
 
 interface UpdateLoyaltyProgramResult {
     signature: string;
 }
 interface UpdateLoyaltyProgramFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: UpdateLoyaltyProgramResult) => void;
     onError?: (error: Error) => void;
 }
-declare function UpdateLoyaltyProgramForm({ context, signer, onSuccess, onError, }: UpdateLoyaltyProgramFormProps): React.JSX.Element;
+declare function UpdateLoyaltyProgramForm({ onSuccess, onError }: UpdateLoyaltyProgramFormProps): React.JSX.Element;
 
 interface IssueLoyaltyPassResult {
     asset: KeypairSigner;
     signature: string;
 }
 interface IssueLoyaltyPassFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: IssueLoyaltyPassResult) => void;
     onError?: (error: Error) => void;
 }
-declare function IssueLoyaltyPassForm({ context, signer, onSuccess, onError }: IssueLoyaltyPassFormProps): React.JSX.Element;
+declare function IssueLoyaltyPassForm({ onSuccess, onError }: IssueLoyaltyPassFormProps): React.JSX.Element;
 
 interface ApproveTransferFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
-    onSuccess?: () => void;
     onError?: (error: Error) => void;
 }
-declare function ApproveTransferForm({ context, signer, onSuccess, onError }: ApproveTransferFormProps): React.JSX.Element;
+declare function ApproveTransferForm({ onError }: ApproveTransferFormProps): React.JSX.Element;
 
 interface MessageResult {
     signature: string;
 }
 interface MessagingFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: MessageResult) => void;
     onError?: (error: Error) => void;
 }
-declare function MessagingForm({ context, signer, onSuccess, onError }: MessagingFormProps): React.JSX.Element;
+declare function MessagingForm({ onSuccess, onError }: MessagingFormProps): React.JSX.Element;
 
 interface RevokeLoyaltyPointsResult {
     points: number;
@@ -74,12 +62,10 @@ interface RevokeLoyaltyPointsResult {
     };
 }
 interface RevokeLoyaltyPointsFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: RevokeLoyaltyPointsResult) => void;
     onError?: (error: Error) => void;
 }
-declare function RevokeLoyaltyPointsForm({ context, signer, onSuccess, onError }: RevokeLoyaltyPointsFormProps): React.JSX.Element;
+declare function RevokeLoyaltyPointsForm({ onSuccess, onError }: RevokeLoyaltyPointsFormProps): React.JSX.Element;
 
 interface GiftLoyaltyPointsResult {
     points: number;
@@ -91,12 +77,10 @@ interface GiftLoyaltyPointsResult {
     };
 }
 interface GiftLoyaltyPointsFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: GiftLoyaltyPointsResult) => void;
     onError?: (error: Error) => void;
 }
-declare function GiftLoyaltyPointsForm({ context, signer, onSuccess, onError }: GiftLoyaltyPointsFormProps): React.JSX.Element;
+declare function GiftLoyaltyPointsForm({ onSuccess, onError }: GiftLoyaltyPointsFormProps): React.JSX.Element;
 
 interface AssetData {
     xp: number;
@@ -137,11 +121,10 @@ interface AssetData {
     }>;
 }
 interface GetAssetDataFormProps {
-    context: VerxioContext;
     onSuccess?: (result: AssetData) => void;
     onError?: (error: Error) => void;
 }
-declare function GetAssetDataForm({ context, onSuccess, onError }: GetAssetDataFormProps): React.JSX.Element;
+declare function GetAssetDataForm({ onSuccess, onError }: GetAssetDataFormProps): React.JSX.Element;
 
 interface ProgramDetails {
     name: string;
@@ -173,11 +156,10 @@ interface ProgramDetails {
     };
 }
 interface GetProgramDetailsFormProps {
-    context: VerxioContext;
     onSuccess?: (result: ProgramDetails) => void;
     onError?: (error: Error) => void;
 }
-declare function GetProgramDetailsForm({ context, onSuccess, onError }: GetProgramDetailsFormProps): React.JSX.Element;
+declare function GetProgramDetailsForm({ onSuccess, onError }: GetProgramDetailsFormProps): React.JSX.Element;
 
 interface AwardLoyaltyPointsResult {
     points: number;
@@ -189,23 +171,61 @@ interface AwardLoyaltyPointsResult {
     };
 }
 interface AwardLoyaltyPointsFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: AwardLoyaltyPointsResult) => void;
     onError?: (error: Error) => void;
 }
-declare function AwardLoyaltyPointsForm({ context, signer, onSuccess, onError }: AwardLoyaltyPointsFormProps): React.JSX.Element;
+declare function AwardLoyaltyPointsForm({ onSuccess, onError }: AwardLoyaltyPointsFormProps): React.JSX.Element;
 
 interface BroadcastResult {
     signature: string;
 }
 interface BroadcastsFormProps {
-    context: VerxioContext;
-    signer: KeypairSigner;
     onSuccess?: (result: BroadcastResult) => void;
     onError?: (error: Error) => void;
 }
-declare function BroadcastsForm({ context, signer, onSuccess, onError }: BroadcastsFormProps): React.JSX.Element;
+declare function BroadcastsForm({ onSuccess, onError }: BroadcastsFormProps): React.JSX.Element;
+
+interface CreateVoucherCollectionFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function CreateVoucherCollectionForm({ onSuccess, onError }: CreateVoucherCollectionFormProps): React.JSX.Element;
+
+interface MintVoucherFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function MintVoucherForm({ onSuccess, onError }: MintVoucherFormProps): React.JSX.Element;
+
+interface ValidateVoucherFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function ValidateVoucherForm({ onSuccess, onError }: ValidateVoucherFormProps): React.JSX.Element;
+
+interface RedeemVoucherFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function RedeemVoucherForm({ onSuccess, onError }: RedeemVoucherFormProps): React.JSX.Element;
+
+interface GetUserVouchersFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function GetUserVouchersForm({ onSuccess, onError }: GetUserVouchersFormProps): React.JSX.Element;
+
+interface ExtendVoucherExpiryFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function ExtendVoucherExpiryForm({ onSuccess, onError }: ExtendVoucherExpiryFormProps): React.JSX.Element;
+
+interface CancelVoucherFormProps {
+    onSuccess?: (result: any) => void;
+    onError?: (error: any) => void;
+}
+declare function CancelVoucherForm({ onSuccess, onError }: CancelVoucherFormProps): React.JSX.Element;
 
 interface VerxioFormProps<T extends Record<string, any>> {
     form: UseFormReturn<T>;
@@ -260,4 +280,4 @@ declare function Input({ className, type, ...props }: React.ComponentProps<'inpu
 
 declare const Label: React.ForwardRefExoticComponent<Omit<LabelPrimitive.LabelProps & React.RefAttributes<HTMLLabelElement>, "ref"> & React.RefAttributes<HTMLLabelElement>>;
 
-export { Alert, AlertDescription, AlertTitle, ApproveTransferForm, AwardLoyaltyPointsForm, BroadcastsForm, Button, CreateLoyaltyProgramForm, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, GetAssetDataForm, GetProgramDetailsForm, GiftLoyaltyPointsForm, Input, IssueLoyaltyPassForm, Label, MessagingForm, RevokeLoyaltyPointsForm, UpdateLoyaltyProgramForm, VerxioForm, VerxioFormField, VerxioFormSection };
+export { Alert, AlertDescription, AlertTitle, ApproveTransferForm, AwardLoyaltyPointsForm, BroadcastsForm, Button, CancelVoucherForm, CreateLoyaltyProgramForm, CreateVoucherCollectionForm, ExtendVoucherExpiryForm, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, GetAssetDataForm, GetProgramDetailsForm, GetUserVouchersForm, GiftLoyaltyPointsForm, Input, IssueLoyaltyPassForm, Label, MessagingForm, MintVoucherForm, RedeemVoucherForm, RevokeLoyaltyPointsForm, UpdateLoyaltyProgramForm, ValidateVoucherForm, VerxioForm, VerxioFormField, VerxioFormSection };

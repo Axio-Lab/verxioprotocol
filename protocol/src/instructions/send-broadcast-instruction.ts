@@ -3,7 +3,6 @@ import { KeypairSigner, PublicKey, TransactionBuilder } from '@metaplex-foundati
 import { fetchCollection, writeCollectionExternalPluginAdapterDataV1 } from '@metaplex-foundation/mpl-core'
 import { PLUGIN_TYPES } from '@/lib/constants'
 import { createFeeInstruction } from '@utils/fee-structure'
-import { Broadcast } from '@/lib/send-broadcast'
 
 export interface SendBroadcastInstructionConfig {
   collectionAddress: PublicKey

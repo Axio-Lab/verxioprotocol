@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { getProgramDetails, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -49,12 +47,11 @@ interface ProgramDetails {
 }
 
 interface GetProgramDetailsFormProps {
-  context: VerxioContext
   onSuccess?: (result: ProgramDetails) => void
   onError?: (error: Error) => void
 }
 
-export default function GetProgramDetailsForm({ context, onSuccess, onError }: GetProgramDetailsFormProps) {
+export default function GetProgramDetailsForm({ onSuccess, onError }: GetProgramDetailsFormProps) {
   const [programDetails, setProgramDetails] = useState<ProgramDetails | null>(null)
 
   const form = useForm<FormData>({
@@ -76,10 +73,28 @@ export default function GetProgramDetailsForm({ context, onSuccess, onError }: G
         return
       }
 
-      context.collectionAddress = publicKey(data.collectionAddress)
-      const result = await getProgramDetails(context)
-      setProgramDetails(result)
-      onSuccess?.(result)
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+      }
+
+      // Call the backend API
+      const response = await fetch('/api/get-program-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to get program details')
+      }
+
+      const result = await response.json()
+      setProgramDetails(result.result)
+      onSuccess?.(result.result)
 
       // Reset form after successful fetching
       form.reset()

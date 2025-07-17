@@ -1,5 +1,5 @@
 import { VerxioContext } from '@schemas/verxio-context'
-import { KeypairSigner, PublicKey, TransactionBuilder } from '@metaplex-foundation/umi'
+import { KeypairSigner, TransactionBuilder } from '@metaplex-foundation/umi'
 import { writeData, fetchAsset, collectionAddress } from '@metaplex-foundation/mpl-core'
 import { validateVoucher, ValidateVoucherConfig, VoucherValidationResult } from '../lib/validate-voucher'
 import { VoucherData } from '../lib/mint-voucher'
@@ -7,6 +7,7 @@ import { PLUGIN_TYPES } from '@/lib/constants'
 import { createFeeInstruction } from '@utils/fee-structure'
 
 export interface RedeemVoucherInstructionConfig extends ValidateVoucherConfig {
+  merchantId: string
   updateAuthority: KeypairSigner
   redemptionAmount?: number // For percentage_off and fixed_verxio_credits
   redemptionDetails?: {
@@ -33,8 +34,13 @@ export async function redeemVoucherInstruction(
 
   // First validate the voucher
   const validation = await validateVoucher(context, config)
-  if (!validation.isValid || !validation.voucher) {
+  if (validation.errors.length > 0 || !validation.voucher) {
     throw new Error('Voucher validation failed')
+  }
+
+  // Validate merchant ID
+  if (validation.voucher.merchantId !== config.merchantId) {
+    throw new Error(`Voucher can only be redeemed by merchant: ${validation.voucher.merchantId}`)
   }
 
   // Fetch the voucher asset to get collection info

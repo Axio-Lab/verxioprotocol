@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { awardLoyaltyPoints, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -32,13 +30,11 @@ interface AwardLoyaltyPointsResult {
 }
 
 interface AwardLoyaltyPointsFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: AwardLoyaltyPointsResult) => void
   onError?: (error: Error) => void
 }
 
-export default function AwardLoyaltyPointsForm({ context, signer, onSuccess, onError }: AwardLoyaltyPointsFormProps) {
+export default function AwardLoyaltyPointsForm({ onSuccess, onError }: AwardLoyaltyPointsFormProps) {
   const [awardResult, setAwardResult] = useState<AwardLoyaltyPointsResult | null>(null)
 
   const form = useForm<FormData>({
@@ -62,17 +58,32 @@ export default function AwardLoyaltyPointsForm({ context, signer, onSuccess, onE
         })
         return
       }
-      context.collectionAddress = publicKey(data.collectionAddress)
-      // Format data for awardLoyaltyPoints
-      const awardData = {
-        passAddress: publicKey(data.passAddress),
+
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
         action: data.action,
-        signer,
         multiplier: data.multiplier,
       }
-      const result = await awardLoyaltyPoints(context, awardData)
-      setAwardResult(result)
-      onSuccess?.(result)
+
+      // Call the backend API
+      const response = await fetch('/api/award-loyalty-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to award loyalty points')
+      }
+
+      const result = await response.json()
+      setAwardResult(result.result)
+      onSuccess?.(result.result)
       // Reset form after successful awarding
       form.reset({
         collectionAddress: '',

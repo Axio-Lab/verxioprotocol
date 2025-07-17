@@ -19,12 +19,23 @@ export interface VoucherData {
   usedAt?: number
   merchantId: string
   conditions?: VoucherCondition[]
+  redemptionHistory?: VoucherRedemptionRecord[]
 }
 
 export interface VoucherCondition {
   type: 'minimum_purchase' | 'specific_items' | 'time_restriction' | 'user_tier'
   value: any
   operator: 'equals' | 'greater_than' | 'less_than' | 'contains'
+}
+
+export interface VoucherRedemptionRecord {
+  timestamp: number
+  redemptionValue: number
+  transactionId?: string
+  items?: string[]
+  totalAmount?: number
+  discountApplied?: number
+  creditsUsed?: number
 }
 
 export interface MintVoucherConfig {
@@ -98,6 +109,7 @@ export async function mintVoucher(
       issuedAt: Date.now(),
       merchantId: config.voucherData.merchantId,
       conditions: config.voucherData.conditions || [],
+      redemptionHistory: [],
     }
 
     const txnInstruction = create(context.umi, {

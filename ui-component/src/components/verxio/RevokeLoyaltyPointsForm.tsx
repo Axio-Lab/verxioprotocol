@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { revokeLoyaltyPoints, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -31,13 +29,11 @@ interface RevokeLoyaltyPointsResult {
 }
 
 interface RevokeLoyaltyPointsFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: RevokeLoyaltyPointsResult) => void
   onError?: (error: Error) => void
 }
 
-export default function RevokeLoyaltyPointsForm({ context, signer, onSuccess, onError }: RevokeLoyaltyPointsFormProps) {
+export default function RevokeLoyaltyPointsForm({ onSuccess, onError }: RevokeLoyaltyPointsFormProps) {
   const [revokeResult, setRevokeResult] = useState<RevokeLoyaltyPointsResult | null>(null)
 
   const form = useForm<FormData>({
@@ -61,18 +57,30 @@ export default function RevokeLoyaltyPointsForm({ context, signer, onSuccess, on
         return
       }
 
-      context.collectionAddress = publicKey(data.collectionAddress)
-
-      // Format data for revokeLoyaltyPoints
-      const revokeData = {
-        passAddress: publicKey(data.passAddress),
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
         pointsToRevoke: data.pointsToRevoke,
-        signer,
       }
 
-      const result = await revokeLoyaltyPoints(context, revokeData)
-      setRevokeResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/revoke-loyalty-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to revoke loyalty points')
+      }
+
+      const result = await response.json()
+      setRevokeResult(result.result)
+      onSuccess?.(result.result)
       // Reset form after successful revoking
       form.reset({
         collectionAddress: '',

@@ -3,13 +3,15 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { createLoyaltyProgram, VerxioContext } from '@verxioprotocol/core'
-import { generateSigner, KeypairSigner } from '@metaplex-foundation/umi'
+import { KeypairSigner } from '@metaplex-foundation/umi'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Upload, Link } from 'lucide-react'
 import { useState } from 'react'
 
 const actionSchema = z.object({
@@ -25,7 +27,10 @@ const tierSchema = z.object({
 
 const formSchema = z.object({
   programName: z.string().min(1, 'Program name is required'),
-  metadataUri: z.string().url('Must be a valid URL'),
+  metadataUri: z.string().optional(),
+  imageBuffer: z.any().optional(),
+  imageFilename: z.string().optional(),
+  imageContentType: z.string().optional(),
   organizationName: z.string().min(1, 'Organization name is required'),
   brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color'),
   pointsPerAction: z.array(actionSchema).min(1, 'At least one action is required'),
@@ -41,20 +46,14 @@ interface CreateLoyaltyProgramResult {
 }
 
 interface CreateLoyaltyProgramFormProps {
-  context: VerxioContext
-  signer?: KeypairSigner
   onSuccess?: (result: CreateLoyaltyProgramResult) => void
   onError?: (error: Error) => void
 }
 
-export default function CreateLoyaltyProgramForm({
-  context,
-  signer: providedSigner,
-  onSuccess,
-  onError,
-}: CreateLoyaltyProgramFormProps) {
+export default function CreateLoyaltyProgramForm({ onSuccess, onError }: CreateLoyaltyProgramFormProps) {
   const [createdProgram, setCreatedProgram] = useState<CreateLoyaltyProgramResult | null>(null)
-  const signer = providedSigner || generateSigner(context.umi)
+  const [uploadMethod, setUploadMethod] = useState<'uri' | 'image'>('uri')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -74,6 +73,15 @@ export default function CreateLoyaltyProgramForm({
     },
   })
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      form.setValue('imageFilename', file.name)
+      form.setValue('imageContentType', file.type)
+    }
+  }
+
   const onSubmit = async (data: FormData) => {
     try {
       // Debug form validation
@@ -86,26 +94,54 @@ export default function CreateLoyaltyProgramForm({
         return
       }
 
-      // Format data for createLoyaltyProgram
-      const programData = {
+      // Prepare the request payload
+      const payload: any = {
         loyaltyProgramName: data.programName,
-        metadataUri: data.metadataUri,
-        programAuthority: context.programAuthority,
-        updateAuthority: signer,
         metadata: {
           organizationName: data.organizationName,
           brandColor: data.brandColor,
         },
         tiers: data.tiers.map((tier) => ({
           name: tier.name,
-          xpRequired: tier.points,
+          points: tier.points,
           rewards: tier.rewards,
         })),
-        pointsPerAction: Object.fromEntries(data.pointsPerAction.map((action) => [action.name, action.points])),
+        pointsPerAction: data.pointsPerAction,
       }
 
-      console.log('programData', programData)
-      const result = await createLoyaltyProgram(context, programData)
+      // Add metadata based on upload method
+      if (uploadMethod === 'uri' && data.metadataUri) {
+        payload.metadataUri = data.metadataUri
+      } else if (uploadMethod === 'image' && selectedFile) {
+        // Convert file to base64 buffer for API transmission
+        const arrayBuffer = await selectedFile.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+        const base64Buffer = buffer.toString('base64')
+
+        payload.imageBuffer = base64Buffer
+        payload.imageFilename = selectedFile.name
+        payload.imageContentType = selectedFile.type
+      } else {
+        throw new Error('Either metadata URI or image file must be provided')
+      }
+
+      console.log('programData', payload)
+
+      // Call the backend API
+      const response = await fetch('/api/create-loyalty-program', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create loyalty program')
+      }
+
+      const result = await response.json()
       setCreatedProgram(result)
       onSuccess?.(result)
 
@@ -211,17 +247,55 @@ export default function CreateLoyaltyProgramForm({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <VerxioFormField
-                form={form}
-                name="metadataUri"
-                label="Metadata URI"
-                description="The URI where your program metadata is stored"
-              >
-                <Input
-                  placeholder="https://arweave.net/..."
-                  onChange={(e) => form.setValue('metadataUri', e.target.value)}
-                />
-              </VerxioFormField>
+              <VerxioFormSection title="Metadata Upload Method">
+                <Tabs value={uploadMethod} onValueChange={(value: string) => setUploadMethod(value as 'uri' | 'image')}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="uri" className="flex items-center gap-2">
+                      <Link className="h-4 w-4" />
+                      Pre-uploaded URI
+                    </TabsTrigger>
+                    <TabsTrigger value="image" className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload Image
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="uri" className="space-y-4">
+                    <VerxioFormField
+                      form={form}
+                      name="metadataUri"
+                      label="Metadata URI"
+                      description="The URI where your program metadata is stored"
+                    >
+                      <Input
+                        placeholder="https://arweave.net/..."
+                        onChange={(e) => form.setValue('metadataUri', e.target.value)}
+                      />
+                    </VerxioFormField>
+                    <Alert>
+                      <AlertDescription>
+                        Provide a pre-uploaded metadata URI. The image and metadata should already be uploaded to
+                        Arweave or another decentralized storage.
+                      </AlertDescription>
+                    </Alert>
+                  </TabsContent>
+
+                  <TabsContent value="image" className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Program Image</label>
+                      <div className="flex items-center gap-4">
+                        <Input type="file" accept="image/*" onChange={handleFileSelect} className="flex-1" />
+                        {selectedFile && <div className="text-sm text-gray-600">Selected: {selectedFile.name}</div>}
+                      </div>
+                    </div>
+                    <Alert>
+                      <AlertDescription>
+                        Upload an image file. The protocol will automatically upload it to Irys and generate metadata.
+                      </AlertDescription>
+                    </Alert>
+                  </TabsContent>
+                </Tabs>
+              </VerxioFormSection>
             </div>
 
             <VerxioFormField form={form} name="brandColor" label="Brand Color" description="Your brand's primary color">

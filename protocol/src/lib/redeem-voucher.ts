@@ -1,14 +1,15 @@
 import { VerxioContext } from '@schemas/verxio-context'
-import { PublicKey, KeypairSigner } from '@metaplex-foundation/umi'
+import { KeypairSigner } from '@metaplex-foundation/umi'
 import { writeData, fetchAsset, collectionAddress } from '@metaplex-foundation/mpl-core'
 import { validateVoucher, ValidateVoucherConfig, VoucherValidationResult } from './validate-voucher'
-import { VoucherData } from './mint-voucher'
+import { VoucherData, VoucherRedemptionRecord } from './mint-voucher'
 import { PLUGIN_TYPES } from '@lib/constants'
 import { toBase58 } from '@utils/to-base58'
 import { createFeeInstruction } from '@/utils/fee-structure'
 
 export interface RedeemVoucherConfig extends ValidateVoucherConfig {
   updateAuthority: KeypairSigner
+  merchantId: string
   redemptionAmount?: number // For percentage_off and fixed_verxio_credits
   redemptionDetails?: {
     transactionId?: string
@@ -34,17 +35,23 @@ export async function redeemVoucher(
 ): Promise<VoucherRedemptionResult> {
   const result: VoucherRedemptionResult = {
     success: false,
-    validation: { isValid: false, errors: [], warnings: [] },
+    validation: { errors: [] },
     errors: [],
   }
 
   try {
     // First validate the voucher
-    const validation = await validateVoucher(context, config)
+    const validation = await validateVoucher(context, { voucherAddress: config.voucherAddress })
     result.validation = validation
 
-    if (!validation.isValid || !validation.voucher) {
+    if (!validation.voucher) {
       result.errors.push('Voucher validation failed')
+      return result
+    }
+
+    // Enforce merchantId match
+    if (validation.voucher.merchantId !== config.merchantId) {
+      result.errors.push('Voucher is not valid for merchant ' + config.merchantId)
       return result
     }
 
@@ -58,7 +65,7 @@ export async function redeemVoucher(
     result.redemptionValue = redemptionValue
 
     // Update voucher data
-    const updatedVoucher = updateVoucherForRedemption(validation.voucher, config.redemptionDetails)
+    const updatedVoucher = updateVoucherForRedemption(validation.voucher, redemptionValue, config.redemptionDetails)
     result.updatedVoucher = updatedVoucher
 
     // Create fee instruction
@@ -120,6 +127,7 @@ function calculateRedemptionValue(voucher: VoucherData, redemptionAmount?: numbe
 
 function updateVoucherForRedemption(
   voucher: VoucherData,
+  redemptionValue: number,
   redemptionDetails?: RedeemVoucherConfig['redemptionDetails'],
 ): VoucherData {
   const updatedVoucher: VoucherData = {
@@ -133,11 +141,23 @@ function updateVoucherForRedemption(
     updatedVoucher.status = 'used'
   }
 
-  // Add redemption details if provided
-  if (redemptionDetails) {
-    // You could extend VoucherData to include redemption history
-    // For now, we'll just update the basic fields
+  // Add redemption record to history
+  const redemptionRecord: VoucherRedemptionRecord = {
+    timestamp: Date.now(),
+    redemptionValue: redemptionValue,
+    transactionId: redemptionDetails?.transactionId,
+    items: redemptionDetails?.items,
+    totalAmount: redemptionDetails?.totalAmount,
+    discountApplied: redemptionDetails?.discountApplied,
+    creditsUsed: redemptionDetails?.creditsUsed,
   }
+
+  // Initialize redemptionHistory if it doesn't exist
+  if (!updatedVoucher.redemptionHistory) {
+    updatedVoucher.redemptionHistory = []
+  }
+
+  updatedVoucher.redemptionHistory.push(redemptionRecord)
 
   return updatedVoucher
 }

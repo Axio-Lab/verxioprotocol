@@ -1,81 +1,206 @@
-# @verxio/components
+# Verxio UI Component Demo
 
-A React component library for Verxio Protocol's functionalities.
+A Next.js demo application showcasing Verxio Protocol UI components and functionality.
 
-## Installation
+## Features
+
+- **Complete Form Library**: All Verxio Protocol operations with full form validation
+- **Image Upload Support**: Server-side image uploads to Irys for metadata generation
+- **TypeScript Support**: Full type safety with comprehensive TypeScript definitions
+- **Accessible Components**: Built on Radix UI primitives for excellent accessibility
+- **Customizable Styling**: Tailwind CSS with customizable design tokens
+- **Wallet Integration**: Seamless Solana wallet integration
+- **Netlify Ready**: Configured for easy deployment on Netlify
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm (recommended) or npm
+
+### Installation
 
 ```bash
-npm install @verxio/components
+# Clone the repository
+git clone <repository-url>
+cd ui-component
+
+# Install dependencies
+pnpm install
 # or
-yarn add @verxio/components
-# or
-pnpm add @verxio/components
+npm install
 ```
 
-## Usage
+### Environment Setup
 
-```tsx
-import { CreateLoyaltyProgramForm } from '@verxio/components'
+Create a `.env.local` file in the root directory:
 
-function App() {
-  return (
-    <CreateLoyaltyProgramForm
-      context={context}
-      signer={signer}
-      onSuccess={(result) => {
-        console.log('Program created:', result)
-      }}
-      onError={(error) => {
-        console.error('Error:', error)
-      }}
-    />
-  )
-}
+```env
+# Solana Secret Key (for testing)
+SECRET_KEY=your_base58_encoded_secret_key_here
+
+# Optional: Custom RPC endpoint
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
 ```
+
+### Development
+
+```bash
+# Start the development server
+pnpm dev
+# or
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the demo.
+
+### Building for Production
+
+```bash
+# Build the application
+pnpm build
+# or
+npm run build
+
+# Start the production server
+pnpm start
+# or
+npm start
+```
+
+## Deployment
+
+### Netlify
+
+This project is configured for easy deployment on Netlify:
+
+1. **Connect your repository** to Netlify
+2. **Build settings**:
+   - Build command: `npm run build`
+   - Publish directory: `out`
+3. **Environment variables**: Add your `SECRET_KEY` in Netlify's environment variables
+4. **Deploy**: Netlify will automatically detect this as a Next.js project
+
+### Other Platforms
+
+The project uses static export (`output: 'export'`), making it compatible with any static hosting platform:
+
+- Vercel
+- GitHub Pages
+- AWS S3
+- Cloudflare Pages
 
 ## Available Components
 
-- `CreateLoyaltyProgramForm` - Create a new loyalty program
-- `UpdateLoyaltyProgramForm` - Update an existing loyalty program
-- `IssueLoyaltyPassForm` - Issue a new loyalty pass
-- `ApproveTransferForm` - Approve transfer of a loyalty pass
-- `MessagingForm` - Send messages to loyalty pass holders
-- `RevokeLoyaltyPointsForm` - Revoke points from a loyalty pass
-- `GiftLoyaltyPointsForm` - Gift points to a loyalty pass
-- `GetAssetDataForm` - Get data for a specific asset
-- `GetProgramDetailsForm` - Get details of a loyalty program
-- `AwardLoyaltyPointsForm` - Award points for specific actions
-- `BroadcastsForm` - Send broadcasts to loyalty pass holders
+### Loyalty Program Management
 
-## Base Components
+- `CreateLoyaltyProgramForm` - Create new loyalty programs
+- `UpdateLoyaltyProgramForm` - Update existing programs
+- `IssueLoyaltyPassForm` - Issue loyalty passes to users
 
-The library also exports base components that can be used to create custom forms:
+### Voucher Management
 
-- `VerxioForm` - Base form component
-- `VerxioFormSection` - Form section component
-- `VerxioFormField` - Form field component
+- `CreateVoucherCollectionForm` - Create voucher collections
+- `MintVoucherForm` - Mint individual vouchers
+- `ValidateVoucherForm` - Validate voucher status
+- `RedeemVoucherForm` - Redeem vouchers
+- `GetUserVouchersForm` - Get user's vouchers
+- `ExtendVoucherExpiryForm` - Extend voucher expiry
+- `CancelVoucherForm` - Cancel vouchers
 
-## Development
+### Points Management
 
-1. Clone the repository
-2. Install dependencies:
+- `AwardLoyaltyPointsForm` - Award points to users
+- `RevokeLoyaltyPointsForm` - Revoke points from users
+- `GiftLoyaltyPointsForm` - Gift points between users
 
-```bash
-pnpm install
+### Communication
+
+- `MessagingForm` - Send direct messages
+- `BroadcastsForm` - Send broadcast messages
+
+### Data Retrieval
+
+- `GetAssetDataForm` - Get asset data
+- `GetProgramDetailsForm` - Get program details
+- `ApproveTransferForm` - Approve transfers
+
+## Project Structure
+
+```
+src/
+├── app/                 # Next.js App Router
+│   ├── api/            # API routes
+│   ├── globals.css     # Global styles
+│   ├── layout.tsx      # Root layout
+│   └── page.tsx        # Home page
+├── components/         # UI components
+│   ├── ui/            # Base UI components
+│   └── verxio/        # Verxio-specific forms
+└── lib/               # Utility functions
 ```
 
-3. Start the development server:
+## API Routes
 
-```bash
-pnpm dev
+The demo includes API routes for all Verxio Protocol operations:
+
+- `/api/create-loyalty-program` - Create loyalty programs
+- `/api/mint-voucher` - Mint vouchers
+- `/api/validate-voucher` - Validate vouchers
+- `/api/redeem-voucher` - Redeem vouchers
+- `/api/gift-loyalty-points` - Gift loyalty points
+- And many more...
+
+## Customization
+
+### Styling
+
+The components use Tailwind CSS and can be customized in `tailwind.config.js`:
+
+```js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        verxio: {
+          primary: '#00adef',
+          secondary: '#6366f1',
+        },
+      },
+    },
+  },
+}
 ```
 
-4. Build the library:
+### Environment Variables
 
-```bash
-pnpm build
+Configure your environment for different networks:
+
+```env
+# Development
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
+
+# Production
+NEXT_PUBLIC_RPC_URL=https://api.mainnet-beta.solana.com
 ```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
 ## License
 
-MIT
+MIT License - see LICENSE file for details.
+
+## Support
+
+For support and questions:
+
+- GitHub Issues: [Create an issue](https://github.com/your-repo/issues)
+- Documentation: [Read the docs](https://docs.verxio.com)
+- Community: [Join our Discord](https://discord.gg/verxio)

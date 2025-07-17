@@ -96,78 +96,78 @@ describe('extendVoucherExpiry', { sequential: true, timeout: 30000 }, () => {
     cancelledVoucherAddress = cancelledVoucherResult.voucherAddress
   })
 
-  describe('successful extension', () => {
-    it('should extend voucher expiry date', async () => {
-      const newExpiryDate = Date.now() + 60 * 24 * 60 * 60 * 1000 // 60 days from now
+  describe('main expiry extension flow', () => {
+    it('should create, mint, validate, extend expiry, and validate again', async () => {
+      // Validate and log voucher before extension
+      const before = await validateVoucher(context, {
+        voucherAddress: activeVoucherAddress,
+        merchantId: 'test_merchant_001',
+      })
+      console.log('Voucher before expiry extension:', before.voucher)
+      const oldExpiry = before.voucher!.expiryDate
 
+      // Extend expiry
+      const newExpiryDate = Date.now() + 60 * 24 * 60 * 60 * 1000 // 60 days from now
       const result = await extendVoucherExpiry(context, {
         voucherAddress: activeVoucherAddress,
         updateAuthority: collectionUpdateAuthority,
         newExpiryDate,
       })
-
       expect(result.success).toBe(true)
-      expect(result.signature).toBeTruthy()
       expect(result.updatedVoucher).toBeTruthy()
       expect(result.updatedVoucher!.expiryDate).toBe(newExpiryDate)
-      expect(result.previousExpiryDate).toBeTruthy()
+      expect(result.previousExpiryDate).toBe(oldExpiry)
       expect(result.errors).toHaveLength(0)
+
+      // Validate and log voucher after extension
+      const after = await validateVoucher(context, {
+        voucherAddress: activeVoucherAddress,
+        merchantId: 'test_merchant_001',
+      })
+      console.log('Voucher after expiry extension:', after.voucher)
+      expect(after.voucher).toBeDefined()
+      expect(after.voucher!.expiryDate).toBe(newExpiryDate)
     })
+  })
 
+  describe('successful extension', () => {
     it('should reactivate expired voucher when extending', async () => {
-      // First, make the voucher expired by setting a past expiry date
-      const pastExpiryDate = Date.now() - 1 * 24 * 60 * 60 * 1000 // 1 day ago
-
-      // We'll need to manually update the voucher to be expired first
-      // For now, let's test with a voucher that's close to expiring
       const newExpiryDate = Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days from now
-
       const result = await extendVoucherExpiry(context, {
         voucherAddress: expiredVoucherAddress,
         updateAuthority: collectionUpdateAuthority,
         newExpiryDate,
       })
-
       expect(result.success).toBe(true)
       expect(result.updatedVoucher!.status).toBe('active')
       expect(result.updatedVoucher!.expiryDate).toBe(newExpiryDate)
-    })
-
-    it('should validate extended voucher as active', async () => {
-      const validation = await validateVoucher(context, {
-        voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
-      })
-
-      expect(validation.isValid).toBe(true)
-      expect(validation.voucher!.status).toBe('active')
-      expect(validation.errors).toHaveLength(0)
     })
   })
 
   describe('error handling', () => {
     it('should fail with past expiry date', async () => {
       const pastDate = Date.now() - 1 * 24 * 60 * 60 * 1000 // 1 day ago
-
       const result = await extendVoucherExpiry(context, {
         voucherAddress: activeVoucherAddress,
         updateAuthority: collectionUpdateAuthority,
         newExpiryDate: pastDate,
       })
-
       expect(result.success).toBe(false)
       expect(result.errors).toContain('New expiry date must be in the future')
     })
 
     it('should fail with earlier expiry date than current', async () => {
-      const earlierDate = Date.now() + 1 * 24 * 60 * 60 * 1000 // 1 day from now (less than current 60 days)
-
+      // Get current expiry
+      const before = await validateVoucher(context, {
+        voucherAddress: activeVoucherAddress,
+        merchantId: 'test_merchant_001',
+      })
+      const earlierDate = before.voucher!.expiryDate - 1 * 24 * 60 * 60 * 1000 // 1 day before current
       const result = await extendVoucherExpiry(context, {
         voucherAddress: activeVoucherAddress,
         updateAuthority: collectionUpdateAuthority,
         newExpiryDate: earlierDate,
       })
-
       expect(result.success).toBe(false)
       expect(result.errors).toContain('New expiry date must be later than current expiry date')
     })
@@ -175,13 +175,11 @@ describe('extendVoucherExpiry', { sequential: true, timeout: 30000 }, () => {
     it('should fail with invalid voucher address', async () => {
       const invalidAddress = generateSigner(context.umi).publicKey
       const newExpiryDate = Date.now() + 30 * 24 * 60 * 60 * 1000
-
       const result = await extendVoucherExpiry(context, {
         voucherAddress: invalidAddress,
         updateAuthority: collectionUpdateAuthority,
         newExpiryDate,
       })
-
       expect(result.success).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       expect(result.errors[0]).toContain('Failed to extend voucher expiry')
@@ -189,14 +187,12 @@ describe('extendVoucherExpiry', { sequential: true, timeout: 30000 }, () => {
 
     it('should fail with wrong update authority', async () => {
       const wrongAuthority = generateSigner(context.umi)
-      const newExpiryDate = Date.now() + 90 * 24 * 60 * 60 * 1000 // 90 days from now (much later than current)
-
+      const newExpiryDate = Date.now() + 90 * 24 * 60 * 60 * 1000 // 90 days from now
       const result = await extendVoucherExpiry(context, {
         voucherAddress: cancelledVoucherAddress, // Use the cancelled voucher which hasn't been modified yet
         updateAuthority: wrongAuthority,
         newExpiryDate,
       })
-
       expect(result.success).toBe(false)
       expect(result.errors.length).toBeGreaterThan(0)
       expect(result.errors[0]).toContain('Failed to extend voucher expiry')
@@ -209,10 +205,8 @@ describe('extendVoucherExpiry', { sequential: true, timeout: 30000 }, () => {
         voucherAddress: activeVoucherAddress,
         merchantId: 'test_merchant_001',
       })
-
       const voucher = validation.voucher!
       const timeInfo = getTimeRemainingUntilExpiry(voucher)
-
       expect(timeInfo.isExpired).toBe(false)
       expect(timeInfo.timeRemaining).toBeGreaterThan(0)
       expect(timeInfo.daysRemaining).toBeGreaterThan(0)
@@ -223,11 +217,8 @@ describe('extendVoucherExpiry', { sequential: true, timeout: 30000 }, () => {
         voucherAddress: expiredVoucherAddress,
         merchantId: 'test_merchant_001',
       })
-
-      // Note: This voucher was extended above, so it should now be active
       const voucher = validation.voucher!
       const timeInfo = getTimeRemainingUntilExpiry(voucher)
-
       // Since we extended it, it should no longer be expired
       expect(timeInfo.isExpired).toBe(false)
     })
@@ -250,15 +241,12 @@ describe('extendVoucherExpiry', { sequential: true, timeout: 30000 }, () => {
           merchantId: 'test_merchant_001',
         },
       })
-
       const validation = await validateVoucher(context, {
         voucherAddress: soonExpiringResult.voucherAddress,
         merchantId: 'test_merchant_001',
       })
-
       const voucher = validation.voucher!
       const needsExtension = shouldExtendVoucher(voucher, 7) // 7 day warning
-
       expect(needsExtension).toBe(true)
     })
   })

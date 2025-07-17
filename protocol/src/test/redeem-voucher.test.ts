@@ -89,9 +89,6 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
       const result = await redeemVoucher(context, {
         voucherAddress: percentageOffVoucherAddress,
         merchantId: 'test_merchant_001',
-        redemptionContext: {
-          purchaseAmount: 100,
-        },
         updateAuthority,
         redemptionAmount: 100,
       })
@@ -109,9 +106,6 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
       const result = await redeemVoucher(context, {
         voucherAddress: fixedCreditsVoucherAddress,
         merchantId: 'test_merchant_001',
-        redemptionContext: {
-          purchaseAmount: 150,
-        },
         updateAuthority,
         redemptionAmount: 150,
       })
@@ -131,9 +125,6 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
       const result = await redeemVoucher(context, {
         voucherAddress: invalidAddress,
         merchantId: 'test_merchant_001',
-        redemptionContext: {
-          purchaseAmount: 100,
-        },
         updateAuthority,
         redemptionAmount: 100,
       })
@@ -169,9 +160,6 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
       const result = await redeemVoucher(context, {
         voucherAddress: wrongMerchantSigner.publicKey,
         merchantId: 'wrong_merchant',
-        redemptionContext: {
-          purchaseAmount: 100,
-        },
         updateAuthority,
         redemptionAmount: 100,
       })
@@ -210,9 +198,6 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
       const result = await redeemVoucher(context, {
         voucherAddress: singleUseSigner.publicKey,
         merchantId: 'test_merchant_001',
-        redemptionContext: {
-          purchaseAmount: 100,
-        },
         updateAuthority,
         redemptionAmount: 100,
       })
@@ -222,11 +207,136 @@ describe('redeemVoucher', { sequential: true, timeout: 30000 }, () => {
       // Verify voucher is now marked as used
       const validation = await validateVoucher(context, {
         voucherAddress: singleUseSigner.publicKey,
-        merchantId: 'test_merchant_001',
       })
 
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Voucher is used')
+      expect(validation.voucher).toBeDefined()
+      expect(validation.voucher!.status).toBe('used')
+    })
+  })
+
+  describe('Redemption history tracking', () => {
+    it('should record redemption history after successful redemption', async () => {
+      const updateAuthority = createSignerFromKeypair(context.umi, feePayer)
+
+      // Create a new voucher for this test
+      const historyVoucherSigner = generateSigner(context.umi)
+      const historyConfig = createTestVoucherConfig({
+        collectionAddress,
+        updateAuthority,
+        assetSigner: historyVoucherSigner,
+        voucherData: {
+          type: 'percentage_off',
+          value: 25,
+          description: '25% off with history tracking',
+          expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+          maxUses: 2,
+          transferable: false,
+          merchantId: 'test_merchant_001',
+        },
+      })
+
+      await mintVoucher(context, historyConfig)
+
+      // Redeem voucher with details
+      const result = await redeemVoucher(context, {
+        voucherAddress: historyVoucherSigner.publicKey,
+        merchantId: 'test_merchant_001',
+        updateAuthority,
+        redemptionAmount: 200,
+        redemptionDetails: {
+          transactionId: 'tx_123',
+          items: ['coffee', 'sandwich'],
+          totalAmount: 200,
+          discountApplied: 50,
+        },
+      })
+
+      expect(result.success).toBe(true)
+
+      // Verify redemption history was recorded
+      const validation = await validateVoucher(context, {
+        voucherAddress: historyVoucherSigner.publicKey,
+      })
+
+      expect(validation.voucher).toBeDefined()
+      expect(validation.voucher!.redemptionHistory).toBeDefined()
+      expect(validation.voucher!.redemptionHistory!.length).toBe(1)
+
+      const redemptionRecord = validation.voucher!.redemptionHistory![0]
+      expect(redemptionRecord.timestamp).toBeGreaterThan(0)
+      expect(redemptionRecord.redemptionValue).toBe(50) // 25% of 200
+      expect(redemptionRecord.transactionId).toBe('tx_123')
+      expect(redemptionRecord.items).toEqual(['coffee', 'sandwich'])
+      expect(redemptionRecord.totalAmount).toBe(200)
+      expect(redemptionRecord.discountApplied).toBe(50)
+    })
+
+    it('should accumulate multiple redemption records', async () => {
+      const updateAuthority = createSignerFromKeypair(context.umi, feePayer)
+
+      // Create a multi-use voucher
+      const multiUseVoucherSigner = generateSigner(context.umi)
+      const multiUseConfig = createTestVoucherConfig({
+        collectionAddress,
+        updateAuthority,
+        assetSigner: multiUseVoucherSigner,
+        voucherData: {
+          type: 'fixed_verxio_credits',
+          value: 50,
+          description: '50 credits multi-use',
+          expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+          maxUses: 3,
+          transferable: false,
+          merchantId: 'test_merchant_001',
+        },
+      })
+
+      await mintVoucher(context, multiUseConfig)
+
+      // First redemption
+      await redeemVoucher(context, {
+        voucherAddress: multiUseVoucherSigner.publicKey,
+        merchantId: 'test_merchant_001',
+        updateAuthority,
+        redemptionAmount: 100,
+        redemptionDetails: {
+          transactionId: 'tx_1',
+          totalAmount: 100,
+        },
+      })
+
+      // Second redemption
+      await redeemVoucher(context, {
+        voucherAddress: multiUseVoucherSigner.publicKey,
+        merchantId: 'test_merchant_001',
+        updateAuthority,
+        redemptionAmount: 150,
+        redemptionDetails: {
+          transactionId: 'tx_2',
+          totalAmount: 150,
+        },
+      })
+
+      // Verify both redemptions are recorded
+      const validation = await validateVoucher(context, {
+        voucherAddress: multiUseVoucherSigner.publicKey,
+      })
+
+      expect(validation.voucher).toBeDefined()
+      expect(validation.voucher!.redemptionHistory).toBeDefined()
+      expect(validation.voucher!.redemptionHistory!.length).toBe(2)
+      expect(validation.voucher!.currentUses).toBe(2)
+      expect(validation.voucher!.status).toBe('active') // Still has 1 use left
+
+      // Check first redemption record
+      const firstRecord = validation.voucher!.redemptionHistory![0]
+      expect(firstRecord.transactionId).toBe('tx_1')
+      expect(firstRecord.redemptionValue).toBe(50) // Fixed credits value
+
+      // Check second redemption record
+      const secondRecord = validation.voucher!.redemptionHistory![1]
+      expect(secondRecord.transactionId).toBe('tx_2')
+      expect(secondRecord.redemptionValue).toBe(50) // Fixed credits value
     })
   })
 })

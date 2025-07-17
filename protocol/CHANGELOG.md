@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - Add more granular changelog entries for future releases here.
 
-## [0.1.2] - 2024-06-01
+## [0.1.3] - 2024-06-01
 
 ### Added
 

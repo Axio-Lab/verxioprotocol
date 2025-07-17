@@ -3,13 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { sendMessage, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
@@ -28,13 +26,11 @@ interface MessageResult {
 }
 
 interface MessagingFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
   onSuccess?: (result: MessageResult) => void
   onError?: (error: Error) => void
 }
 
-export default function MessagingForm({ context, signer, onSuccess, onError }: MessagingFormProps) {
+export default function MessagingForm({ onSuccess, onError }: MessagingFormProps) {
   const [messageResult, setMessageResult] = useState<MessageResult | null>(null)
 
   const form = useForm<FormData>({
@@ -57,18 +53,31 @@ export default function MessagingForm({ context, signer, onSuccess, onError }: M
         })
         return
       }
-      context.collectionAddress = publicKey(data.collectionAddress)
-      // Format data for sendMessage
-      const messageData = {
-        passAddress: publicKey(data.passAddress),
+
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
         message: data.message,
-        sender: context.programAuthority,
-        signer,
       }
 
-      const result = await sendMessage(context, messageData)
-      setMessageResult(result)
-      onSuccess?.(result)
+      // Call the backend API
+      const response = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send message')
+      }
+
+      const result = await response.json()
+      setMessageResult(result.result)
+      onSuccess?.(result.result)
 
       // Reset form after successful sending
       form.reset({

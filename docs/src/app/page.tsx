@@ -27,6 +27,10 @@ import { publicKey, keypairIdentity } from '@metaplex-foundation/umi'
 
 // Initialize the SDK
 const umi = createUmi('https://api.devnet.solana.com')
+
+// Add Irys uploader for metadata/image uploads (Optional)
+umi.use(irysUploader())
+
 const context = initializeVerxio(umi, publicKey('PROGRAM_AUTHORITY'))
 context.umi.use(keypairIdentity('FEE_PAYER'))
 

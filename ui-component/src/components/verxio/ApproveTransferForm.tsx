@@ -3,16 +3,15 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { approveTransfer, VerxioContext } from '@verxioprotocol/core'
 import { VerxioForm } from './base/VerxioForm'
 import { VerxioFormSection } from './base/VerxioFormSection'
 import { VerxioFormField } from './base/VerxioFormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { publicKey, KeypairSigner } from '@metaplex-foundation/umi'
 import { useState } from 'react'
 
 const formSchema = z.object({
+  collectionAddress: z.string().min(1, 'Collection address is required'),
   passAddress: z.string().min(1, 'Pass address is required'),
   newOwner: z.string().min(1, 'New owner address is required'),
 })
@@ -20,18 +19,16 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 interface ApproveTransferFormProps {
-  context: VerxioContext
-  signer: KeypairSigner
-  onSuccess?: () => void
   onError?: (error: Error) => void
 }
 
-export default function ApproveTransferForm({ context, signer, onSuccess, onError }: ApproveTransferFormProps) {
+export default function ApproveTransferForm({ onError }: ApproveTransferFormProps) {
   const [isSuccess, setIsSuccess] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      collectionAddress: '',
       passAddress: '',
       newOwner: '',
     },
@@ -49,15 +46,39 @@ export default function ApproveTransferForm({ context, signer, onSuccess, onErro
         return
       }
 
-      await approveTransfer(context, publicKey(data.passAddress), publicKey(data.newOwner))
-      setIsSuccess(true)
-      onSuccess?.()
+      // Prepare the request payload
+      const payload = {
+        collectionAddress: data.collectionAddress,
+        passAddress: data.passAddress,
+        newOwner: data.newOwner,
+      }
 
-      // Reset form after successful transfer
-      form.reset()
+      // Call the backend API
+      const response = await fetch('/api/approve-transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to approve transfer')
+      }
+
+      const result = await response.json()
+      setIsSuccess(true)
+
+      // Reset form after successful approval
+      form.reset({
+        collectionAddress: '',
+        passAddress: '',
+        newOwner: '',
+      })
     } catch (error) {
       console.error(error)
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred while approving the transfer'
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while approving transfer'
       form.setError('root', { message: errorMessage })
       onError?.(error instanceof Error ? error : new Error(errorMessage))
     }
@@ -68,6 +89,17 @@ export default function ApproveTransferForm({ context, signer, onSuccess, onErro
       <VerxioForm form={form} onSubmit={onSubmit} className="space-y-8">
         <VerxioFormSection title="Transfer Information" description="Enter the details of the loyalty pass transfer">
           <div className="space-y-6">
+            <VerxioFormField
+              form={form}
+              name="collectionAddress"
+              label="Collection Address"
+              description="The address of the voucher or pass collection"
+            >
+              <Input
+                placeholder="Enter the collection address"
+                onChange={(e) => form.setValue('collectionAddress', e.target.value)}
+              />
+            </VerxioFormField>
             <VerxioFormField
               form={form}
               name="passAddress"

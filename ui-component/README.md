@@ -1,6 +1,6 @@
-# Verxio UI Component Library
+# Verxio UI Component Demo
 
-A comprehensive React component library for building Verxio Protocol applications with beautiful, accessible, and customizable UI components.
+A Next.js demo application showcasing Verxio Protocol UI components and functionality.
 
 ## Features
 
@@ -10,73 +10,86 @@ A comprehensive React component library for building Verxio Protocol application
 - **Accessible Components**: Built on Radix UI primitives for excellent accessibility
 - **Customizable Styling**: Tailwind CSS with customizable design tokens
 - **Wallet Integration**: Seamless Solana wallet integration
+- **Netlify Ready**: Configured for easy deployment on Netlify
 
-## Installation
+## Getting Started
 
-```bash
-npm install @verxioprotocol/components
-# or
-yarn add @verxioprotocol/components
-# or
-pnpm add @verxioprotocol/components
-```
+### Prerequisites
 
-## Quick Start
+- Node.js 18+
+- pnpm (recommended) or npm
 
-### Basic Setup
-
-```tsx
-import { CreateLoyaltyProgramForm } from '@verxioprotocol/components'
-
-function App() {
-  const context = // Your Verxio context
-  const signer = // Your signer
-
-  return (
-    <CreateLoyaltyProgramForm
-      context={context}
-      signer={signer}
-      onSuccess={(result) => console.log('Program created:', result)}
-      onError={(error) => console.error('Error:', error)}
-    />
-  )
-}
-```
-
-### Image Upload Setup
-
-The component library includes server-side image upload functionality. To enable this, you need to:
-
-1. **Install the Irys uploader package** in your server environment:
+### Installation
 
 ```bash
-npm install @metaplex-foundation/umi-uploader-irys
+# Clone the repository
+git clone <repository-url>
+cd ui-component
+
+# Install dependencies
+pnpm install
+# or
+npm install
 ```
 
-2. **Create an API route** for image uploads (already included in this library):
+### Environment Setup
 
-```typescript
-// app/api/upload-image/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
-import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
-import { createGenericFile } from '@metaplex-foundation/umi'
+Create a `.env.local` file in the root directory:
 
-export async function POST(request: NextRequest) {
-  // Implementation included in the library
-}
+```env
+# Solana Secret Key (for testing)
+SECRET_KEY=your_base58_encoded_secret_key_here
+
+# Optional: Custom RPC endpoint
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
 ```
 
-3. **Use the upload functionality** in your forms:
+### Development
 
-```tsx
-// The forms automatically handle image uploads when you select "Upload Image"
-<CreateLoyaltyProgramForm
-  context={context}
-  signer={signer}
-  // Image upload is handled automatically
-/>
+```bash
+# Start the development server
+pnpm dev
+# or
+npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) to view the demo.
+
+### Building for Production
+
+```bash
+# Build the application
+pnpm build
+# or
+npm run build
+
+# Start the production server
+pnpm start
+# or
+npm start
+```
+
+## Deployment
+
+### Netlify
+
+This project is configured for easy deployment on Netlify:
+
+1. **Connect your repository** to Netlify
+2. **Build settings**:
+   - Build command: `npm run build`
+   - Publish directory: `out`
+3. **Environment variables**: Add your `SECRET_KEY` in Netlify's environment variables
+4. **Deploy**: Netlify will automatically detect this as a Next.js project
+
+### Other Platforms
+
+The project uses static export (`output: 'export'`), making it compatible with any static hosting platform:
+
+- Vercel
+- GitHub Pages
+- AWS S3
+- Cloudflare Pages
 
 ## Available Components
 
@@ -113,65 +126,63 @@ export async function POST(request: NextRequest) {
 - `GetProgramDetailsForm` - Get program details
 - `ApproveTransferForm` - Approve transfers
 
-## Form Features
+## Project Structure
 
-### Image Upload Support
+```
+src/
+├── app/                 # Next.js App Router
+│   ├── api/            # API routes
+│   ├── globals.css     # Global styles
+│   ├── layout.tsx      # Root layout
+│   └── page.tsx        # Home page
+├── components/         # UI components
+│   ├── ui/            # Base UI components
+│   └── verxio/        # Verxio-specific forms
+└── lib/               # Utility functions
+```
 
-All forms that support metadata can handle image uploads:
+## API Routes
 
-1. **Pre-uploaded URI**: Provide a metadata URI that's already uploaded
-2. **Image Upload**: Upload an image file that gets automatically processed
+The demo includes API routes for all Verxio Protocol operations:
 
-### Validation
+- `/api/create-loyalty-program` - Create loyalty programs
+- `/api/mint-voucher` - Mint vouchers
+- `/api/validate-voucher` - Validate vouchers
+- `/api/redeem-voucher` - Redeem vouchers
+- `/api/gift-loyalty-points` - Gift loyalty points
+- And many more...
 
-- Comprehensive form validation using Zod schemas
-- Real-time error feedback
-- Type-safe form handling
+## Customization
 
-### Loading States
+### Styling
 
-- Upload progress indicators
-- Transaction status feedback
-- Disabled states during operations
+The components use Tailwind CSS and can be customized in `tailwind.config.js`:
 
-## Styling
-
-The components use Tailwind CSS and can be customized using:
-
-```css
-/* Custom CSS variables */
-:root {
-  --verxio-primary: #00adef;
-  --verxio-secondary: #6366f1;
+```js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        verxio: {
+          primary: '#00adef',
+          secondary: '#6366f1',
+        },
+      },
+    },
+  },
 }
 ```
 
-## TypeScript Support
+### Environment Variables
 
-All components are fully typed with TypeScript:
+Configure your environment for different networks:
 
-```tsx
-import type { VerxioContext } from '@verxioprotocol/core'
+```env
+# Development
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
 
-interface FormProps {
-  context: VerxioContext
-  signer: KeypairSigner
-  onSuccess?: (result: any) => void
-  onError?: (error: Error) => void
-}
-```
-
-## Error Handling
-
-Components include comprehensive error handling:
-
-```tsx
-<CreateLoyaltyProgramForm
-  onError={(error) => {
-    console.error('Form error:', error)
-    // Handle error appropriately
-  }}
-/>
+# Production
+NEXT_PUBLIC_RPC_URL=https://api.mainnet-beta.solana.com
 ```
 
 ## Contributing

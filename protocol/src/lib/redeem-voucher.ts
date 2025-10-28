@@ -10,13 +10,14 @@ import { createFeeInstruction } from '@/utils/fee-structure'
 export interface RedeemVoucherConfig extends ValidateVoucherConfig {
   updateAuthority: KeypairSigner
   merchantId: string
-  redemptionAmount?: number // For percentage_off and fixed_verxio_credits
+  redemptionAmount?: number // Required for voucher types that need it (e.g., percentage-based vouchers)
   redemptionDetails?: {
     transactionId?: string
     items?: string[]
     totalAmount?: number
     discountApplied?: number
     creditsUsed?: number
+    redemptionMessage?: string
   }
 }
 
@@ -101,28 +102,26 @@ export async function redeemVoucher(
 }
 
 function calculateRedemptionValue(voucher: VoucherData, redemptionAmount?: number): number {
-  switch (voucher.type) {
-    case 'percentage_off':
-      if (!redemptionAmount) {
-        throw new Error('Redemption amount required for percentage_off voucher')
-      }
-      return (redemptionAmount * voucher.value) / 100
+  // Handle common voucher type patterns for backward compatibility
+  const type = voucher.type.toLowerCase()
 
-    case 'fixed_verxio_credits':
-      return voucher.value
-
-    case 'free_item':
-      return voucher.value // Could represent item value or just 1 for quantity
-
-    case 'buy_one_get_one':
-      return voucher.value // Could represent value of free item
-
-    case 'custom_reward':
-      return voucher.value // Custom value as defined
-
-    default:
-      return 0
+  // Percentage-based vouchers (e.g., 'percentage_off', 'percent_discount', 'pct_off')
+  if (type.includes('percentage') || type.includes('percent') || type.includes('pct')) {
+    if (!redemptionAmount) {
+      throw new Error(`Redemption amount required for percentage-based voucher type: ${voucher.type}`)
+    }
+    return (redemptionAmount * voucher.value) / 100
   }
+
+  // Fixed credits/amount vouchers (e.g., 'fixed_verxio_credits', 'fixed_credits', 'fixed_amount')
+  if (type.includes('fixed') && (type.includes('credit') || type.includes('amount'))) {
+    // For fixed credits, value represents credits per redemption
+    return voucher.value
+  }
+
+  // For all other voucher types, return the voucher value
+  // Merchants can handle custom logic in their application layer
+  return voucher.value
 }
 
 function updateVoucherForRedemption(
@@ -135,6 +134,10 @@ function updateVoucherForRedemption(
     currentUses: voucher.currentUses + 1,
     usedAt: Date.now(),
   }
+
+  // For multi-use vouchers with fixed value types, value typically represents the amount per redemption
+  // The value stays the same (same amount per use), so we don't reduce it
+  // Merchants define the semantics of the value field based on their voucher type
 
   // If this was the last use, mark as used
   if (updatedVoucher.currentUses >= updatedVoucher.maxUses) {
@@ -150,6 +153,7 @@ function updateVoucherForRedemption(
     totalAmount: redemptionDetails?.totalAmount,
     discountApplied: redemptionDetails?.discountApplied,
     creditsUsed: redemptionDetails?.creditsUsed,
+    redemptionMessage: redemptionDetails?.redemptionMessage,
   }
 
   // Initialize redemptionHistory if it doesn't exist
@@ -164,20 +168,27 @@ function updateVoucherForRedemption(
 
 // Helper function to get voucher value for display/calculation purposes
 export function getVoucherDisplayValue(voucher: VoucherData): string {
-  switch (voucher.type) {
-    case 'percentage_off':
-      return `${voucher.value}% off`
-    case 'fixed_verxio_credits':
-      return `${voucher.value} Verxio Credits`
-    case 'free_item':
-      return `Free ${voucher.description}`
-    case 'buy_one_get_one':
-      return `Buy One Get One Free`
-    case 'custom_reward':
-      return voucher.description
-    default:
-      return voucher.description
+  const type = voucher.type.toLowerCase()
+
+  // Handle common patterns for backward compatibility
+  if (type.includes('percentage') || type.includes('percent') || type.includes('pct')) {
+    return `${voucher.value}% off`
   }
+
+  if (type.includes('fixed') && type.includes('credit')) {
+    return `${voucher.value} Verxio Credits`
+  }
+
+  if (type.includes('free')) {
+    return `Free ${voucher.description}`
+  }
+
+  if (type.includes('buy_one_get_one') || type.includes('bogo')) {
+    return `Buy One Get One Free`
+  }
+
+  // For custom types, return description or formatted value
+  return voucher.description || `${voucher.value}`
 }
 
 // Helper function to check if voucher can be redeemed multiple times

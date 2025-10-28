@@ -9,7 +9,7 @@ export interface GetUserVouchersConfig {
   collectionAddress?: PublicKey
   merchantId?: string
   status?: 'active' | 'used' | 'expired' | 'cancelled'
-  voucherType?: 'percentage_off' | 'fixed_verxio_credits' | 'free_item' | 'buy_one_get_one' | 'custom_reward'
+  voucherType?: string // Filter by voucher type (can be any merchant-defined type)
   limit?: number
   offset?: number
 }

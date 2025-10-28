@@ -7,7 +7,7 @@ import { createFeeInstruction } from '@/utils/fee-structure'
 import { generateVoucherMetadata, uploadImage } from './metadata/generate-nft-metadata'
 
 export interface VoucherData {
-  type: 'percentage_off' | 'fixed_verxio_credits' | 'free_item' | 'buy_one_get_one' | 'custom_reward'
+  type: string // Flexible voucher type defined by merchant (e.g., 'percentage_off', 'fixed_credits', 'free_coffee', etc.)
   value: number
   description: string
   expiryDate: number
@@ -20,6 +20,8 @@ export interface VoucherData {
   merchantId: string
   conditions?: VoucherCondition[]
   redemptionHistory?: VoucherRedemptionRecord[]
+  cancellationMessage?: string
+  xpReward?: number // XP points to award when voucher is redeemed
 }
 
 export interface VoucherCondition {
@@ -36,6 +38,7 @@ export interface VoucherRedemptionRecord {
   totalAmount?: number
   discountApplied?: number
   creditsUsed?: number
+  redemptionMessage?: string
 }
 
 export interface MintVoucherConfig {
@@ -43,7 +46,7 @@ export interface MintVoucherConfig {
   recipient: PublicKey
   voucherName: string
   voucherData: {
-    type: 'percentage_off' | 'fixed_verxio_credits' | 'free_item' | 'buy_one_get_one' | 'custom_reward'
+    type: string // Flexible voucher type defined by merchant
     value: number
     description: string
     expiryDate: number
@@ -51,6 +54,7 @@ export interface MintVoucherConfig {
     transferable?: boolean // Default: false
     merchantId: string
     conditions?: VoucherCondition[]
+    xpReward?: number // XP points to award when voucher is redeemed
   }
   assetSigner?: KeypairSigner
   updateAuthority: KeypairSigner
@@ -110,6 +114,7 @@ export async function mintVoucher(
       merchantId: config.voucherData.merchantId,
       conditions: config.voucherData.conditions || [],
       redemptionHistory: [],
+      xpReward: config.voucherData.xpReward,
     }
 
     const txnInstruction = create(context.umi, {
@@ -137,6 +142,9 @@ export async function mintVoucher(
             { key: 'voucherType', value: config.voucherData.type },
             { key: 'merchantId', value: config.voucherData.merchantId },
             { key: 'transferable', value: voucherData.transferable.toString() },
+            ...(config.voucherData.xpReward !== undefined
+              ? [{ key: ATTRIBUTE_KEYS.XP, value: config.voucherData.xpReward.toString() }]
+              : []),
           ],
         },
         {

@@ -9,6 +9,7 @@ import { getTestContext } from './helpers/get-test-context'
 import { ensureFeePayerBalance } from './helpers/ensure-fee-payer-balance'
 import { createVoucherCollection, CreateVoucherCollectionConfig } from '../lib/create-voucher-collection'
 import { FEES } from '../utils/fee-structure'
+import { getProgramTiers } from '../lib/get-program-tiers'
 
 const { feePayer, context } = getTestContext()
 
@@ -380,6 +381,103 @@ describe('create-voucher-collection', { sequential: true, timeout: 30000 }, () =
           expect(error.message).toContain('UMI is undefined')
         }
       })
+    })
+  })
+
+  describe('voucher collection tiers', () => {
+    it('should create voucher collection with default tiers if tiers not specified', async () => {
+      // ARRANGE
+      const config = createTestVoucherCollectionConfig({
+        programAuthority: context.programAuthority,
+        metadata: {
+          merchantName: 'Test Merchant',
+          merchantAddress: 'test_merchant_001',
+          voucherTypes: ['discount'],
+        },
+      })
+
+      // ACT
+      const result = await createVoucherCollection(context, config)
+      context.collectionAddress = result.collection.publicKey
+
+      // ASSERT
+      const tiers = await getProgramTiers(context)
+      expect(tiers).toBeTruthy()
+      expect(tiers.length).toBe(4)
+      expect(tiers[0].name).toBe('Grind')
+      expect(tiers[0].xpRequired).toBe(0)
+      expect(tiers[1].name).toBe('Bronze')
+      expect(tiers[1].xpRequired).toBe(500)
+      expect(tiers[2].name).toBe('Silver')
+      expect(tiers[2].xpRequired).toBe(1000)
+      expect(tiers[3].name).toBe('Gold')
+      expect(tiers[3].xpRequired).toBe(2000)
+    })
+
+    it('should create voucher collection with custom tier names using default thresholds', async () => {
+      // ARRANGE
+      const config = createTestVoucherCollectionConfig({
+        programAuthority: context.programAuthority,
+        metadata: {
+          merchantName: 'Test Merchant',
+          merchantAddress: 'test_merchant_002',
+          voucherTypes: ['discount'],
+        },
+        tiers: [{ name: 'Starter' }, { name: 'Regular' }, { name: 'Pro' }, { name: 'VIP' }],
+      })
+
+      // ACT
+      const result = await createVoucherCollection(context, config)
+      context.collectionAddress = result.collection.publicKey
+
+      // ASSERT
+      const tiers = await getProgramTiers(context)
+      expect(tiers).toBeTruthy()
+      expect(tiers.length).toBe(4)
+      expect(tiers[0].name).toBe('Starter')
+      expect(tiers[0].xpRequired).toBe(0) // Default threshold
+      expect(tiers[1].name).toBe('Regular')
+      expect(tiers[1].xpRequired).toBe(500) // Default threshold
+      expect(tiers[2].name).toBe('Pro')
+      expect(tiers[2].xpRequired).toBe(1000) // Default threshold
+      expect(tiers[3].name).toBe('VIP')
+      expect(tiers[3].xpRequired).toBe(2000) // Default threshold
+    })
+
+    it('should create voucher collection with custom tier names and custom thresholds', async () => {
+      // ARRANGE
+      const config = createTestVoucherCollectionConfig({
+        programAuthority: context.programAuthority,
+        metadata: {
+          merchantName: 'Test Merchant',
+          merchantAddress: 'test_merchant_003',
+          voucherTypes: ['discount'],
+        },
+        tiers: [
+          { name: 'Beginner', xpRequired: 0, rewards: ['Welcome bonus'] },
+          { name: 'Intermediate', xpRequired: 300, rewards: ['5% discount'] },
+          { name: 'Advanced', xpRequired: 800, rewards: ['10% discount'] },
+          { name: 'Expert', xpRequired: 1500, rewards: ['15% discount'] },
+        ],
+      })
+
+      // ACT
+      const result = await createVoucherCollection(context, config)
+      context.collectionAddress = result.collection.publicKey
+
+      // ASSERT
+      const tiers = await getProgramTiers(context)
+      expect(tiers).toBeTruthy()
+      expect(tiers.length).toBe(4)
+      expect(tiers[0].name).toBe('Beginner')
+      expect(tiers[0].xpRequired).toBe(0)
+      expect(tiers[0].rewards).toEqual(['Welcome bonus'])
+      expect(tiers[1].name).toBe('Intermediate')
+      expect(tiers[1].xpRequired).toBe(300)
+      expect(tiers[2].name).toBe('Advanced')
+      expect(tiers[2].xpRequired).toBe(800)
+      expect(tiers[3].name).toBe('Expert')
+      expect(tiers[3].xpRequired).toBe(1500)
     })
   })
 })

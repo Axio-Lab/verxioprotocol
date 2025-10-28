@@ -11,7 +11,7 @@ export interface MintVoucherInstructionConfig {
   recipient: PublicKey
   voucherName: string
   voucherData: {
-    type: 'percentage_off' | 'fixed_verxio_credits' | 'free_item' | 'buy_one_get_one' | 'custom_reward'
+    type: string // Flexible voucher type defined by merchant
     value: number
     description: string
     expiryDate: number
@@ -19,6 +19,7 @@ export interface MintVoucherInstructionConfig {
     transferable?: boolean // Default: false
     merchantId: string
     conditions?: VoucherCondition[]
+    xpReward?: number // XP points to award when voucher is redeemed
   }
   assetSigner?: KeypairSigner
   updateAuthority: KeypairSigner
@@ -77,6 +78,8 @@ export async function mintVoucherInstruction(
     issuedAt: Date.now(),
     merchantId: config.voucherData.merchantId,
     conditions: config.voucherData.conditions || [],
+    redemptionHistory: [],
+    xpReward: config.voucherData.xpReward,
   }
 
   // Create the base instruction
@@ -105,6 +108,9 @@ export async function mintVoucherInstruction(
           { key: 'voucherType', value: config.voucherData.type },
           { key: 'merchantId', value: config.voucherData.merchantId },
           { key: 'transferable', value: voucherData.transferable.toString() },
+          ...(config.voucherData.xpReward !== undefined
+            ? [{ key: ATTRIBUTE_KEYS.XP, value: config.voucherData.xpReward.toString() }]
+            : []),
         ],
       },
       {

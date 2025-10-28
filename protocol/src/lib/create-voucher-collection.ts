@@ -6,7 +6,8 @@ import {
   ExternalPluginAdapterSchema,
   writeCollectionExternalPluginAdapterDataV1,
 } from '@metaplex-foundation/mpl-core'
-import { ATTRIBUTE_KEYS, DEFAULT_VOUCHER_COLLECTION_DATA, PLUGIN_TYPES } from '@lib/constants'
+import { ATTRIBUTE_KEYS, DEFAULT_VOUCHER_COLLECTION_DATA, DEFAULT_VOUCHER_TIERS, PLUGIN_TYPES } from '@lib/constants'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
 import { VerxioContext } from '@schemas/verxio-context'
 import { toBase58 } from '@utils/to-base58'
 import { assertValidContext } from '@utils/assert-valid-context'
@@ -25,6 +26,12 @@ export interface CreateVoucherCollectionConfig {
     voucherTypes: string[] // ["discount", "free_item", "credits"]
     [key: string]: any // Allow additional metadata fields
   }
+  // Tier configuration - optional custom tier names, uses default thresholds if not provided
+  tiers?: Array<{
+    name: string // Custom tier name (e.g., "Starter", "Pro", "VIP")
+    xpRequired?: number // Optional: if not provided, uses default thresholds
+    rewards?: string[] // Optional rewards for this tier
+  }>
   // New image and metadata options
   imageBuffer?: Buffer
   imageFilename?: string
@@ -72,7 +79,7 @@ export async function createVoucherCollection(
     )
 
     // Create collection with plugins
-    const txnInstruction = createCollection(context.umi, {
+    const createTxn = await createCollection(context.umi, {
       collection,
       name: config.voucherCollectionName,
       plugins: createVoucherCollectionPlugins(config, updateAuthority.publicKey),
@@ -80,26 +87,34 @@ export async function createVoucherCollection(
       updateAuthority: updateAuthority.publicKey,
     })
       .add(feeInstruction)
-      .add(
-        writeCollectionExternalPluginAdapterDataV1(context.umi, {
-          collection: collection.publicKey,
-          authority: updateAuthority,
-          key: {
-            __kind: PLUGIN_TYPES.APP_DATA,
-            fields: [
-              {
-                __kind: 'Address',
-                address: updateAuthority.publicKey,
-              },
-            ],
-          },
-          data: new TextEncoder().encode(JSON.stringify(DEFAULT_VOUCHER_COLLECTION_DATA)),
-        }),
-      )
+      .sendAndConfirm(context.umi, {
+        confirm: { commitment: 'confirmed' },
+      })
 
-    const txn = await txnInstruction.sendAndConfirm(context.umi, {
-      confirm: { commitment: 'confirmed' },
-    })
+    // Initialize collection data in a separate transaction to avoid size limits
+    try {
+      await writeCollectionExternalPluginAdapterDataV1(context.umi, {
+        collection: collection.publicKey,
+        authority: updateAuthority,
+        key: {
+          __kind: PLUGIN_TYPES.APP_DATA,
+          fields: [
+            {
+              __kind: 'Address',
+              address: updateAuthority.publicKey,
+            },
+          ],
+        },
+        data: new TextEncoder().encode(JSON.stringify(DEFAULT_VOUCHER_COLLECTION_DATA)),
+      }).sendAndConfirm(context.umi, {
+        confirm: { commitment: 'confirmed' },
+      })
+    } catch (error) {
+      // If data initialization fails, collection is still created, log but don't fail
+      console.warn('Failed to initialize collection data:', error)
+    }
+
+    const txn = createTxn
 
     return { collection, signature: toBase58(txn.signature), updateAuthority }
   } catch (error) {
@@ -111,6 +126,19 @@ export function createVoucherCollectionPlugins(
   config: CreateVoucherCollectionConfig,
   updateAuthority: PublicKey,
 ): CreateCollectionArgsPlugin[] {
+  // Create tiers: use custom names if provided, otherwise use defaults
+  // Default thresholds: 0, 500, 1000, 2000
+  const tiers: LoyaltyProgramTier[] = config.tiers
+    ? config.tiers.map((customTier, index) => {
+        const defaultTier = DEFAULT_VOUCHER_TIERS[index] ?? DEFAULT_VOUCHER_TIERS[DEFAULT_VOUCHER_TIERS.length - 1]
+        return {
+          name: customTier.name,
+          xpRequired: customTier.xpRequired ?? defaultTier.xpRequired,
+          rewards: customTier.rewards ?? defaultTier.rewards,
+        }
+      })
+    : DEFAULT_VOUCHER_TIERS
+
   return [
     {
       type: PLUGIN_TYPES.ATTRIBUTES,
@@ -118,8 +146,7 @@ export function createVoucherCollectionPlugins(
         { key: ATTRIBUTE_KEYS.PROGRAM_TYPE, value: 'voucher' },
         { key: ATTRIBUTE_KEYS.CREATOR, value: config.programAuthority.toString() },
         { key: ATTRIBUTE_KEYS.METADATA, value: JSON.stringify(config.metadata) },
-        { key: 'voucherTypes', value: JSON.stringify(config.metadata.voucherTypes) },
-        { key: 'merchantId', value: config.metadata.merchantAddress },
+        { key: ATTRIBUTE_KEYS.TIERS, value: JSON.stringify(tiers) },
       ],
     },
     {

@@ -6,7 +6,7 @@ import { awardPoints, revokePoints, giftPoints } from '@/lib/methods/manageLoyal
 import { convertSecretKeyToKeypair } from '@/lib/utils'
 import { getPassCollection, storeLoyaltyPass } from './loyalty'
 import { getProgramAuthorityAccount } from './program'
-import { cache } from 'react'
+import { unstable_cache as cache } from 'next/cache'
 import bs58 from 'bs58'
 import { Network } from '@/lib/methods/serverProgram'
 import { createServerContextWithFeePayer } from '@/lib/methods/serverContext'

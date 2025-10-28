@@ -65,7 +65,9 @@ export async function reduceVoucherXpReward(
 
     // Validate reduction amount
     if (config.xpToReduce > voucherData.xpReward) {
-      result.errors.push(`Cannot reduce ${config.xpToReduce} XP. Voucher only has ${voucherData.xpReward} XP reward remaining`)
+      result.errors.push(
+        `Cannot reduce ${config.xpToReduce} XP. Voucher only has ${voucherData.xpReward} XP reward remaining`,
+      )
       return result
     }
 
@@ -131,4 +133,3 @@ function assertValidReduceVoucherXpRewardConfig(config: ReduceVoucherXpRewardCon
     throw new Error('assertValidReduceVoucherXpRewardConfig: XP to reduce must be greater than 0')
   }
 }
-

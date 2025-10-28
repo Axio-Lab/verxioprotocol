@@ -245,7 +245,7 @@ describe('reduceVoucherXpReward', { sequential: true, timeout: 30000 }, () => {
       // Create and cancel a voucher
       const cancelVoucherSigner = generateSigner(context.umi)
       const { cancelVoucher } = await import('../lib/cancel-voucher')
-      
+
       const cancelVoucherResult = await mintVoucher(context, {
         ...createTestVoucherConfig(),
         collectionAddress,
@@ -406,10 +406,9 @@ describe('reduceVoucherXpReward', { sequential: true, timeout: 30000 }, () => {
       expect(after.voucher?.currentUses).toBe(before.voucher?.currentUses)
       expect(after.voucher?.status).toBe(before.voucher?.status)
       expect(after.voucher?.merchantId).toBe(before.voucher?.merchantId)
-      
+
       // Only XP reward should change
       expect(after.voucher?.xpReward).toBe(before.voucher!.xpReward! - 200)
     })
   })
 })
-

@@ -423,12 +423,7 @@ describe('create-voucher-collection', { sequential: true, timeout: 30000 }, () =
           merchantAddress: 'test_merchant_002',
           voucherTypes: ['discount'],
         },
-        tiers: [
-          { name: 'Starter' },
-          { name: 'Regular' },
-          { name: 'Pro' },
-          { name: 'VIP' },
-        ],
+        tiers: [{ name: 'Starter' }, { name: 'Regular' }, { name: 'Pro' }, { name: 'VIP' }],
       })
 
       // ACT

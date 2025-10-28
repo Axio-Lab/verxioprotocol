@@ -687,11 +687,7 @@ const result = await createVoucherCollection(context, {
     voucherTypes: ['discount', 'free_item', 'credits'],
   },
   // Optional: Custom tier names with default thresholds
-  tiers: [
-    { name: 'Member' },
-    { name: 'VIP' },
-    { name: 'Elite' },
-  ],
+  tiers: [{ name: 'Member' }, { name: 'VIP' }, { name: 'Elite' }],
 })
 // The protocol will upload the image, generate metadata, and use the resulting URI
 ```
@@ -909,6 +905,7 @@ Verxio Protocol supports **flexible, merchant-defined voucher types**. Merchants
 The system automatically recognizes these patterns for value calculation:
 
 **Percentage-Based Vouchers** (type contains 'percentage', 'percent', or 'pct'):
+
 ```typescript
 {
   type: 'percentage_off', // or 'percent_discount', 'pct_off', etc.
@@ -918,6 +915,7 @@ The system automatically recognizes these patterns for value calculation:
 ```
 
 **Fixed Credits/Amount Vouchers** (type contains 'fixed' and 'credit'/'amount'):
+
 ```typescript
 {
   type: 'fixed_verxio_credits', // or 'fixed_credits', 'fixed_amount', etc.

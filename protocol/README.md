@@ -34,22 +34,26 @@ On-chain loyalty infrastructure for creating and managing loyalty programs on so
 ### Complete Voucher Management System
 
 - **Create, mint, validate, and redeem vouchers** with full lifecycle management
-- **Voucher Collections** - Organize vouchers by merchant and type
+- **Voucher Collections** - Organize vouchers by merchant and type with tier support
+- **Flexible Voucher Types** - Merchants define their own voucher types (e.g., 'percentage_off', 'free_coffee', 'birthday_discount')
+- **XP Rewards Integration** - Vouchers can award loyalty points on redemption
+- **Tier-Based Rewards** - Voucher collections support tier systems for XP-based reward structures
 - **Voucher Analytics** - Track redemption rates, usage patterns, and performance metrics
 - **User Voucher Management** - Get user vouchers with filtering and sorting
 - **Merchant Voucher Operations** - Bulk operations and merchant-specific analytics
 - **Voucher Validation** - Comprehensive validation with expiry and usage tracking
-- **Voucher Redemption** - Multi-type voucher redemption with value calculation
-- **Voucher Expiry Management** - Extend or cancel vouchers with reason tracking
+- **Voucher Redemption** - Multi-type voucher redemption with value calculation and message tracking
+- **Voucher Expiry Management** - Extend or cancel vouchers with reason tracking and messages
+- **XP Reward Management** - Reduce voucher XP rewards when customers cash out rewards
 - **Merchant Identification** - Flexible merchant ID system for off-chain integration
 
-### Supported Voucher Types
+### Flexible Voucher Types & XP Rewards
 
-- **Percentage Off Vouchers** - Dynamic discounts based on purchase amount
-- **Fixed Credit Vouchers** - Fixed value credits for any purchase
-- **Free Item Vouchers** - Free items up to specified value
-- **Buy One Get One Vouchers** - BOGO promotions with value limits
-- **Custom Reward Vouchers** - Flexible reward structures
+- **Merchant-Defined Types** - Merchants can create any voucher type (e.g., 'free_coffee', 'birthday_discount', 'wholesale_price')
+- **Automatic Pattern Detection** - Common patterns like percentage discounts and fixed credits are automatically detected
+- **XP Rewards** - Vouchers can award loyalty points (XP) when redeemed, integrated with voucher collection tiers
+- **Voucher Tiers** - Collections support tier systems similar to loyalty programs for XP-based rewards
+- **Cancellation & Redemption Messages** - Full message tracking for user display and audit trails
 
 ### Advanced Features
 
@@ -631,6 +635,8 @@ Verxio Protocol includes a comprehensive voucher management system for creating,
 
 ### Create Voucher Collection
 
+Voucher collections can include tier systems for XP-based rewards, similar to loyalty programs. You can use default tiers or define custom tier names and XP thresholds.
+
 You can either:
 
 - **Provide a pre-uploaded metadata URI** (no image upload needed), or
@@ -640,14 +646,21 @@ You can either:
 
 ```typescript
 const result = await createVoucherCollection(context, {
-  collectionName: 'Summer Sale Vouchers',
-  collectionMetadataUri: 'https://arweave.net/...', // Already uploaded metadata
+  voucherCollectionName: 'Summer Sale Vouchers',
+  metadataUri: 'https://arweave.net/...', // Already uploaded metadata
+  programAuthority: context.programAuthority,
   updateAuthority: generateSigner(context.umi),
   metadata: {
     merchantName: 'Coffee Brew',
-    description: 'Summer sale vouchers for loyal customers',
-    terms: 'Valid until August 31st, 2024',
+    merchantAddress: 'coffee_brew_001',
+    voucherTypes: ['discount', 'free_item', 'credits'], // Types this collection supports
   },
+  // Optional: Define custom tiers for XP rewards
+  tiers: [
+    { name: 'Bronze', xpRequired: 500, rewards: ['2% cashback'] },
+    { name: 'Silver', xpRequired: 1000, rewards: ['5% cashback'] },
+    { name: 'Gold', xpRequired: 2000, rewards: ['10% cashback'] },
+  ],
 })
 
 console.log(result)
@@ -663,15 +676,18 @@ console.log(result)
 ```typescript
 const imageBuffer = fs.readFileSync('voucher-collection.png')
 const result = await createVoucherCollection(context, {
-  collectionName: 'Summer Sale Vouchers',
+  voucherCollectionName: 'Summer Sale Vouchers',
   imageBuffer, // Buffer of your image
   imageFilename: 'voucher-collection.png',
+  programAuthority: context.programAuthority,
   updateAuthority: generateSigner(context.umi),
   metadata: {
     merchantName: 'Coffee Brew',
-    description: 'Summer sale vouchers for loyal customers',
-    terms: 'Valid until August 31st, 2024',
+    merchantAddress: 'coffee_brew_001',
+    voucherTypes: ['discount', 'free_item', 'credits'],
   },
+  // Optional: Custom tier names with default thresholds
+  tiers: [{ name: 'Member' }, { name: 'VIP' }, { name: 'Elite' }],
 })
 // The protocol will upload the image, generate metadata, and use the resulting URI
 ```
@@ -691,13 +707,14 @@ const result = await mintVoucher(context, {
   voucherName: 'Summer Sale Voucher',
   voucherMetadataUri: 'https://arweave.net/...', // Already uploaded metadata
   voucherData: {
-    type: 'percentage_off',
+    type: 'percentage_off', // Flexible type: can be any string (e.g., 'free_coffee', 'birthday_discount')
     value: 15, // 15% off
     maxUses: 1,
     expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
     conditions: [{ type: 'minimum_purchase', value: 50, operator: 'greater_than' }],
     description: '15% off your next purchase',
     merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+    xpReward: 50, // Optional: XP points to award when voucher is redeemed
   },
   recipient: publicKey('RECIPIENT_ADDRESS'),
   updateAuthority: generateSigner(context.umi),
@@ -721,13 +738,14 @@ const result = await mintVoucher(context, {
   imageBuffer, // Buffer of your image
   imageFilename: 'voucher.png',
   voucherData: {
-    type: 'percentage_off',
+    type: 'percentage_off', // Flexible type: can be any string (e.g., 'free_coffee', 'birthday_discount')
     value: 15, // 15% off
     maxUses: 1,
     expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
     conditions: [{ type: 'minimum_purchase', value: 50, operator: 'greater_than' }],
     description: '15% off your next purchase',
     merchantId: 'coffee_brew_merchant_001', // String identifier for the merchant
+    xpReward: 50, // Optional: XP points to award when voucher is redeemed
   },
   recipient: publicKey('RECIPIENT_ADDRESS'),
   updateAuthority: generateSigner(context.umi),
@@ -776,18 +794,20 @@ const result = await redeemVoucher(context, {
     items: ['Coffee', 'Pastry'],
     totalAmount: 100,
     discountApplied: 25,
+    redemptionMessage: 'Thank you for your purchase!', // Optional: Message shown to user
   },
 })
 
 console.log(result)
 // {
-//   instruction: TransactionBuilder, // Transaction instruction for execution
+//   success: boolean,
+//   signature: string,
 //   validation: {
 //     errors: string[], // Validation errors if any
 //     voucher: VoucherData // Voucher data after validation
 //   },
 //   redemptionValue: number, // Calculated redemption value
-//   updatedVoucher: VoucherData // Voucher data after redemption
+//   updatedVoucher: VoucherData // Voucher data after redemption (includes redemptionHistory with message)
 // }
 ```
 
@@ -796,33 +816,38 @@ console.log(result)
 ```typescript
 const vouchers = await getUserVouchers(context, {
   userAddress: publicKey('USER_ADDRESS'),
-  filters: {
-    status: 'active', // 'active' | 'expired' | 'fully_used'
-    type: 'percentage_off', // Optional: filter by voucher type
-    minValue: 10, // Optional: minimum value
-  },
-  sortBy: 'expiryDate', // 'expiryDate' | 'value' | 'createdAt'
-  sortOrder: 'asc', // 'asc' | 'desc'
+  collectionAddress: publicKey('COLLECTION_ADDRESS'), // Optional: filter by collection
+  merchantId: 'coffee_brew_001', // Optional: filter by merchant
+  status: 'active', // Optional: 'active' | 'used' | 'expired' | 'cancelled'
+  voucherType: 'percentage_off', // Optional: filter by voucher type (any merchant-defined type)
   limit: 10, // Optional: limit results
+  offset: 0, // Optional: pagination offset
 })
 
 console.log(vouchers)
 // {
 //   vouchers: Array<{
-//     address: string,
-//     type: string,
-//     value: number,
-//     currentUses: number,
-//     maxUses: number,
-//     expiryDate: number,
-//     status: string,
-//     description: string,
-//     conditions: string[],
-//     collection: string
+//     voucherAddress: PublicKey,
+//     voucherData: VoucherData, // Full voucher data including type, value, xpReward, etc.
+//     collectionAddress: PublicKey,
+//     name: string,
+//     uri: string,
+//     isExpired: boolean,
+//     canRedeem: boolean,
+//     remainingUses: number,
+//     timeUntilExpiry: number
 //   }>,
-//   total: number,
-//   expiringSoon: Array<string>, // Voucher addresses expiring in 7 days
-//   redeemable: Array<string>    // Voucher addresses that can be redeemed
+//   totalCount: number,
+//   hasMore: boolean,
+//   summary: {
+//     activeVouchers: number,
+//     expiredVouchers: number,
+//     usedVouchers: number,
+//     cancelledVouchers: number,
+//     totalValue: number,
+//     byType: Record<string, number>, // Count by voucher type
+//     byMerchant: Record<string, number>
+//   }
 // }
 ```
 
@@ -848,14 +873,15 @@ console.log(result)
 ```typescript
 const result = await cancelVoucher(context, {
   voucherAddress: publicKey('VOUCHER_ADDRESS'),
-  reason: 'Customer refund',
-  signer: generateSigner(context.umi),
+  updateAuthority: generateSigner(context.umi),
+  reason: 'Customer refund', // Cancellation reason (stored in cancellationMessage)
 })
 
 console.log(result)
 // {
+//   success: boolean,
 //   signature: string,
-//   status: 'cancelled'
+//   updatedVoucher: VoucherData // Includes cancellationMessage
 // }
 ```
 
@@ -870,58 +896,97 @@ In the voucher system, merchants are identified using a `merchantId` string rath
 
 The `merchantId` is set when creating vouchers and validated during redemption to ensure vouchers are only used at the correct merchant.
 
-### Supported Voucher Types
+### Flexible Voucher Types
 
-Verxio Protocol supports multiple voucher types for different use cases:
+Verxio Protocol supports **flexible, merchant-defined voucher types**. Merchants can create any voucher type that fits their business needs. The system automatically detects common patterns for value calculation while allowing complete flexibility.
 
-#### Percentage Off Vouchers
+#### Common Patterns (Auto-Detected)
+
+The system automatically recognizes these patterns for value calculation:
+
+**Percentage-Based Vouchers** (type contains 'percentage', 'percent', or 'pct'):
 
 ```typescript
 {
-  type: 'percentage_off',
+  type: 'percentage_off', // or 'percent_discount', 'pct_off', etc.
   value: 15, // 15% discount
   conditions: ['Minimum purchase: $50']
 }
 ```
 
-#### Fixed Credit Vouchers
+**Fixed Credits/Amount Vouchers** (type contains 'fixed' and 'credit'/'amount'):
 
 ```typescript
 {
-  type: 'fixed_verxio_credits',
+  type: 'fixed_verxio_credits', // or 'fixed_credits', 'fixed_amount', etc.
   value: 100, // $100 in credits
   conditions: ['Valid for any purchase']
 }
 ```
 
-#### Free Item Vouchers
+#### Custom Merchant Types
+
+For any other type, the system returns the voucher value and merchants can handle custom logic in their application layer:
 
 ```typescript
 {
-  type: 'free_item',
-  value: 25, // $25 item value
-  conditions: ['Valid for items up to $25']
+  type: 'free_coffee', // Merchant-defined type
+  value: 1,
+  description: 'Free coffee with any purchase',
+  xpReward: 50, // Award 50 XP when redeemed
+}
+
+{
+  type: 'birthday_discount',
+  value: 25, // $25 value
+  description: 'Birthday special discount',
+}
+
+{
+  type: 'wholesale_price',
+  value: 30, // 30% wholesale discount
+  description: 'Wholesale pricing for bulk orders',
 }
 ```
 
-#### Buy One Get One Vouchers
+### XP Rewards & Tier Management
+
+Vouchers can award XP (experience points) when redeemed, integrating with voucher collection tier systems.
+
+#### Minting a Voucher with XP Reward
 
 ```typescript
-{
-  type: 'buy_one_get_one',
-  value: 30, // Free item worth $30
-  conditions: ['Buy any item, get one free up to $30']
-}
+await mintVoucher(context, {
+  // ... other config
+  voucherData: {
+    type: 'percentage_off',
+    value: 20,
+    xpReward: 100, // Award 100 XP when this voucher is redeemed
+    // ... other fields
+  },
+})
 ```
 
-#### Custom Reward Vouchers
+#### Reducing XP Reward
+
+When a customer qualifies for and cashes out their XP reward, merchants can reduce the voucher's remaining XP:
 
 ```typescript
-{
-  type: 'custom_reward',
-  value: 50, // Custom value
-  conditions: ['Special promotion', 'Valid with other offers']
-}
+const result = await reduceVoucherXpReward(context, {
+  voucherAddress: publicKey('VOUCHER_ADDRESS'),
+  updateAuthority: generateSigner(context.umi),
+  xpToReduce: 50, // Reduce by 50 XP
+  reason: 'Customer cashed out XP reward', // Optional
+})
+
+console.log(result)
+// {
+//   success: boolean,
+//   signature: string,
+//   updatedVoucher: VoucherData,
+//   previousXpReward: number,
+//   newXpReward: number
+// }
 ```
 
 ---

@@ -6,26 +6,38 @@ import { PLUGIN_TYPES } from '@lib/constants'
 import { toBase58 } from '@utils/to-base58'
 import { createFeeInstruction } from '@/utils/fee-structure'
 
-export interface CancelVoucherConfig {
+export interface ReduceVoucherXpRewardConfig {
   voucherAddress: PublicKey
   updateAuthority: KeypairSigner
-  reason?: string
+  xpToReduce: number // Amount of XP to reduce from the voucher
+  reason?: string // Optional reason for the reduction
 }
 
-export interface CancelVoucherResult {
+export interface ReduceVoucherXpRewardResult {
   success: boolean
   signature?: string
   updatedVoucher?: VoucherData
+  previousXpReward?: number
+  newXpReward?: number
   errors: string[]
 }
 
-export async function cancelVoucher(context: VerxioContext, config: CancelVoucherConfig): Promise<CancelVoucherResult> {
-  const result: CancelVoucherResult = {
+export async function reduceVoucherXpReward(
+  context: VerxioContext,
+  config: ReduceVoucherXpRewardConfig,
+): Promise<ReduceVoucherXpRewardResult> {
+  const result: ReduceVoucherXpRewardResult = {
     success: false,
     errors: [],
   }
 
   try {
+    // Validate config
+    if (config.xpToReduce <= 0) {
+      result.errors.push('XP to reduce must be greater than 0')
+      return result
+    }
+
     // Fetch the voucher asset
     const asset = await fetchAsset(context.umi, config.voucherAddress)
     const voucherCollectionAddress = collectionAddress(asset)
@@ -39,24 +51,35 @@ export async function cancelVoucher(context: VerxioContext, config: CancelVouche
 
     const voucherData: VoucherData = appData.data
 
-    // Check if voucher is already cancelled
-    if (voucherData.status === 'cancelled') {
-      result.errors.push('Voucher is already cancelled')
+    // Check if voucher has XP reward
+    if (!voucherData.xpReward || voucherData.xpReward <= 0) {
+      result.errors.push('Voucher does not have any XP reward to reduce')
       return result
     }
 
-    // Check if voucher is already fully used
-    if (voucherData.status === 'used') {
-      result.errors.push('Cannot cancel a fully used voucher')
+    // Check if voucher is cancelled
+    if (voucherData.status === 'cancelled') {
+      result.errors.push('Cannot reduce XP reward of a cancelled voucher')
       return result
     }
+
+    // Validate reduction amount
+    if (config.xpToReduce > voucherData.xpReward) {
+      result.errors.push(`Cannot reduce ${config.xpToReduce} XP. Voucher only has ${voucherData.xpReward} XP reward remaining`)
+      return result
+    }
+
+    // Store previous XP reward
+    result.previousXpReward = voucherData.xpReward
+
+    // Calculate new XP reward
+    const newXpReward = Math.max(0, voucherData.xpReward - config.xpToReduce)
+    result.newXpReward = newXpReward
 
     // Update voucher data
     const updatedVoucher: VoucherData = {
       ...voucherData,
-      status: 'cancelled',
-      usedAt: Date.now(),
-      cancellationMessage: config.reason,
+      xpReward: newXpReward,
     }
 
     result.updatedVoucher = updatedVoucher
@@ -88,20 +111,24 @@ export async function cancelVoucher(context: VerxioContext, config: CancelVouche
 
     return result
   } catch (error) {
-    result.errors.push(`Failed to cancel voucher: ${error}`)
+    result.errors.push(`Failed to reduce voucher XP reward: ${error}`)
     return result
   }
 }
 
 // TODO: Replace with zod validation
-function assertValidCancelVoucherConfig(config: CancelVoucherConfig) {
+function assertValidReduceVoucherXpRewardConfig(config: ReduceVoucherXpRewardConfig) {
   if (!config) {
-    throw new Error('assertValidCancelVoucherConfig: Config is undefined')
+    throw new Error('assertValidReduceVoucherXpRewardConfig: Config is undefined')
   }
   if (!config.voucherAddress) {
-    throw new Error('assertValidCancelVoucherConfig: Voucher address is undefined')
+    throw new Error('assertValidReduceVoucherXpRewardConfig: Voucher address is undefined')
   }
   if (!config.updateAuthority) {
-    throw new Error('assertValidCancelVoucherConfig: Update authority is undefined')
+    throw new Error('assertValidReduceVoucherXpRewardConfig: Update authority is undefined')
+  }
+  if (!config.xpToReduce || config.xpToReduce <= 0) {
+    throw new Error('assertValidReduceVoucherXpRewardConfig: XP to reduce must be greater than 0')
   }
 }
+

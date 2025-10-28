@@ -6,6 +6,13 @@ export const DEFAULT_TIER: LoyaltyProgramTier = {
   xpRequired: 0,
 }
 
+export const DEFAULT_VOUCHER_TIERS: LoyaltyProgramTier[] = [
+  { name: 'Grind', xpRequired: 0, rewards: [] },
+  { name: 'Bronze', xpRequired: 500, rewards: [] },
+  { name: 'Silver', xpRequired: 1000, rewards: [] },
+  { name: 'Gold', xpRequired: 2000, rewards: [] },
+]
+
 export const DEFAULT_BROADCAST_DATA = {
   totalBroadcasts: 0,
   broadcasts: [],

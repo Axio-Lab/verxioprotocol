@@ -49,6 +49,7 @@ export async function cancelVoucherInstruction(
     ...voucherData,
     status: 'cancelled',
     usedAt: Date.now(),
+    cancellationMessage: config.reason,
   }
 
   // Create the base instruction

@@ -6,7 +6,8 @@ import {
   ExternalPluginAdapterSchema,
   writeCollectionExternalPluginAdapterDataV1,
 } from '@metaplex-foundation/mpl-core'
-import { ATTRIBUTE_KEYS, DEFAULT_VOUCHER_COLLECTION_DATA, PLUGIN_TYPES } from '@/lib/constants'
+import { ATTRIBUTE_KEYS, DEFAULT_VOUCHER_COLLECTION_DATA, DEFAULT_VOUCHER_TIERS, PLUGIN_TYPES } from '@/lib/constants'
+import { LoyaltyProgramTier } from '@schemas/loyalty-program-tier'
 import { VerxioContext } from '@schemas/verxio-context'
 import { assertValidContext } from '@utils/assert-valid-context'
 import { createFeeInstruction } from '@utils/fee-structure'
@@ -24,6 +25,12 @@ export interface CreateVoucherCollectionInstructionConfig {
     voucherTypes: string[] // ["discount", "free_item", "credits"]
     [key: string]: any // Allow additional metadata fields
   }
+  // Tier configuration - optional custom tier names, uses default thresholds if not provided
+  tiers?: Array<{
+    name: string // Custom tier name (e.g., "Starter", "Pro", "VIP")
+    xpRequired?: number // Optional: if not provided, uses default thresholds
+    rewards?: string[] // Optional rewards for this tier
+  }>
   // New image and metadata options
   imageBuffer?: Buffer
   imageFilename?: string
@@ -111,6 +118,19 @@ export function createVoucherCollectionPluginsInstruction(
   config: CreateVoucherCollectionInstructionConfig,
   updateAuthority: PublicKey,
 ): CreateCollectionArgsPlugin[] {
+  // Create tiers: use custom names if provided, otherwise use defaults
+  // Default thresholds: 0, 500, 1000, 2000
+  const tiers: LoyaltyProgramTier[] = config.tiers
+    ? config.tiers.map((customTier, index) => {
+        const defaultTier = DEFAULT_VOUCHER_TIERS[index] ?? DEFAULT_VOUCHER_TIERS[DEFAULT_VOUCHER_TIERS.length - 1]
+        return {
+          name: customTier.name,
+          xpRequired: customTier.xpRequired ?? defaultTier.xpRequired,
+          rewards: customTier.rewards ?? defaultTier.rewards,
+        }
+      })
+    : DEFAULT_VOUCHER_TIERS
+
   return [
     {
       type: PLUGIN_TYPES.ATTRIBUTES,
@@ -118,8 +138,7 @@ export function createVoucherCollectionPluginsInstruction(
         { key: ATTRIBUTE_KEYS.PROGRAM_TYPE, value: 'voucher' },
         { key: ATTRIBUTE_KEYS.CREATOR, value: config.programAuthority.toString() },
         { key: ATTRIBUTE_KEYS.METADATA, value: JSON.stringify(config.metadata) },
-        { key: 'voucherTypes', value: JSON.stringify(config.metadata.voucherTypes) },
-        { key: 'merchantId', value: config.metadata.merchantAddress },
+        { key: ATTRIBUTE_KEYS.TIERS, value: JSON.stringify(tiers) },
       ],
     },
     {

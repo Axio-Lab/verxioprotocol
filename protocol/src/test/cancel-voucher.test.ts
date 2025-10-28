@@ -58,7 +58,6 @@ describe('voucher lifecycle: create, mint, validate, cancel, validate', { sequen
     // Validate and log voucher before cancellation
     const before = await validateVoucher(context, {
       voucherAddress,
-      merchantId: 'test_merchant_001',
     })
     console.log('Voucher before cancel:', before.voucher)
 
@@ -71,11 +70,11 @@ describe('voucher lifecycle: create, mint, validate, cancel, validate', { sequen
     expect(cancelResult.success).toBe(true)
     expect(cancelResult.updatedVoucher).toBeTruthy()
     expect(cancelResult.updatedVoucher!.status).toBe('cancelled')
+    expect(cancelResult.updatedVoucher!.cancellationMessage).toBe('Merchant request')
 
     // Validate and log voucher after cancellation
     const after = await validateVoucher(context, {
       voucherAddress,
-      merchantId: 'test_merchant_001',
     })
     console.log('Voucher after cancel:', after.voucher)
   })
@@ -151,7 +150,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log voucher before cancellation
       const before = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Voucher before cancel:', before.voucher)
       const result = await cancelVoucher(context, {
@@ -165,21 +163,21 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       expect(result.updatedVoucher).toBeTruthy()
       expect(result.updatedVoucher!.status).toBe('cancelled')
       expect(result.updatedVoucher!.usedAt).toBeTruthy()
+      expect(result.updatedVoucher!.cancellationMessage).toBe('Merchant request')
       expect(result.errors).toHaveLength(0)
 
       // Log voucher after cancellation
       const after = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Voucher after cancel:', after.voucher)
+      expect(after.voucher?.cancellationMessage).toBe('Merchant request')
     })
 
     it('should update voucher status to cancelled', async () => {
       // Validate the voucher to check its status
       const validation = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Voucher status check:', validation.voucher)
       expect(validation.voucher).toBeDefined()
@@ -192,7 +190,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log voucher before attempting to cancel again
       const before = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Voucher before second cancel attempt:', before.voucher)
 
@@ -207,7 +204,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log voucher after failed cancel attempt
       const after = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Voucher after failed cancel attempt:', after.voucher)
     })
@@ -218,7 +214,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log attempt to validate invalid voucher
       const before = await validateVoucher(context, {
         voucherAddress: invalidAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Invalid voucher before cancel attempt:', before.voucher)
 
@@ -234,7 +229,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log after failed cancel attempt
       const after = await validateVoucher(context, {
         voucherAddress: invalidAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Invalid voucher after failed cancel attempt:', after.voucher)
     })
@@ -245,7 +239,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log voucher before wrong authority attempt
       const before = await validateVoucher(context, {
         voucherAddress: usedVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Used voucher before wrong authority cancel attempt:', before.voucher)
 
@@ -261,7 +254,6 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log voucher after wrong authority attempt
       const after = await validateVoucher(context, {
         voucherAddress: usedVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Used voucher after wrong authority cancel attempt:', after.voucher)
     })
@@ -272,13 +264,11 @@ describe('cancelVoucher', { sequential: true, timeout: 30000 }, () => {
       // Log voucher before redemption attempt
       const before = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
       console.log('Voucher before redemption attempt:', before.voucher)
 
       const validation = await validateVoucher(context, {
         voucherAddress: activeVoucherAddress,
-        merchantId: 'test_merchant_001',
       })
 
       expect(validation.voucher).toBeDefined()
